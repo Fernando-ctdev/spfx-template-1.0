@@ -1,0 +1,42 @@
+# Arquivos e pastas que devem ser ignorados pelo Git
+
+# Dependências
+node_modules/
+
+# Build
+dist/
+lib/
+release/
+solution/
+temp/
+*.sppkg
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache/
+.npm/
+
+# Coverage
+coverage/
+
+# Certificados locais
+*.crt
+*.key
+*.pem
+*.pfx
+
+# GUIDs gerados (não editar manualmente)
+# .guids.json

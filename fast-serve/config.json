@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/s-KaiNet/spfx-fast-serve/master/schema/config.v2.schema.json",
+  "serveConfigurations": {
+    "serve": {
+      "openUrl": "https://{tenantDomain}/sites/{siteName}?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
+      "fullScreenErrors": false,
+      "eslint": true
+    }
+  }
+}

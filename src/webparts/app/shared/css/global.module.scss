@@ -1,0 +1,62 @@
+// Fontes globais para o projeto
+// Customize as fontes conforme necessário
+
+$primaryFont: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", Arial, sans-serif;
+
+body {
+  font-family: $primaryFont !important;
+}
+
+span,
+div,
+label,
+table,
+input {
+  font-family: $primaryFont !important;
+}
+
+// Ajustes para o workbench do SharePoint (Full Page)
+:global(#workbenchPageContent) {
+  max-width: 100%;
+}
+
+:global(.CanvasZone) {
+  padding-right: 0px !important;
+  padding-left: 0px !important;
+}
+
+// Responsividade
+$break-small: 800px;
+$break-large: 1200px;
+
+// Anti-aliasing
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Reset de links
+a {
+  color: initial;
+  outline: unset !important;
+  text-decoration: none;
+}
+
+// Scrollbar customizada (opcional)
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

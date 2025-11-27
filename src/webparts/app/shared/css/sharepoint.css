@@ -1,0 +1,65 @@
+/* 
+ * CSS para esconder elementos nativos do SharePoint
+ * Útil para aplicações Full Page que substituem toda a interface
+ */
+
+/* Esconder o header do SharePoint */
+[data-sp-feature-tag="Site header host"] {
+  display: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+}
+
+#spSiteHeader {
+  display: none;
+}
+
+/* Esconder a barra de navegação do Office 365 */
+#O365_SuiteBranding_container {
+  display: none;
+}
+
+#SuiteNavWrapper,
+#SuiteNavPlaceholder,
+#O365_NavHeader,
+#O365_MainLink_NavMenu,
+#O365_MainLink_Me {
+  display: none;
+}
+
+#HeaderButtonRegion {
+  display: none;
+}
+
+.od-TopBar-header {
+  display: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+}
+
+/* Ajustes de layout */
+.bg-menu {
+  margin-top: 0px;
+}
+
+@media screen and (max-width: 760px) {
+  .bg-menu {
+    margin-top: 59px;
+  }
+}
+
+/* Ajuste de padding responsivo */
+@media screen and (max-width: 1023px) {
+  .CanvasZone {
+    padding-left: 0px !important;
+  }
+}
+
+@media screen and (min-height: 384px) {
+  .od-ItemsScopeList-page
+    .od-ItemsScopeList-content-sticky
+    .ms-DetailsList-headerWrapper {
+    z-index: 2;
+    background-color: #ffffff;
+  }
+}
