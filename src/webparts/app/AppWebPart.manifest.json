@@ -1,22 +1,35 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "00000000-0000-0000-0000-000000000002",
+  "id": "7FBC8194-144A-49AC-838B-0CD9F640862D",
   "alias": "AppWebPart",
   "componentType": "WebPart",
   "version": "*",
   "manifestVersion": 2,
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportedHosts": [
+    "SharePointWebPart",
+    "TeamsPersonalApp",
+    "TeamsTab",
+    "SharePointFullPage"
+  ],
   "supportsThemeVariants": true,
   "supportsFullBleed": true,
-  "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-    "group": { "default": "Advanced" },
-    "title": { "default": "My App" },
-    "description": { "default": "Aplicação SharePoint SPFx Full Page" },
-    "officeFabricIconFontName": "Page",
-    "properties": {
-      "description": "My App"
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "Advanced"
+      },
+      "title": {
+        "default": "Nome Do Site"
+      },
+      "description": {
+        "default": "Nome Do Site"
+      },
+      "officeFabricIconFontName": "Page",
+      "properties": {
+        "description": "My App"
+      }
     }
-  }]
+  ]
 }
