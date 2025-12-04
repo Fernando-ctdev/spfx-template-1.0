@@ -2,5 +2,6 @@
   "tenant": "tvglobocorp",
   "siteUrl": "/sites/SeuSite",
   "appName": "NomeDoSite",
-  "appTitle": "Nome Do Site"
+  "appTitle": "Nome Do Site",
+  "mode": "fullpage"
 }

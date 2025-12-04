@@ -10,7 +10,13 @@
     "build:prod": "gulp clean && gulp bundle --ship && gulp package-solution --ship",
     "clean": "gulp clean",
     "test": "gulp test",
-    "serve": "npx fast-serve"
+    "serve": "npx fast-serve",
+    "generate": "node scripts/generate.js",
+    "generate:page": "node scripts/generate.js page",
+    "generate:component": "node scripts/generate.js component",
+    "generate:service": "node scripts/generate.js service",
+    "generate:hook": "node scripts/generate.js hook",
+    "generate:model": "node scripts/generate.js model"
   },
   "engines": {
     "node": ">=18.17.1 <19.0.0 || >=20.0.0 <21.0.0"

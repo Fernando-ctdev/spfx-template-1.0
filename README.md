@@ -17,6 +17,7 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 - ✅ Suporte a Teams, Office e Outlook
 - ✅ CSS Global que esconde elementos nativos do SharePoint
 - ✅ **Configuração centralizada em um único arquivo!**
+- ✅ **🎨 Gerador CLI de páginas, componentes, serviços e hooks!**
 
 ## 🛠️ Instalação (Super Simples!)
 
@@ -36,18 +37,25 @@ Edite apenas o arquivo `app.config.json` na raiz do projeto:
   "tenant": "contoso",
   "siteUrl": "/sites/meusite",
   "appName": "my-spfx-app",
-  "appTitle": "My App"
+  "appTitle": "My App",
+  "mode": "fullpage"
 }
 ```
 
-**Só isso!** 4 campos:
+**Só isso!** 5 campos:
 
-| Campo | O que é | Exemplo |
-|-------|---------|---------|
-| `tenant` | Nome do seu tenant (sem .sharepoint.com) | `contoso` |
-| `siteUrl` | Caminho do site | `/sites/meusite` |
-| `appName` | Nome técnico do app (sem espaços) | `portal-rh` |
-| `appTitle` | Nome que aparece no SharePoint | `Portal RH` |
+| Campo | O que é | Valores | Exemplo |
+|-------|---------|---------|---------|
+| `tenant` | Nome do seu tenant (sem .sharepoint.com) | - | `contoso` |
+| `siteUrl` | Caminho do site | - | `/sites/meusite` |
+| `appName` | Nome técnico do app (sem espaços) | - | `portal-rh` |
+| `appTitle` | Nome que aparece no SharePoint | - | `Portal RH` |
+| `mode` | Tipo de aplicação | `fullpage` ou `webpart` | `fullpage` |
+
+#### 🎯 Modos Disponíveis:
+
+- **`fullpage`** - Página Completa (oculta header e navegação do SharePoint)
+- **`webpart`** - WebPart Tradicional (convive com outros elementos do SharePoint)
 
 > 💡 Os GUIDs são gerados automaticamente na primeira execução!
 
@@ -63,6 +71,7 @@ O script `postinstall` vai automaticamente:
 - ✅ Atualizar `fast-serve/config.json`
 - ✅ Atualizar `config/serve.json`
 - ✅ Atualizar `src/webparts/app/AppWebPart.manifest.json`
+- ✅ Configurar o modo (fullpage ou webpart) automaticamente
 
 ### 4. Execute em modo de desenvolvimento
 
@@ -111,8 +120,71 @@ npm run serve
 | `npm run serve` | Inicia o servidor de desenvolvimento com fast-serve |
 | `npm run build` | Compila o projeto |
 | `npm test` | Executa os testes |
+| `npm run generate` | 🎨 Gerador interativo de código |
+| `npm run generate:page` | Gera uma nova página |
+| `npm run generate:component` | Gera um novo componente |
+| `npm run generate:service` | Gera um novo serviço |
+| `npm run generate:hook` | Gera um novo hook customizado |
 
 > 💡 O script `configure` roda automaticamente após `npm install`
+
+---
+
+## 🎯 Modos de Aplicação
+
+O template suporta **dois modos** de desenvolvimento, configurados automaticamente no `app.config.json`:
+
+### 🖥️ **Modo Full Page (`"mode": "fullpage"`)**
+
+**Para aplicações que ocupam a página inteira:**
+
+- ✅ Oculta automaticamente header e navegação do SharePoint
+- ✅ Controle total da interface do usuário
+- ✅ Ideal para portais, dashboards e aplicações completas
+- ✅ React Router para navegação SPA
+
+**Quando usar:**
+- Portais corporativos
+- Dashboards executivos
+- Aplicações que precisam de UX customizada
+- Sistemas completos (CRM, ERP, etc)
+
+### 🧩 **Modo WebPart (`"mode": "webpart"`)**
+
+**Para componentes que convivem com o SharePoint:**
+
+- ✅ Mantém header e navegação do SharePoint visíveis
+- ✅ Pode ser inserido em qualquer página
+- ✅ Convive com outros WebParts
+- ✅ Múltiplas instâncias na mesma página
+
+**Quando usar:**
+- Widgets e componentes reutilizáveis
+- Gráficos e visualizações de dados
+- Formulários específicos
+- Integrações pontuais
+
+### 🔄 **Trocar de Modo**
+
+Para mudar o modo da aplicação:
+
+1. Edite o `app.config.json`:
+```json
+{
+  "mode": "webpart"  // ou "fullpage"
+}
+```
+
+2. Execute:
+```bash
+npm run configure
+```
+
+Pronto! O template será reconfigurado automaticamente.
+
+📖 **[Ver guia completo de modos →](./MODES.md)**
+
+---
 
 ## 📦 Deploy para Produção
 
@@ -180,7 +252,45 @@ const MyComponent = () => {
 };
 ```
 
-## 📝 Criando Novas Páginas
+## 🎨 Gerador de Código (NOVO!)
+
+Crie páginas, componentes, serviços e hooks automaticamente!
+
+### Modo Interativo
+```bash
+npm run generate
+```
+
+### Comandos Diretos
+```bash
+# Criar uma página (adiciona rota automaticamente!)
+npm run generate:page Dashboard
+
+# Criar um componente
+npm run generate:component UserCard
+
+# Criar um serviço com CRUD completo
+npm run generate:service UserService
+
+# Criar um hook customizado
+npm run generate:hook useUserData
+```
+
+**O que é criado:**
+- ✅ Arquivo com template completo
+- ✅ Imports e configurações automáticas
+- ✅ Rotas adicionadas ao App.tsx (páginas)
+- ✅ Arquivo de teste
+- ✅ TypeScript tipado
+- ✅ Integração com PnPjs e SharePoint
+
+📖 **[Ver documentação completa do gerador →](./GENERATOR.md)**
+
+---
+
+## 📝 Criando Páginas Manualmente
+
+Se preferir criar manualmente:
 
 1. Crie o componente em `src/webparts/app/pages/`
 2. Adicione a rota em `src/webparts/app/App.tsx`:

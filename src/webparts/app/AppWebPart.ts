@@ -13,6 +13,9 @@ import App from './App';
 import { IAppProps } from './App';
 import { getSP } from '../../config/pnpConfig';
 import './shared/css/global.module.scss';
+import './shared/css/sharepoint.css';
+// NOTA: O import do sharepoint.css é adicionado automaticamente pelo script configure.js
+// quando mode="fullpage" está definido no app.config.json
 
 export interface IAppWebPartProps {
   description: string;

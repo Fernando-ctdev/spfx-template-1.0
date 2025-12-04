@@ -72,7 +72,22 @@ function readConfig() {
     process.exit(1);
   }
   
-  return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  
+  // Validar e definir modo padrão se não especificado
+  if (!config.mode) {
+    config.mode = 'fullpage';
+    log.warn('Modo não especificado. Usando "fullpage" como padrão.');
+  }
+  
+  // Validar modo
+  const validModes = ['fullpage', 'webpart'];
+  if (!validModes.includes(config.mode)) {
+    log.error(`Modo inválido: "${config.mode}". Use "fullpage" ou "webpart".`);
+    process.exit(1);
+  }
+  
+  return config;
 }
 
 // Escrever arquivo JSON formatado
@@ -121,9 +136,41 @@ function updateManifest(config, guids) {
   log.success('src/webparts/app/AppWebPart.manifest.json');
 }
 
+// Configurar modo da aplicação (fullpage ou webpart)
+function configureAppMode(config) {
+  const appWebPartPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.ts');
+  let content = fs.readFileSync(appWebPartPath, 'utf8');
+  
+  const fullPageImport = "import './shared/css/sharepoint.css';";
+  const hasFullPageImport = content.includes(fullPageImport);
+  
+  if (config.mode === 'fullpage') {
+    // Modo Full Page - adicionar import do CSS se não existir
+    if (!hasFullPageImport) {
+      // Adicionar após o import do global.module.scss
+      content = content.replace(
+        "import './shared/css/global.module.scss';",
+        "import './shared/css/global.module.scss';\nimport './shared/css/sharepoint.css';"
+      );
+      fs.writeFileSync(appWebPartPath, content);
+      log.success('Modo Full Page ativado - CSS do SharePoint será ocultado');
+    }
+  } else if (config.mode === 'webpart') {
+    // Modo WebPart - remover import do CSS se existir
+    if (hasFullPageImport) {
+      content = content.replace(`\n${fullPageImport}`, '');
+      content = content.replace(fullPageImport, '');
+      fs.writeFileSync(appWebPartPath, content);
+      log.success('Modo WebPart ativado - Elementos do SharePoint visíveis');
+    }
+  }
+}
+
 // Exibir resumo da configuração
 function showSummary(config) {
   const fullUrl = `https://${config.tenant}.sharepoint.com${config.siteUrl}`;
+  const modeText = config.mode === 'fullpage' ? 'Página Completa (Full Page)' : 'WebPart Tradicional';
+  const modeIcon = config.mode === 'fullpage' ? '🖥️' : '🧩';
   
   console.log(`
 ${colors.cyan}┌─────────────────────────────────────────────────────┐
@@ -131,6 +178,7 @@ ${colors.cyan}┌─────────────────────
 ├─────────────────────────────────────────────────────┤${colors.reset}
 │ ${colors.yellow}Site:${colors.reset}  ${fullUrl}
 │ ${colors.yellow}App:${colors.reset}   ${config.appTitle} (${config.appName})
+│ ${colors.yellow}Modo:${colors.reset}  ${modeIcon} ${modeText}
 ${colors.cyan}└─────────────────────────────────────────────────────┘${colors.reset}
 `);
 }
@@ -148,6 +196,7 @@ function main() {
     updatePackageSolution(config, guids);
     updateFastServe(config);
     updateManifest(config, guids);
+    configureAppMode(config);
     
     showSummary(config);
     
