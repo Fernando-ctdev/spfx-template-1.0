@@ -100,7 +100,7 @@ npm run serve
 
 ### Erro: "Node version not compatible"
 ```bash
-nvm use 20
+nvm use 18.17.1
 ```
 ---
 
