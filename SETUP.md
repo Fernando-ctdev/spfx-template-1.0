@@ -2,18 +2,18 @@
 
 ## 📋 Pré-requisitos
 
-- Node.js 18.17.x LTS ou 20.11.x LTS
-- NVM (Node Version Manager) - Recomendado
+- Node.js 18.17.x LTS (obrigatório)
+- NVM (Node Version Manager) – recomendado
 - Acesso a um tenant SharePoint Online
 
 ### 🔧 Configurando o Node.js com NVM
 
 ```bash
 # Instalar a versão correta do Node
-nvm install 20
+nvm install 18.17.1
 
-# Usar a versão 20
-nvm use 20
+# Usar a versão 18
+nvm use 18.17.1
 
 # Verificar a versão
 node -v
@@ -21,7 +21,7 @@ node -v
 
 ## 🚀 Instalação (Super Simples!)
 
-### 1. Clone ou copie o template
+### 1. copie o template, COPIE NÃO CLONE
 
 ### 2. Configure TUDO em um único arquivo! 📝
 
