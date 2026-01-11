@@ -7,7 +7,7 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 ## 📋 Características
 
 - ✅ SPFx 1.21+ com React 17
-- ✅ Node.js 18.17.x ou 20.11.x (via NVM)
+- ✅ Node.js 18.17.x ou superior (18.x LTS)
 - ✅ Fast-serve para desenvolvimento rápido (reload acelerado)
 - ✅ PnPjs 4.x para operações com SharePoint
 - ✅ Material UI (MUI) 5.x para componentes
@@ -23,11 +23,13 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 
 ### 🔧 Versão do Node.js
 
-Este projeto é compatível com:
-- Node.js 18.17.x LTS
-- Node.js 20.11.x LTS
+- Node.js 18.17.x ou superior (18.x LTS)
+- NVM recomendado
+- SharePoint Framework (SPFx) 1.21.x
+- React 17
 
-Recomendado usar NVM para evitar conflitos com o SPFx.
+⚠️ Node.js 20.x NÃO é suportado pelo SPFx 1.21.
+
 
 ## 📁 Estrutura do Projeto
 
