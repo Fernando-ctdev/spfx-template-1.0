@@ -39,4 +39,4 @@ coverage/
 *.pfx
 
 # GUIDs gerados (não editar manualmente)
-# .guids.json
+.guids.json
