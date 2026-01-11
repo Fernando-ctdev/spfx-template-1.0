@@ -183,6 +183,40 @@ ${colors.cyan}└─────────────────────
 `);
 }
 
+// Limpar arquivos de configuração inicial
+function cleanupSetupFiles() {
+  const filesToRemove = [
+    path.join(basePath, 'SETUP.md'),
+    path.join(basePath, 'app.config.json'),
+    __filename // Este próprio arquivo (configure.js)
+  ];
+
+  log.info('Limpando arquivos de configuração inicial...\n');
+
+  filesToRemove.forEach(file => {
+    if (fs.existsSync(file)) {
+      try {
+        fs.unlinkSync(file);
+        log.success(`Removido: ${path.basename(file)}`);
+      } catch (err) {
+        log.warn(`Não foi possível remover: ${path.basename(file)}`);
+      }
+    }
+  });
+
+  // Atualizar package.json para remover scripts de configuração
+  const packageJsonPath = path.join(basePath, 'package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  
+  // Remover scripts relacionados à configuração
+  delete packageJson.scripts.configure;
+  delete packageJson.scripts.postinstall;
+  delete packageJson.scripts.preinstall;
+  
+  writeJson(packageJsonPath, packageJson);
+  log.success('package.json atualizado (scripts de setup removidos)');
+}
+
 // Função principal
 function main() {
   log.title('🔧 CONFIGURANDO PROJETO SPFx');
@@ -200,9 +234,13 @@ function main() {
     
     showSummary(config);
     
+    // Limpar arquivos de setup após configuração bem-sucedida
+    cleanupSetupFiles();
+    
+    console.log('');
+    log.success('🎉 Configuração inicial concluída!');
     log.info('Próximos passos:');
-    console.log('   1. npm install (se ainda não fez)');
-    console.log('   2. npm run serve\n');
+    console.log('   1. npm run serve\n');
     
   } catch (error) {
     log.error(`Erro: ${error.message}`);

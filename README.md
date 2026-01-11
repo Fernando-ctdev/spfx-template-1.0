@@ -1,94 +1,42 @@
-# 🚀 SPFx Full Page Template
+# 🚀 SPFx Template
 
-Template pré-configurado para desenvolvimento rápido de aplicações SharePoint SPFx de **página inteira**.
+Template pré-configurado para desenvolvimento rápido de aplicações SharePoint SPFx.
+
+> 📖 **Primeira vez usando o template?** Consulte o arquivo **[SETUP.md](./SETUP.md)** para instruções de configuração inicial.
 
 ## 📋 Características
 
-- ✅ SPFx 1.20+ com React 17
-- ✅ Fast-serve para desenvolvimento rápido (hot reload)
+- ✅ SPFx 1.21+ com React 17
+- ✅ Node.js 18.17.x ou 20.11.x (via NVM)
+- ✅ Fast-serve para desenvolvimento rápido (reload acelerado)
 - ✅ PnPjs 4.x para operações com SharePoint
-- ✅ Material UI (MUI) 6.x para componentes
+- ✅ Material UI (MUI) 5.x para componentes
 - ✅ Radix UI para componentes acessíveis
-- ✅ React Router DOM para navegação SPA
+- ✅ React Router DOM para navegação SPA (MemoryRouter)
 - ✅ React Hook Form + Zod para formulários
-- ✅ TanStack Query para cache de dados
-- ✅ TypeScript configurado
-- ✅ Jest para testes
-- ✅ Suporte a Teams, Office e Outlook
-- ✅ CSS Global que esconde elementos nativos do SharePoint
-- ✅ **Configuração centralizada em um único arquivo!**
-- ✅ **🎨 Gerador CLI de páginas, componentes, serviços e hooks!**
+- ✅ TanStack Query para cache e sincronização de dados
+- ✅ TypeScript configurado para SPFx
+- ✅ Jest configurado para testes unitários (hooks, services e helpers)
+- ✅ Suporte a Teams, Office e Outlook (via SPFx)
+- ✅ CSS global para ocultar elementos nativos do SharePoint
+- ✅ 🎨 Gerador CLI de páginas, componentes, serviços e hooks
 
-## 🛠️ Instalação (Super Simples!)
+### 🔧 Versão do Node.js
 
-### 1. Clone ou copie o template
+Este projeto é compatível com:
+- Node.js 18.17.x LTS
+- Node.js 20.11.x LTS
 
-```bash
-cp -r spfx-template-fullpage meu-novo-projeto
-cd meu-novo-projeto
-```
-
-### 2. Configure TUDO em um único arquivo! 📝
-
-Edite apenas o arquivo `app.config.json` na raiz do projeto:
-
-```json
-{
-  "tenant": "contoso",
-  "siteUrl": "/sites/meusite",
-  "appName": "my-spfx-app",
-  "appTitle": "My App",
-  "mode": "fullpage"
-}
-```
-
-**Só isso!** 5 campos:
-
-| Campo | O que é | Valores | Exemplo |
-|-------|---------|---------|---------|
-| `tenant` | Nome do seu tenant (sem .sharepoint.com) | - | `contoso` |
-| `siteUrl` | Caminho do site | - | `/sites/meusite` |
-| `appName` | Nome técnico do app (sem espaços) | - | `portal-rh` |
-| `appTitle` | Nome que aparece no SharePoint | - | `Portal RH` |
-| `mode` | Tipo de aplicação | `fullpage` ou `webpart` | `fullpage` |
-
-#### 🎯 Modos Disponíveis:
-
-- **`fullpage`** - Página Completa (oculta header e navegação do SharePoint)
-- **`webpart`** - WebPart Tradicional (convive com outros elementos do SharePoint)
-
-> 💡 Os GUIDs são gerados automaticamente na primeira execução!
-
-### 3. Instale as dependências
-
-```bash
-npm install
-```
-
-O script `postinstall` vai automaticamente:
-- ✅ Ler o `app.config.json`
-- ✅ Atualizar `config/package-solution.json`
-- ✅ Atualizar `fast-serve/config.json`
-- ✅ Atualizar `config/serve.json`
-- ✅ Atualizar `src/webparts/app/AppWebPart.manifest.json`
-- ✅ Configurar o modo (fullpage ou webpart) automaticamente
-
-### 4. Execute em modo de desenvolvimento
-
-```bash
-npm run serve
-```
-
-**Pronto!** 🎉 O navegador abrirá automaticamente no seu site SharePoint.
+Recomendado usar NVM para evitar conflitos com o SPFx.
 
 ## 📁 Estrutura do Projeto
 
 ```
 ├── app.config.json           # 🔧 CONFIGURE TUDO AQUI!
 ├── scripts/
-│   └── configure.js          # Script de configuração automática
-├── config/                   # Configurações do SPFx (auto-gerado)
-├── fast-serve/               # Configuração do fast-serve (auto-gerado)
+│   └── generate.js           # Gerador de código CLI
+├── config/                   # Configurações do SPFx
+├── fast-serve/               # Configuração do fast-serve
 ├── sharepoint/               # Assets do SharePoint
 ├── src/
 │   ├── @types/               # Declarações de tipos
@@ -116,7 +64,6 @@ npm run serve
 
 | Comando | Descrição |
 |---------|-----------|
-| `npm run configure` | Aplica as configurações do app.config.json |
 | `npm run serve` | Inicia o servidor de desenvolvimento com fast-serve |
 | `npm run build` | Compila o projeto |
 | `npm test` | Executa os testes |
@@ -125,64 +72,6 @@ npm run serve
 | `npm run generate:component` | Gera um novo componente |
 | `npm run generate:service` | Gera um novo serviço |
 | `npm run generate:hook` | Gera um novo hook customizado |
-
-> 💡 O script `configure` roda automaticamente após `npm install`
-
----
-
-## 🎯 Modos de Aplicação
-
-O template suporta **dois modos** de desenvolvimento, configurados automaticamente no `app.config.json`:
-
-### 🖥️ **Modo Full Page (`"mode": "fullpage"`)**
-
-**Para aplicações que ocupam a página inteira:**
-
-- ✅ Oculta automaticamente header e navegação do SharePoint
-- ✅ Controle total da interface do usuário
-- ✅ Ideal para portais, dashboards e aplicações completas
-- ✅ React Router para navegação SPA
-
-**Quando usar:**
-- Portais corporativos
-- Dashboards executivos
-- Aplicações que precisam de UX customizada
-- Sistemas completos (CRM, ERP, etc)
-
-### 🧩 **Modo WebPart (`"mode": "webpart"`)**
-
-**Para componentes que convivem com o SharePoint:**
-
-- ✅ Mantém header e navegação do SharePoint visíveis
-- ✅ Pode ser inserido em qualquer página
-- ✅ Convive com outros WebParts
-- ✅ Múltiplas instâncias na mesma página
-
-**Quando usar:**
-- Widgets e componentes reutilizáveis
-- Gráficos e visualizações de dados
-- Formulários específicos
-- Integrações pontuais
-
-### 🔄 **Trocar de Modo**
-
-Para mudar o modo da aplicação:
-
-1. Edite o `app.config.json`:
-```json
-{
-  "mode": "webpart"  // ou "fullpage"
-}
-```
-
-2. Execute:
-```bash
-npm run configure
-```
-
-Pronto! O template será reconfigurado automaticamente.
-
-📖 **[Ver guia completo de modos →](./MODES.md)**
 
 ---
 
@@ -252,7 +141,7 @@ const MyComponent = () => {
 };
 ```
 
-## 🎨 Gerador de Código (NOVO!)
+## 🎨 Gerador de Código 
 
 Crie páginas, componentes, serviços e hooks automaticamente!
 
@@ -287,21 +176,6 @@ npm run generate:hook useUserData
 📖 **[Ver documentação completa do gerador →](./GENERATOR.md)**
 
 ---
-
-## 📝 Criando Páginas Manualmente
-
-Se preferir criar manualmente:
-
-1. Crie o componente em `src/webparts/app/pages/`
-2. Adicione a rota em `src/webparts/app/App.tsx`:
-
-```typescript
-import MinhaNovaPage from './pages/MinhaNovaPage';
-
-// No componente Routes:
-<Route path="/minha-nova-pagina" element={<MinhaNovaPage />} />
-```
-
 ## 📄 Licença
 
 MIT
