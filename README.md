@@ -10,7 +10,7 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 - ✅ Node.js 18.17.1+ ou 20.x LTS (compatível com SPFx 1.21.0)
 - ✅ Fast-serve para desenvolvimento rápido (reload acelerado)
 - ✅ PnPjs 4.x para operações com SharePoint
-- ✅ **Fluent UI v8/v9** para componentes visuais (padrão SharePoint)
+- ✅ **Fluent UI v8** para componentes visuais (padrão SharePoint)
 - ✅ **Radix UI** para componentes headless avançados
 - ✅ React Router DOM para navegação SPA com sync de URL
 - ✅ React Hook Form + Zod para formulários
