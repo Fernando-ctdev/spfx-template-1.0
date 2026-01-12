@@ -1,65 +1,90 @@
 /* 
  * CSS para esconder elementos nativos do SharePoint
  * Útil para aplicações Full Page que substituem toda a interface
+ * 
+ * ⚠️ IMPORTANTE: Todo CSS é escopado dentro de .spfx-app-root
+ * para evitar conflitos com atualizações do SharePoint
  */
 
-/* Esconder o header do SharePoint */
-[data-sp-feature-tag="Site header host"] {
+/* ===========================================
+ * CLASSE RAIZ - Escopo isolado
+ * =========================================== */
+.spfx-app-root {
+  /* Garante que a aplicação ocupe toda a área disponível */
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ===========================================
+ * MODO FULL PAGE - Ocultar elementos SharePoint
+ * Estes seletores só afetam quando a WebPart está em Full Page
+ * =========================================== */
+
+/* Esconder o header do SharePoint (Full Page) */
+:global([data-sp-feature-tag="Site header host"]) {
   display: none !important;
   opacity: 0 !important;
   height: 0 !important;
 }
 
-#spSiteHeader {
-  display: none;
+:global(#spSiteHeader) {
+  display: none !important;
 }
 
 /* Esconder a barra de navegação do Office 365 */
-#O365_SuiteBranding_container {
-  display: none;
+:global(#O365_SuiteBranding_container),
+:global(#SuiteNavWrapper),
+:global(#SuiteNavPlaceholder),
+:global(#O365_NavHeader),
+:global(#O365_MainLink_NavMenu),
+:global(#O365_MainLink_Me),
+:global(#HeaderButtonRegion) {
+  display: none !important;
 }
 
-#SuiteNavWrapper,
-#SuiteNavPlaceholder,
-#O365_NavHeader,
-#O365_MainLink_NavMenu,
-#O365_MainLink_Me {
-  display: none;
-}
-
-#HeaderButtonRegion {
-  display: none;
-}
-
-.od-TopBar-header {
+:global(.od-TopBar-header) {
   display: none !important;
   opacity: 0 !important;
   height: 0 !important;
 }
 
-/* Ajustes de layout */
-.bg-menu {
-  margin-top: 0px;
+/* ===========================================
+ * LAYOUT - Ajustes responsivos
+ * =========================================== */
+
+/* Ajuste de padding do Canvas Zone */
+:global(.CanvasZone) {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
 }
 
-@media screen and (max-width: 760px) {
-  .bg-menu {
-    margin-top: 59px;
-  }
+/* Workbench Full Page */
+:global(#workbenchPageContent) {
+  max-width: 100% !important;
 }
 
-/* Ajuste de padding responsivo */
+/* ===========================================
+ * RESPONSIVIDADE
+ * =========================================== */
 @media screen and (max-width: 1023px) {
-  .CanvasZone {
+  :global(.CanvasZone) {
     padding-left: 0px !important;
+    padding-right: 0px !important;
   }
 }
 
-@media screen and (min-height: 384px) {
-  .od-ItemsScopeList-page
-    .od-ItemsScopeList-content-sticky
-    .ms-DetailsList-headerWrapper {
-    z-index: 2;
-    background-color: #ffffff;
-  }
+/* ===========================================
+ * ESTILOS DENTRO DO ESCOPO .spfx-app-root
+ * =========================================== */
+.spfx-app-root {
+  /* Reset de margin do body quando em full page */
+  margin: 0;
+  padding: 0;
+}
+
+/* Garante que listas dentro do app tenham z-index correto */
+.spfx-app-root :global(.ms-DetailsList-headerWrapper) {
+  z-index: 2;
+  background-color: var(--colorNeutralBackground1, #ffffff);
 }

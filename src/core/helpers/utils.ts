@@ -70,3 +70,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 export const generateUniqueId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
+
+// Re-exportar helpers de roteamento e query keys
+export * from './routeHelpers';
+export * from './queryKeys';

@@ -10,15 +10,16 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 - ✅ Node.js 18.17.1+ ou 20.x LTS (compatível com SPFx 1.21.0)
 - ✅ Fast-serve para desenvolvimento rápido (reload acelerado)
 - ✅ PnPjs 4.x para operações com SharePoint
-- ✅ Material UI (MUI) 5.x para componentes
-- ✅ Radix UI para componentes acessíveis
-- ✅ React Router DOM para navegação SPA (MemoryRouter)
+- ✅ **Fluent UI v8/v9** para componentes visuais (padrão SharePoint)
+- ✅ **Radix UI** para componentes headless avançados
+- ✅ React Router DOM para navegação SPA com sync de URL
 - ✅ React Hook Form + Zod para formulários
 - ✅ TanStack Query para cache e sincronização de dados
 - ✅ TypeScript configurado para SPFx
-- ✅ Jest configurado para testes unitários (hooks, services e helpers)
+- ✅ Jest + Testing Library para testes unitários
+- ✅ Mocks de SPFx incluídos para testes
 - ✅ Suporte a Teams, Office e Outlook (via SPFx)
-- ✅ CSS global para ocultar elementos nativos do SharePoint
+- ✅ CSS escopado com `.spfx-app-root` (seguro para updates)
 - ✅ 🎨 Gerador CLI de páginas, componentes, serviços e hooks
 
 ## 🔧 Versão do Node.js
@@ -57,7 +58,58 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 │           └── loc/          # Localização
 ├── teams/                    # Configuração do Teams
 └── tests/                    # Testes unitários
+    └── __mocks__/            # Mocks de SPFx para testes
 ```
+
+---
+
+## 📐 Stack de UI - Regras de Governança
+
+> ⚠️ **IMPORTANTE:** Seguir estas regras garante consistência e manutenibilidade.
+
+### ✅ **USE: Fluent UI v8 (Padrão)**
+
+```typescript
+// Componentes visuais - SEMPRE usar Fluent UI v8
+import { PrimaryButton, TextField, Dialog, Text } from '@fluentui/react';
+import { mergeStyleSets, getTheme } from '@fluentui/react';
+
+const theme = getTheme();
+const styles = mergeStyleSets({
+  container: {
+    padding: theme.spacing.l1,
+    backgroundColor: theme.palette.neutralLight,
+  },
+});
+```
+
+**Quando usar:**
+- Botões, inputs, selects, tabelas
+- Layouts e containers
+- Todos os componentes visuais
+
+### ✅ **USE: Radix UI (Headless)**
+
+```typescript
+// Apenas para comportamentos avançados não disponíveis no Fluent
+import * as Toast from '@radix-ui/react-toast';
+import * as Tooltip from '@radix-ui/react-tooltip';
+```
+
+**Quando usar:**
+- Toast/notifications customizadas
+- Tooltips avançados
+- Componentes que precisam de controle total de estilo
+
+### ❌ **NÃO USE: MUI (Material UI) ou Fluent UI v9**
+
+MUI e Fluent UI v9 foram **removidos** do template para evitar:
+- Conflitos de CSS com SharePoint
+- Incompatibilidade com React 17 (v9 requer React 18)
+- Bundle desnecessariamente grande
+- Inconsistência visual
+
+---
 
 ## 🔧 Scripts Disponíveis
 

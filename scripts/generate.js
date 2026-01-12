@@ -50,13 +50,34 @@ const rl = readline.createInterface({
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
 // ============================================
-// TEMPLATES
+// TEMPLATES (Fluent UI v8 + Radix UI)
 // ============================================
 
 const templates = {
   page: (name, withSharePoint) => `import * as React from 'react';
-import { Box, Typography${withSharePoint ? ', CircularProgress, Alert' : ''} } from '@mui/material';${withSharePoint ? `
+import { mergeStyleSets, getTheme, Text, Spinner, SpinnerSize, MessageBar, MessageBarType } from '@fluentui/react';${withSharePoint ? `
 import { useListItems } from '../../../core/hooks/useSharePoint';` : ''}
+
+const theme = getTheme();
+
+const styles = mergeStyleSets({
+  container: {
+    padding: theme.spacing.l2,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.l1,
+  },
+  content: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.m,
+  },
+  loading: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: theme.spacing.l2,
+  },
+});
 
 /**
  * Página ${name}
@@ -64,23 +85,22 @@ import { useListItems } from '../../../core/hooks/useSharePoint';` : ''}
  * @description Descrição da página ${name}
  */
 const ${name}: React.FC = () => {${withSharePoint ? `
+  
   // Exemplo de uso do hook useListItems
   // const { items, loading, error } = useListItems('NomeDaLista', ['Id', 'Title']);
   
-  // if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>;
-  // if (error) return <Alert severity="error">{error}</Alert>;` : ''}
+  // if (loading) return <div className={styles.loading}><Spinner size={SpinnerSize.large} label="Carregando..." /></div>;
+  // if (error) return <MessageBar messageBarType={MessageBarType.error}>{error.message}</MessageBar>;` : ''}
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        ${name}
-      </Typography>
-      <Typography variant="body1" color="text.secondary">
-        Conteúdo da página ${name}
-      </Typography>
-      
-      {/* Seu conteúdo aqui */}
-    </Box>
+    <div className={styles.container}>
+      <Text variant="xxLarge" block>${name}</Text>
+      <div className={styles.content}>
+        <Text variant="medium">Conteúdo da página ${name}</Text>
+        
+        {/* Seu conteúdo aqui */}
+      </div>
+    </div>
   );
 };
 
@@ -88,7 +108,17 @@ export default ${name};
 `,
 
   component: (name, withProps) => `import * as React from 'react';
-import { Box } from '@mui/material';
+import { mergeStyleSets, getTheme } from '@fluentui/react';
+
+const theme = getTheme();
+
+const styles = mergeStyleSets({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.s1,
+  },
+});
 
 /**
  * Props do componente ${name}
@@ -106,11 +136,11 @@ export interface I${name}Props {${withProps ? `
  */
 const ${name}: React.FC<I${name}Props> = (${withProps ? '{ title, description }' : 'props'}) => {
   return (
-    <Box>
+    <div className={styles.root}>
       {/* Conteúdo do componente ${name} */}${withProps ? `
       {title && <h3>{title}</h3>}
       {description && <p>{description}</p>}` : ''}
-    </Box>
+    </div>
   );
 };
 
