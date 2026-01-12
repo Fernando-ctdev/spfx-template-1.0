@@ -2,32 +2,20 @@
 
 Template pré-configurado para desenvolvimento rápido de aplicações SharePoint SPFx.
 
-📖 **Primeira vez usando o template?** Consulte o arquivo [SETUP.md](./SETUP.md) para instruções de configuração inicial.
+> 📖 **Primeira vez?** Veja [SETUP.md](./SETUP.md) para configuração inicial.
 
-## 📋 Características
+## 📋 Stack do Template
 
-- ✅ SPFx 1.21.0 com React 17
-- ✅ Node.js 18.17.1+ ou 20.x LTS (compatível com SPFx 1.21.0)
-- ✅ Fast-serve para desenvolvimento rápido (reload acelerado)
-- ✅ PnPjs 4.x para operações com SharePoint
-- ✅ **Fluent UI v8** para componentes visuais (padrão SharePoint)
-- ✅ **Radix UI** para componentes headless avançados
-- ✅ React Router DOM para navegação SPA com sync de URL
-- ✅ React Hook Form + Zod para formulários
-- ✅ TanStack Query para cache e sincronização de dados
-- ✅ TypeScript configurado para SPFx
-- ✅ Jest + Testing Library para testes unitários
-- ✅ Mocks de SPFx incluídos para testes
-- ✅ Suporte a Teams, Office e Outlook (via SPFx)
-- ✅ CSS escopado com `.spfx-app-root` (seguro para updates)
-- ✅ 🎨 Gerador CLI de páginas, componentes, serviços e hooks
-
-## 🔧 Versão do Node.js
-
-- **Node.js 18.17.1+ ou 20.x LTS** (recomendado)
-- NVM recomendado para gerenciar versões
-- SharePoint Framework (SPFx) 1.21.0
-- React 17
+| Tecnologia | Versão | Observação |
+|------------|--------|------------|
+| SPFx | 1.21.0 | Framework base |
+| React | 17.0.1 | Versão do SPFx |
+| Node.js | 18.x LTS | Recomendado (ver .nvmrc) |
+| Fluent UI | v8 | UI padrão SharePoint |
+| PnPjs | 4.x | API SharePoint |
+| React Router | v6 | **HashRouter obrigatório** |
+| TanStack Query | v4 | Cache de dados |
+| TypeScript | 4.8 | Tipagem |
 
 ## 📁 Estrutura do Projeto
 
@@ -88,18 +76,109 @@ const styles = mergeStyleSets({
 - Layouts e containers
 - Todos os componentes visuais
 
-### ✅ **USE: Radix UI (Headless)**
+### ⚠️ **EXCEÇÃO: Radix UI (Headless) - Uso Restrito**
+
+> ❗ **Radix é EXCEÇÃO, não padrão.** Use apenas quando Fluent UI não atender.
 
 ```typescript
-// Apenas para comportamentos avançados não disponíveis no Fluent
+// SOMENTE para casos específicos não cobertos pelo Fluent
 import * as Toast from '@radix-ui/react-toast';
 import * as Tooltip from '@radix-ui/react-tooltip';
 ```
 
-**Quando usar:**
+**✅ Permitido (apenas estes 3 casos):**
 - Toast/notifications customizadas
 - Tooltips avançados
-- Componentes que precisam de controle total de estilo
+- Dropdowns muito customizados
+
+**❌ PROIBIDO usar Radix para:**
+- Layouts e containers
+- Formulários (inputs, selects, checkboxes)
+- Navegação e menus
+- Modals e Dialogs (use Fluent `Dialog`)
+- Qualquer coisa que Fluent já resolve
+
+**⚠️ Por quê essa restrição em SPFx?**
+
+| Problema | Impacto |
+|----------|---------|
+| **Portais DOM** | Radix usa `Portal` que pode escapar do container SPFx |
+| **Focus Trap** | SharePoint já tem focus trap, Radix cria outro → conflito |
+| **Acessibilidade** | Fluent já resolve ARIA, Radix duplica → redundância |
+| **iFrames/Teams** | Componentes podem renderizar fora do contexto esperado |
+
+---
+
+### 🔀 **React Router DOM em SPFx - OBRIGATÓRIO HashRouter**
+
+> ❗ **SEMPRE usar `HashRouter`.** NUNCA usar `BrowserRouter` em SPFx.
+
+```typescript
+// ✅ CORRETO - Usar sempre HashRouter
+import { HashRouter as Router } from 'react-router-dom';
+
+<HashRouter>
+  <Routes>
+    <Route path="/" element={<Home />} />
+  </Routes>
+</HashRouter>
+```
+
+```typescript
+// ❌ ERRADO - NUNCA usar BrowserRouter em SPFx
+import { BrowserRouter } from 'react-router-dom'; // NÃO!
+```
+
+**⚠️ Por quê essa restrição?**
+
+| Problema com BrowserRouter | Consequência |
+|---------------------------|--------------|
+| **Refresh da página** | SharePoint retorna 404 (não encontra a rota) |
+| **Deep links** | URLs compartilhadas não funcionam |
+| **History API** | Conflita com navegação nativa do SharePoint |
+| **Deploy em subpastas** | Rotas quebram dependendo do site |
+
+**Como funciona o HashRouter:**
+- URL: `https://tenant.sharepoint.com/sites/app#/dashboard`
+- O `#` indica ao SharePoint que tudo após é client-side
+- Refresh e deep links funcionam corretamente
+
+---
+
+### 📦 **TanStack Query v4 - Limitações no React 17**
+
+> ⚠️ **Use como DATA CACHE, não como state manager geral.**
+
+TanStack Query funciona no React 17, mas **sem os recursos do React 18**:
+
+| Recurso | React 18 | React 17 (SPFx) |
+|---------|----------|-----------------|
+| Concurrent rendering | ✅ | ❌ Não disponível |
+| Automatic batching | ✅ Moderno | ⚠️ Limitado |
+| Suspense para data | ✅ | ⚠️ Experimental |
+| Cache efficiency | ✅ Otimizado | ⚠️ Menos eficiente |
+
+**✅ Use TanStack Query para:**
+- Cache de chamadas API/SharePoint
+- Retry automático em falhas
+- Stale-while-revalidate
+- Invalidação de cache
+
+**❌ NÃO use como substituto de:**
+- Estado local de componente (`useState`)
+- Estado global complexo (considere Context ou Zustand)
+- Formulários (use React Hook Form)
+
+```typescript
+// ✅ Uso correto - cache de dados do SharePoint
+const { data, isLoading } = useQuery({
+  queryKey: ['listItems', listName],
+  queryFn: () => sp.web.lists.getByTitle(listName).items(),
+  staleTime: 5 * 60 * 1000, // 5 minutos
+});
+```
+
+---
 
 ## 🔧 Scripts Disponíveis
 
@@ -113,44 +192,6 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 | `npm run generate:component` | Gera um novo componente |
 | `npm run generate:service` | Gera um novo serviço |
 | `npm run generate:hook` | Gera um novo hook customizado |
-
----
-
-## 🎯 Modos de Aplicação
-
-O template suporta **dois modos** de desenvolvimento, configurados automaticamente no `app.config.json`:
-
-### 🖥️ **Modo Full Page (`"mode": "fullpage"`)**
-
-**Para aplicações que ocupam a página inteira:**
-
-- ✅ Oculta automaticamente header e navegação do SharePoint
-- ✅ Controle total da interface do usuário
-- ✅ Ideal para portais, dashboards e aplicações completas
-- ✅ React Router para navegação SPA
-
-**Quando usar:**
-- Portais corporativos
-- Dashboards executivos
-- Aplicações que precisam de UX customizada
-- Sistemas completos (CRM, ERP, etc)
-
-### 🧩 **Modo WebPart (`"mode": "webpart"`)**
-
-**Para componentes que convivem com o SharePoint:**
-
-- ✅ Mantém header e navegação do SharePoint visíveis
-- ✅ Pode ser inserido em qualquer página
-- ✅ Convive com outros WebParts
-- ✅ Múltiplas instâncias na mesma página
-
-**Quando usar:**
-- Widgets e componentes reutilizáveis
-- Gráficos e visualizações de dados
-- Formulários específicos
-- Integrações pontuais
-
-📖 **[Ver guia completo de modos →](./MODES.md)**
 
 ---
 
@@ -257,20 +298,6 @@ npm run generate:hook useUserData
 
 ---
 
-## 📝 Criando Páginas Manualmente
-
-Se preferir criar manualmente:
-
-1. Crie o componente em `src/webparts/app/pages/`
-2. Adicione a rota em `src/webparts/app/App.tsx`:
-
-```typescript
-import MinhaNovaPage from './pages/MinhaNovaPage';
-
-// No componente Routes:
-<Route path="/minha-nova-pagina" element={<MinhaNovaPage />} />
-```
-
-## 📄 Licença
+##  Licença
 
 MIT

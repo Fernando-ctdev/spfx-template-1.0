@@ -1,333 +1,165 @@
-# 🎨 Gerador de Código SPFx
+# 🎨 Gerador de Código
 
-Gerador CLI para criar páginas, componentes, serviços e hooks automaticamente no seu projeto SPFx.
+CLI para criar páginas, componentes, serviços e hooks automaticamente.
 
-## 🚀 Como Usar
-
-### Modo Interativo (Recomendado)
+## 🚀 Uso Rápido
 
 ```bash
-npm run generate
+npm run generate          # Modo interativo (recomendado)
 ```
-
-Responda as perguntas e o gerador criará tudo automaticamente!
 
 ### Comandos Diretos
 
-```bash
-# Criar uma página
-npm run generate:page Dashboard
-
-# Criar um componente
-npm run generate:component UserCard
-
-# Criar um serviço
-npm run generate:service UserService
-
-# Criar um hook customizado
-npm run generate:hook useUserData
-
-# Criar um model/interface
-npm run generate:model User
-```
+| Comando | Descrição | Exemplo |
+|---------|-----------|---------|
+| `npm run generate:page` | Cria página + rota | `npm run generate:page Dashboard` |
+| `npm run generate:component` | Cria componente | `npm run generate:component UserCard` |
+| `npm run generate:service` | Cria serviço CRUD | `npm run generate:service UserService` |
+| `npm run generate:hook` | Cria hook customizado | `npm run generate:hook useUserData` |
+| `npm run generate:model` | Cria interface | `npm run generate:model User` |
 
 ---
 
 ## 📦 O Que é Criado
 
-### 🔷 Página (`generate:page`)
-
-**Cria:**
-- ✅ `src/webparts/app/pages/NomeDaPagina.tsx`
-- ✅ `tests/pages/NomeDaPagina.test.tsx`
-- ✅ Adiciona rota automaticamente no `App.tsx`
-
-**Template inclui:**
-- Estrutura básica com Material UI
-- Exemplo de uso de hooks do SharePoint (opcional)
-- Estados de loading e error
-- TypeScript tipado
-
-**Exemplo de uso:**
-```bash
-npm run generate:page Dashboard
-# Cria: Dashboard.tsx
-# Rota: /dashboard
-# Acesse: http://localhost:4321/#/dashboard
-```
-
----
-
-### 🔷 Componente (`generate:component`)
-
-**Cria:**
-- ✅ `src/webparts/app/components/NomeDoComponente.tsx`
-- ✅ `tests/components/NomeDoComponente.test.tsx`
-
-**Template inclui:**
-- Interface de Props
-- Componente funcional React
-- Material UI integrado
-- JSDoc comentários
-- TypeScript tipado
-
-**Exemplo de uso:**
-```bash
-npm run generate:component UserCard
-# Cria: UserCard.tsx
-# Import: import UserCard from '../components/UserCard';
-```
-
----
-
-### 🔷 Serviço (`generate:service`)
-
-**Cria:**
-- ✅ `src/core/services/NomeDoServico.ts`
-- ✅ `tests/services/NomeDoServico.test.ts`
-
-**Template inclui:**
-- Classe de serviço completa
-- Métodos CRUD (getAll, getById, create, update, delete)
-- Integração com PnPjs
-- Tratamento de erros
-- TypeScript tipado
-
-**Exemplo de uso:**
-```bash
-npm run generate:service UserService
-# Cria: UserService.ts
-# Import: import { UserService } from '../../core/services/UserService';
-
-// Usar:
-const users = await UserService.getAll('Users', ['Id', 'Title', 'Email']);
-```
-
----
-
-### 🔷 Hook (`generate:hook`)
-
-**Cria:**
-- ✅ `src/core/hooks/useNomeDoHook.ts`
-- ✅ `tests/hooks/useNomeDoHook.test.ts`
-
-**Template inclui:**
-- Hook customizado com TanStack Query
-- Cache automático de dados
-- Mutations (create, update, delete)
-- Estados de loading
-- TypeScript tipado
-
-**Exemplo de uso:**
-```bash
-npm run generate:hook useUserData
-# Cria: useUserData.ts
-# Import: import { useUserData } from '../../core/hooks/useUserData';
-
-// Usar:
-const { items, loading, create, update, delete } = useUserData('Users');
-```
-
----
-
-### 🔷 Model (`generate:model`)
-
-**Cria:**
-- ✅ `src/models/INomeDoModel.ts`
-
-**Template inclui:**
-- Interface TypeScript
-- Campos padrão do SharePoint (Id, Title, Created, Modified, Author, Editor)
-- Espaço para campos customizados
-
-**Exemplo de uso:**
-```bash
-npm run generate:model User
-# Cria: IUser.ts
-# Import: import { IUser } from '../../models/IUser';
-```
-
----
-
-## 🎯 Exemplos Práticos
-
-### Criar uma página de Dashboard completa
+### Página (`generate:page`)
 
 ```bash
 npm run generate:page Dashboard
 ```
 
-**Resultado:**
-```
-✔ Arquivo criado: src/webparts/app/pages/Dashboard.tsx
-✔ Rota adicionada ao App.tsx: /dashboard
-✔ Teste criado: tests/pages/Dashboard.test.tsx
+| Arquivo | Caminho |
+|---------|---------|
+| Página | `src/webparts/app/pages/Dashboard.tsx` |
+| Teste | `tests/pages/Dashboard.test.tsx` |
+| Rota | Adicionada automaticamente no `App.tsx` |
 
-┌─────────────────────────────────────────────────────┐
-│           ✨ Página criada com sucesso!             │
-├─────────────────────────────────────────────────────┤
-│ Arquivo: src/webparts/app/pages/Dashboard.tsx      │
-│ Rota:    /dashboard                                 │
-└─────────────────────────────────────────────────────┘
+**Acesse:** `http://localhost:4321/#/dashboard`
 
-📝 Próximos passos:
-  1. Edite o arquivo Dashboard.tsx
-  2. Acesse http://localhost:4321/#/dashboard
-  3. Execute os testes: npm test
-```
+---
 
-### Criar um componente reutilizável
+### Componente (`generate:component`)
 
 ```bash
 npm run generate:component UserCard
 ```
 
-Depois use em qualquer página:
+| Arquivo | Caminho |
+|---------|---------|
+| Componente | `src/webparts/app/components/UserCard.tsx` |
+| Teste | `tests/components/UserCard.test.tsx` |
+
 ```typescript
 import UserCard from '../components/UserCard';
 
 <UserCard title="João Silva" description="Desenvolvedor" />
 ```
 
-### Criar um serviço para gerenciar usuários
+---
+
+### Serviço (`generate:service`)
 
 ```bash
 npm run generate:service UserService
 ```
 
-Use em qualquer lugar:
+| Arquivo | Caminho |
+|---------|---------|
+| Serviço | `src/core/services/UserService.ts` |
+| Teste | `tests/services/UserService.test.ts` |
+
+**Métodos inclusos:** `getAll`, `getById`, `create`, `update`, `delete`
+
 ```typescript
 import { UserService } from '../../core/services/UserService';
 
-// Buscar todos
 const users = await UserService.getAll('Users');
-
-// Criar novo
-const newUser = await UserService.create('Users', {
-  Title: 'João Silva',
-  Email: 'joao@empresa.com'
-});
-
-// Atualizar
-await UserService.update('Users', 1, { Title: 'João Silva Jr.' });
-
-// Deletar
+await UserService.create('Users', { Title: 'João' });
+await UserService.update('Users', 1, { Title: 'João Jr.' });
 await UserService.delete('Users', 1);
 ```
 
-### Criar um hook com cache
+---
+
+### Hook (`generate:hook`)
 
 ```bash
 npm run generate:hook useUsers
 ```
 
-Use em componentes:
+| Arquivo | Caminho |
+|---------|---------|
+| Hook | `src/core/hooks/useUsers.ts` |
+| Teste | `tests/hooks/useUsers.test.ts` |
+
 ```typescript
 import { useUsers } from '../../core/hooks/useUsers';
 
-const MyComponent = () => {
-  const { items, loading, error, create, update, delete } = useUsers('Users');
-  
-  if (loading) return <CircularProgress />;
-  
-  return (
-    <div>
-      {items.map(user => (
-        <div key={user.Id}>{user.Title}</div>
-      ))}
-    </div>
-  );
-};
+const { items, loading, create, update, remove } = useUsers('Users');
 ```
 
 ---
 
-## 💡 Dicas
+### Model (`generate:model`)
 
-### ✅ Nomes em PascalCase
-O gerador converte automaticamente para PascalCase:
 ```bash
-npm run generate:page my-dashboard  # → MyDashboard.tsx
-npm run generate:component user card # → UserCard.tsx
+npm run generate:model User
 ```
 
-### ✅ Hooks sempre começam com "use"
-```bash
-npm run generate:hook userData     # → useUserData.ts
-npm run generate:hook useUserData  # → useUserData.ts (mesmo resultado)
-```
+| Arquivo | Caminho |
+|---------|---------|
+| Interface | `src/models/IUser.ts` |
 
-### ✅ Serviços terminam com "Service"
-```bash
-npm run generate:service User      # → UserService.ts
-npm run generate:service UserService # → UserService.ts (mesmo resultado)
-```
-
-### ✅ Models começam com "I"
-```bash
-npm run generate:model User        # → IUser.ts
-npm run generate:model IUser       # → IUser.ts (mesmo resultado)
-```
+Inclui campos padrão SharePoint: `Id`, `Title`, `Created`, `Modified`, `Author`, `Editor`
 
 ---
 
-## 🔧 Estrutura Criada
+## 💡 Convenções de Nomes
 
-Após usar o gerador, seu projeto terá:
+O gerador normaliza automaticamente:
+
+| Tipo | Input | Output |
+|------|-------|--------|
+| Página | `my-dashboard` | `MyDashboard.tsx` |
+| Componente | `user card` | `UserCard.tsx` |
+| Hook | `userData` | `useUserData.ts` |
+| Serviço | `User` | `UserService.ts` |
+| Model | `User` | `IUser.ts` |
+
+---
+
+## 📁 Estrutura Gerada
 
 ```
 src/
-├── webparts/
-│   └── app/
-│       ├── pages/           ← Páginas geradas aqui
-│       │   ├── Dashboard.tsx
-│       │   └── Users.tsx
-│       ├── components/      ← Componentes gerados aqui
-│       │   ├── UserCard.tsx
-│       │   └── Header.tsx
-│       └── App.tsx         ← Rotas adicionadas automaticamente
+├── webparts/app/
+│   ├── pages/          ← Páginas
+│   ├── components/     ← Componentes
+│   └── App.tsx         ← Rotas (auto)
 ├── core/
-│   ├── services/           ← Serviços gerados aqui
-│   │   ├── UserService.ts
-│   │   └── TaskService.ts
-│   └── hooks/              ← Hooks gerados aqui
-│       ├── useUsers.ts
-│       └── useTasks.ts
-└── models/                 ← Models gerados aqui
-    ├── IUser.ts
-    └── ITask.ts
+│   ├── services/       ← Serviços
+│   └── hooks/          ← Hooks
+└── models/             ← Interfaces
 
 tests/
-├── pages/                  ← Testes de páginas
-├── components/             ← Testes de componentes
-├── services/               ← Testes de serviços
-└── hooks/                  ← Testes de hooks
+├── pages/
+├── components/
+├── services/
+└── hooks/
 ```
 
 ---
 
 ## ❓ FAQ
 
-**Q: Posso editar os arquivos gerados?**  
-A: Sim! Os arquivos são templates iniciais. Edite livremente.
-
-**Q: E se o arquivo já existir?**  
-A: O gerador não sobrescreve. Mostra um erro e você pode escolher outro nome.
-
-**Q: As rotas são adicionadas automaticamente?**  
-A: Sim! Para páginas, a rota é adicionada ao `App.tsx` automaticamente.
-
-**Q: Posso customizar os templates?**  
-A: Sim! Edite o arquivo `scripts/generate.js` e modifique as funções de template.
-
-**Q: Os testes são criados automaticamente?**  
-A: Sim! Um arquivo de teste básico é criado para cada item gerado.
+| Pergunta | Resposta |
+|----------|----------|
+| Posso editar os arquivos? | Sim, são templates iniciais |
+| E se o arquivo existir? | Erro + escolha outro nome |
+| Rotas são automáticas? | Sim, para páginas |
+| Posso customizar templates? | Sim, edite `scripts/generate.js` |
 
 ---
-
-## 🎉 Pronto!
-
-Agora você pode criar páginas, componentes, serviços e hooks em segundos!
 
 ```bash
 npm run generate

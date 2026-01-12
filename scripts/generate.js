@@ -50,7 +50,7 @@ const rl = readline.createInterface({
 const question = (query) => new Promise((resolve) => rl.question(query, resolve));
 
 // ============================================
-// TEMPLATES (Fluent UI v8 + Radix UI)
+// TEMPLATES (Fluent UI v8 - Padrão | Radix UI - Apenas exceções)
 // ============================================
 
 const templates = {
