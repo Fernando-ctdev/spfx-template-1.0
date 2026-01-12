@@ -1,8 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "NomeDoSite",
-    "id": "9D8F6483-490B-4AD9-A8F7-08B4A3B330AF",
+    "name": "spfx-template",
+    "id": "00000000-0000-0000-0000-000000000000",
     "version": "1.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
@@ -29,7 +29,7 @@
       {
         "title": "App Features",
         "description": "Features and components of the solution.",
-        "id": "C76EA005-E428-4C2B-AF4E-0009D42E0000",
+        "id": "00000000-0000-0000-0000-000000000001",
         "version": "1.0.0.0",
         "assets": {
           "elementManifests": [
@@ -40,6 +40,6 @@
     ]
   },
   "paths": {
-    "zippedPackage": "solution/NomeDoSite.sppkg"
+    "zippedPackage": "solution/spfx-template.sppkg"
   }
 }

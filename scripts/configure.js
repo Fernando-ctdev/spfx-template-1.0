@@ -6,7 +6,15 @@
  * Este script lê o arquivo app.config.json e atualiza
  * automaticamente todos os arquivos de configuração.
  * 
- * Execute: npm run configure
+ * O que ele faz:
+ * ✅ Gera GUIDs únicos na primeira execução (.guids.json)
+ * ✅ Atualiza package-solution.json
+ * ✅ Atualiza fast-serve/config.json
+ * ✅ Atualiza config/serve.json
+ * ✅ Atualiza AppWebPart.manifest.json
+ * ✅ Configura modo fullpage ou webpart
+ * 
+ * Execute: npm run configure (ou automático após npm install)
  * ===============================================
  */
 
@@ -123,6 +131,19 @@ function updateFastServe(config) {
   log.success('fast-serve/config.json');
 }
 
+// Atualizar config/serve.json
+function updateServe(config) {
+  const filePath = path.join(basePath, 'config', 'serve.json');
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  
+  const fullUrl = `https://${config.tenant}.sharepoint.com`;
+  
+  data.initialPage = `${fullUrl}/_layouts/workbench.aspx`;
+  
+  writeJson(filePath, data);
+  log.success('config/serve.json');
+}
+
 // Atualizar AppWebPart.manifest.json
 function updateManifest(config, guids) {
   const filePath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.manifest.json');
@@ -229,6 +250,7 @@ function main() {
   try {
     updatePackageSolution(config, guids);
     updateFastServe(config);
+    updateServe(config);
     updateManifest(config, guids);
     configureAppMode(config);
     

@@ -2,12 +2,12 @@
 
 Template pré-configurado para desenvolvimento rápido de aplicações SharePoint SPFx.
 
-> 📖 **Primeira vez usando o template?** Consulte o arquivo **[SETUP.md](./SETUP.md)** para instruções de configuração inicial.
+📖 **Primeira vez usando o template?** Consulte o arquivo [SETUP.md](./SETUP.md) para instruções de configuração inicial.
 
 ## 📋 Características
 
-- ✅ SPFx 1.21+ com React 17
-- ✅ Node.js 18.17.x ou superior (18.x LTS)
+- ✅ SPFx 1.20.2 com React 17
+- ✅ Node.js 18.17.1+ ou 20.x LTS (compatível com SPFx 1.20.2)
 - ✅ Fast-serve para desenvolvimento rápido (reload acelerado)
 - ✅ PnPjs 4.x para operações com SharePoint
 - ✅ Material UI (MUI) 5.x para componentes
@@ -21,15 +21,12 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 - ✅ CSS global para ocultar elementos nativos do SharePoint
 - ✅ 🎨 Gerador CLI de páginas, componentes, serviços e hooks
 
-### 🔧 Versão do Node.js
+## 🔧 Versão do Node.js
 
-- Node.js 18.17.x ou superior (18.x LTS)
-- NVM recomendado
-- SharePoint Framework (SPFx) 1.21.x
+- **Node.js 18.17.1+ ou 20.x LTS** (recomendado)
+- NVM recomendado para gerenciar versões
+- SharePoint Framework (SPFx) 1.20.2
 - React 17
-
-⚠️ Node.js 20.x NÃO é suportado pelo SPFx 1.21.
-
 
 ## 📁 Estrutura do Projeto
 
@@ -74,6 +71,62 @@ Template pré-configurado para desenvolvimento rápido de aplicações SharePoin
 | `npm run generate:component` | Gera um novo componente |
 | `npm run generate:service` | Gera um novo serviço |
 | `npm run generate:hook` | Gera um novo hook customizado |
+
+---
+
+## 🎯 Modos de Aplicação
+
+O template suporta **dois modos** de desenvolvimento, configurados automaticamente no `app.config.json`:
+
+### 🖥️ **Modo Full Page (`"mode": "fullpage"`)**
+
+**Para aplicações que ocupam a página inteira:**
+
+- ✅ Oculta automaticamente header e navegação do SharePoint
+- ✅ Controle total da interface do usuário
+- ✅ Ideal para portais, dashboards e aplicações completas
+- ✅ React Router para navegação SPA
+
+**Quando usar:**
+- Portais corporativos
+- Dashboards executivos
+- Aplicações que precisam de UX customizada
+- Sistemas completos (CRM, ERP, etc)
+
+### 🧩 **Modo WebPart (`"mode": "webpart"`)**
+
+**Para componentes que convivem com o SharePoint:**
+
+- ✅ Mantém header e navegação do SharePoint visíveis
+- ✅ Pode ser inserido em qualquer página
+- ✅ Convive com outros WebParts
+- ✅ Múltiplas instâncias na mesma página
+
+**Quando usar:**
+- Widgets e componentes reutilizáveis
+- Gráficos e visualizações de dados
+- Formulários específicos
+- Integrações pontuais
+
+### 🔄 **Trocar de Modo**
+
+Para mudar o modo da aplicação:
+
+1. Edite o `app.config.json`:
+```json
+{
+  "mode": "webpart"  // ou "fullpage"
+}
+```
+
+2. Execute:
+```bash
+npm run configure
+```
+
+Pronto! O template será reconfigurado automaticamente.
+
+📖 **[Ver guia completo de modos →](./MODES.md)**
 
 ---
 
@@ -143,7 +196,7 @@ const MyComponent = () => {
 };
 ```
 
-## 🎨 Gerador de Código 
+## 🎨 Gerador de Código
 
 Crie páginas, componentes, serviços e hooks automaticamente!
 
@@ -168,6 +221,7 @@ npm run generate:hook useUserData
 ```
 
 **O que é criado:**
+
 - ✅ Arquivo com template completo
 - ✅ Imports e configurações automáticas
 - ✅ Rotas adicionadas ao App.tsx (páginas)
@@ -178,6 +232,21 @@ npm run generate:hook useUserData
 📖 **[Ver documentação completa do gerador →](./GENERATOR.md)**
 
 ---
+
+## 📝 Criando Páginas Manualmente
+
+Se preferir criar manualmente:
+
+1. Crie o componente em `src/webparts/app/pages/`
+2. Adicione a rota em `src/webparts/app/App.tsx`:
+
+```typescript
+import MinhaNovaPage from './pages/MinhaNovaPage';
+
+// No componente Routes:
+<Route path="/minha-nova-pagina" element={<MinhaNovaPage />} />
+```
+
 ## 📄 Licença
 
 MIT
