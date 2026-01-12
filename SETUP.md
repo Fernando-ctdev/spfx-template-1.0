@@ -29,17 +29,17 @@ git clone <seu-repo-url>
 cd spfx-template-1.0
 ```
 
-### 2. Configyour-tenant",
+### 2. Configure TUDO em um único arquivo! 📝
+
+Edite apenas o arquivo `app.config.json` na raiz do projeto:
+
+```json
+{
+  "tenant": "your-tenant",
   "siteUrl": "/sites/your-site",
   "appName": "my-spfx-app",
   "appTitle": "My App",
   "mode": "fullpage"
-{
-  "tenant": "contoso",
-  "siteUrl": "/sites/meusite",
-  "appName": "my-spfx-app", //Este será o nome da webpart
-  "appTitle": "My App",  //Este será o nome da webpart
-  "mode": "fullpage" //Modo fullpage ou webpart
 }
 ```
 

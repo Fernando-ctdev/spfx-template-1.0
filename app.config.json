@@ -1,7 +1,7 @@
 {
-  "tenant": "tvglobocorp", 
-  "siteUrl": "/sites/SeuSite",
-  "appName": "NomeDoSite",
-  "appTitle": "Nome Do Site",
+  "tenant": "your-tenant",
+  "siteUrl": "/sites/your-site",
+  "appName": "your-app-name",
+  "appTitle": "Your App Title",
   "mode": "fullpage"
 }

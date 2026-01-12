@@ -21,10 +21,10 @@
         "default": "Advanced"
       },
       "title": {
-        "default": "Nome Do Site"
+        "default": "SPFx Template"
       },
       "description": {
-        "default": "Nome Do Site"
+        "default": "SPFx Template"
       },
       "officeFabricIconFontName": "Page",
       "properties": {
