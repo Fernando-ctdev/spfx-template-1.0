@@ -1,7 +1,5 @@
 # 🛠️ Configuração Inicial
 
-> Este arquivo será **removido automaticamente** após `npm install`.
-
 ## 📋 Pré-requisitos
 
 - **Node.js 18.x LTS** (recomendado) ou 20.x
