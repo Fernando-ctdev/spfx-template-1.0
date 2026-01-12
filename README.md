@@ -101,16 +101,6 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 - Tooltips avançados
 - Componentes que precisam de controle total de estilo
 
-### ❌ **NÃO USE: MUI (Material UI) ou Fluent UI v9**
-
-MUI e Fluent UI v9 foram **removidos** do template para evitar:
-- Conflitos de CSS com SharePoint
-- Incompatibilidade com React 17 (v9 requer React 18)
-- Bundle desnecessariamente grande
-- Inconsistência visual
-
----
-
 ## 🔧 Scripts Disponíveis
 
 | Comando | Descrição |
@@ -159,24 +149,6 @@ O template suporta **dois modos** de desenvolvimento, configurados automaticamen
 - Gráficos e visualizações de dados
 - Formulários específicos
 - Integrações pontuais
-
-### 🔄 **Trocar de Modo**
-
-Para mudar o modo da aplicação:
-
-1. Edite o `app.config.json`:
-```json
-{
-  "mode": "webpart"  // ou "fullpage"
-}
-```
-
-2. Execute:
-```bash
-npm run configure
-```
-
-Pronto! O template será reconfigurado automaticamente.
 
 📖 **[Ver guia completo de modos →](./MODES.md)**
 

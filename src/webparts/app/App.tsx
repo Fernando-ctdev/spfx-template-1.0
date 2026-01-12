@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { HashRouter as Router, Route, Routes, useSearchParams, useNavigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, ITheme } from '@fluentui/react';
+import { ThemeProvider, createTheme, ITheme, mergeStyleSets, Text, Stack } from '@fluentui/react';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
+import { Rocket, FolderOpen, Puzzle, Wrench, Database, Sparkles, ExternalLink } from 'lucide-react';
 import { getSP } from '../../config/pnpConfig';
 
 // Inicializa ícones do Fluent UI
@@ -101,52 +102,287 @@ export interface IAppProps {
   userDisplayName: string;
 }
 
-// Componente Home de exemplo usando Fluent UI
-const Home: React.FC<{ userName?: string }> = ({ userName }) => {
-  return (
-    <div className="spfx-app-root" style={{ padding: '24px' }}>
-      <h1 style={{ margin: '0 0 16px 0', fontSize: '28px', fontWeight: 600 }}>
-        🚀 Bem-vindo ao seu App SPFx{userName ? `, ${userName}` : ''}!
-      </h1>
-      <p style={{ color: '#605e5c', marginBottom: '24px' }}>
-        Este é o template de página inteira. Edite este arquivo para começar a desenvolver.
-      </p>
-      
-      <div style={{ 
-        background: '#f3f2f1', 
-        padding: '16px', 
-        borderRadius: '4px',
-        border: '1px solid #edebe9'
-      }}>
-        <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 600 }}>
-          📁 Estrutura do Projeto
-        </h3>
-        <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.8' }}>
-          <li>📁 Páginas em: <code style={{ background: '#e1dfdd', padding: '2px 6px', borderRadius: '3px' }}>src/webparts/app/pages/</code></li>
-          <li>🧩 Componentes em: <code style={{ background: '#e1dfdd', padding: '2px 6px', borderRadius: '3px' }}>src/webparts/app/components/</code></li>
-          <li>🔧 Serviços em: <code style={{ background: '#e1dfdd', padding: '2px 6px', borderRadius: '3px' }}>src/core/services/</code></li>
-          <li>📊 Models em: <code style={{ background: '#e1dfdd', padding: '2px 6px', borderRadius: '3px' }}>src/models/</code></li>
-        </ul>
-      </div>
+// Estilos da página Home
+const homeStyles = mergeStyleSets({
+  container: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    padding: '24px',
+  },
+  card: {
+    background: '#ffffff',
+    borderRadius: '16px',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    maxWidth: '600px',
+    width: '100%',
+    overflow: 'hidden',
+  },
+  header: {
+    background: 'linear-gradient(135deg, #0078d4 0%, #106ebe 100%)',
+    padding: '32px',
+    textAlign: 'center' as const,
+  },
+  headerIcon: {
+    width: '64px',
+    height: '64px',
+    background: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 16px',
+  },
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: '28px',
+    fontWeight: 600,
+    margin: '0 0 8px 0',
+  },
+  headerSubtitle: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: '14px',
+    margin: 0,
+  },
+  body: {
+    padding: '32px',
+  },
+  section: {
+    marginBottom: '24px',
+  },
+  sectionTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '16px',
+    fontSize: '16px',
+    fontWeight: 600,
+    color: '#323130',
+  },
+  structureList: {
+    display: 'grid',
+    gap: '12px',
+  },
+  structureItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px 16px',
+    background: '#f3f2f1',
+    borderRadius: '8px',
+    transition: 'all 0.2s ease',
+    ':hover': {
+      background: '#edebe9',
+      transform: 'translateX(4px)',
+    },
+  },
+  structureIcon: {
+    width: '36px',
+    height: '36px',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  structureText: {
+    flex: 1,
+  },
+  structureLabel: {
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#323130',
+    margin: 0,
+  },
+  structurePath: {
+    fontSize: '12px',
+    color: '#605e5c',
+    fontFamily: 'Consolas, Monaco, monospace',
+    margin: 0,
+  },
+  stackBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '8px 16px',
+    background: '#deecf9',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: 500,
+    color: '#0078d4',
+    marginRight: '8px',
+    marginBottom: '8px',
+  },
+  footer: {
+    borderTop: '1px solid #edebe9',
+    padding: '16px 32px',
+    background: '#faf9f8',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  footerText: {
+    fontSize: '12px',
+    color: '#605e5c',
+  },
+  footerLink: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '12px',
+    color: '#0078d4',
+    textDecoration: 'none',
+    ':hover': {
+      textDecoration: 'underline',
+    },
+  },
+});
 
-      <div style={{ marginTop: '24px', padding: '16px', background: '#deecf9', borderRadius: '4px', border: '1px solid #c7e0f4' }}>
-        <h3 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 600, color: '#0078d4' }}>
-          💡 Stack de UI
-        </h3>
-        <p style={{ margin: 0, fontSize: '14px', color: '#323130' }}>
-          <strong>Fluent UI</strong> para componentes visuais | <strong>Radix UI</strong> para componentes headless avançados
-        </p>
+// Cores para ícones de estrutura
+const iconColors = {
+  pages: { bg: '#e3f2fd', color: '#1976d2' },
+  components: { bg: '#f3e5f5', color: '#7b1fa2' },
+  services: { bg: '#e8f5e9', color: '#388e3c' },
+  models: { bg: '#fff3e0', color: '#f57c00' },
+};
+
+// Componente Home moderno
+const Home: React.FC<{ userName?: string }> = ({ userName }) => {
+  const structureItems = [
+    { icon: FolderOpen, label: 'Páginas', path: 'src/webparts/app/pages/', colors: iconColors.pages },
+    { icon: Puzzle, label: 'Componentes', path: 'src/webparts/app/components/', colors: iconColors.components },
+    { icon: Wrench, label: 'Serviços', path: 'src/core/services/', colors: iconColors.services },
+    { icon: Database, label: 'Models', path: 'src/models/', colors: iconColors.models },
+  ];
+
+  return (
+    <div className={homeStyles.container}>
+      <div className={homeStyles.card}>
+        {/* Header */}
+        <div className={homeStyles.header}>
+          <div className={homeStyles.headerIcon}>
+            <Rocket size={32} color="#ffffff" />
+          </div>
+          <h1 className={homeStyles.headerTitle}>
+            {userName ? `Olá, ${userName}!` : 'Bem-vindo!'}
+          </h1>
+          <p className={homeStyles.headerSubtitle}>
+            Seu template SPFx está pronto para desenvolvimento
+          </p>
+        </div>
+
+        {/* Body */}
+        <div className={homeStyles.body}>
+          {/* Estrutura do Projeto */}
+          <div className={homeStyles.section}>
+            <div className={homeStyles.sectionTitle}>
+              <FolderOpen size={18} color="#0078d4" />
+              <span>Estrutura do Projeto</span>
+            </div>
+            <div className={homeStyles.structureList}>
+              {structureItems.map((item, index) => (
+                <div key={index} className={homeStyles.structureItem}>
+                  <div 
+                    className={homeStyles.structureIcon}
+                    style={{ background: item.colors.bg }}
+                  >
+                    <item.icon size={18} color={item.colors.color} />
+                  </div>
+                  <div className={homeStyles.structureText}>
+                    <p className={homeStyles.structureLabel}>{item.label}</p>
+                    <p className={homeStyles.structurePath}>{item.path}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stack de UI */}
+          <div className={homeStyles.section} style={{ marginBottom: 0 }}>
+            <div className={homeStyles.sectionTitle}>
+              <Sparkles size={18} color="#0078d4" />
+              <span>Stack de UI</span>
+            </div>
+            <div>
+              <span className={homeStyles.stackBadge}>
+                <span style={{ fontSize: '16px' }}>🎨</span> Fluent UI v8
+              </span>
+              <span className={homeStyles.stackBadge}>
+                <span style={{ fontSize: '16px' }}>⚡</span> Radix UI
+              </span>
+              <span className={homeStyles.stackBadge}>
+                <span style={{ fontSize: '16px' }}>📦</span> PnPjs 4.x
+              </span>
+              <span className={homeStyles.stackBadge}>
+                <span style={{ fontSize: '16px' }}>🔄</span> TanStack Query
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className={homeStyles.footer}>
+          <span className={homeStyles.footerText}>
+            SPFx 1.21.0 • React 17 • TypeScript
+          </span>
+          <a 
+            href="https://learn.microsoft.com/en-us/sharepoint/dev/spfx/sharepoint-framework-overview" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={homeStyles.footerLink}
+          >
+            Documentação <ExternalLink size={12} />
+          </a>
+        </div>
       </div>
     </div>
   );
 };
 
-// Componente NotFound
+// Estilos da página NotFound
+const notFoundStyles = mergeStyleSets({
+  container: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    padding: '24px',
+  },
+  card: {
+    background: '#ffffff',
+    borderRadius: '16px',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    padding: '48px',
+    textAlign: 'center' as const,
+  },
+  errorCode: {
+    fontSize: '120px',
+    fontWeight: 700,
+    background: 'linear-gradient(135deg, #d13438 0%, #a4262c 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+    margin: 0,
+    lineHeight: 1,
+  },
+  errorText: {
+    fontSize: '18px',
+    color: '#605e5c',
+    margin: '16px 0 0 0',
+  },
+});
+
+// Componente NotFound moderno
 const NotFound: React.FC = () => {
   return (
-    <div className="spfx-app-root" style={{ padding: '24px', textAlign: 'center' }}>
-      <h1 style={{ fontSize: '72px', margin: '0', color: '#d13438' }}>404</h1>
-      <p style={{ fontSize: '18px', color: '#605e5c' }}>Página não encontrada</p>
+    <div className={notFoundStyles.container}>
+      <div className={notFoundStyles.card}>
+        <h1 className={notFoundStyles.errorCode}>404</h1>
+        <p className={notFoundStyles.errorText}>Página não encontrada</p>
+      </div>
     </div>
   );
 };
