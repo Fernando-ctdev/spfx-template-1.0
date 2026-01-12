@@ -2,7 +2,7 @@
 
 ## 📋 Pré-requisitos
 
-- Node.js 18.17.1+ ou 20.x LTS (compatível com SPFx 1.20.2)
+- Node.js 18.17.1+ ou 20.x LTS (compatível com SPFx 1.21.0)
 - NVM (Node Version Manager) – recomendado
 - Acesso a um tenant SharePoint Online
 
