@@ -9,6 +9,22 @@ build.addSuppression(`Warning - [package-solution] Admins can make this solution
 build.configureWebpack.mergeConfig({
   additionalConfiguration: (generatedConfiguration) => {
     generatedConfiguration.module.rules.push({
+      test: /\.css$/,
+      use: [
+        {
+          loader: 'postcss-loader',
+          options: {
+            postcssOptions: {
+              plugins: [
+                require('tailwindcss'),
+                require('autoprefixer'),
+              ],
+            },
+          },
+        },
+      ],
+    });
+    generatedConfiguration.module.rules.push({
       test: /\.(woff|woff2|eot|ttf|otf)$/,
       use: {
         loader: 'file-loader',

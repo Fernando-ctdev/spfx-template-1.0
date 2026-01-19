@@ -12,10 +12,12 @@ import * as strings from 'AppWebPartStrings';
 import App from './App';
 import { IAppProps } from './App';
 import { getSP } from '../../config/pnpConfig';
+import './shared/css/tailwind.css';
 import './shared/css/global.module.scss';
-import './shared/css/sharepoint.css';
-// NOTA: O import do sharepoint.css é adicionado automaticamente pelo script configure.js
-// quando mode="fullpage" está definido no app.config.json
+import './shared/css/page-layout.css';
+// NOTA: O import do page-layout.css é adicionado automaticamente pelo script configure.js
+// quando mode="page" (Modo Página) está definido no app.config.json
+// Se mode="component", este import é removido automaticamente.
 
 export interface IAppWebPartProps {
   description: string;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { mergeStyleSets } from '@fluentui/react';
 import { Rocket, FolderOpen, Puzzle, Wrench, Database, Sparkles, ExternalLink } from 'lucide-react';
 
 // Cores para ícones de estrutura
@@ -9,149 +8,6 @@ const iconColors = {
   services: { bg: '#e8f5e9', color: '#388e3c' },
   models: { bg: '#fff3e0', color: '#f57c00' },
 };
-
-// Estilos da Home
-const homeStyles = mergeStyleSets({
-  container: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    padding: '24px',
-  },
-  card: {
-    background: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    maxWidth: '600px',
-    width: '100%',
-    overflow: 'hidden',
-  },
-  header: {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    padding: '32px',
-    textAlign: 'center' as const,
-    color: '#ffffff',
-  },
-  headerIcon: {
-    display: 'inline-flex',
-    padding: '12px',
-    borderRadius: '50%',
-    background: 'rgba(255, 255, 255, 0.2)',
-    marginBottom: '16px',
-  },
-  headerTitle: {
-    fontSize: '28px',
-    fontWeight: 600,
-    margin: '0 0 8px 0',
-    color: '#ffffff',
-  },
-  headerSubtitle: {
-    fontSize: '14px',
-    opacity: 0.9,
-    margin: 0,
-    color: '#ffffff',
-  },
-  body: {
-    padding: '32px',
-  },
-  section: {
-    marginBottom: '24px',
-  },
-  sectionTitle: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#323130',
-    marginBottom: '12px',
-  },
-  structureList: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '8px',
-  },
-  structureItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '12px',
-    background: '#f9f9f9',
-    borderRadius: '8px',
-    border: '1px solid #edebe9',
-    transition: 'all 0.2s',
-    selectors: {
-      ':hover': {
-        background: '#f3f2f1',
-        transform: 'translateX(4px)',
-      },
-    },
-  },
-  structureIcon: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  structureText: {
-    flex: 1,
-  },
-  structureLabel: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#323130',
-    margin: '0 0 2px 0',
-  },
-  structurePath: {
-    fontSize: '12px',
-    color: '#605e5c',
-    margin: 0,
-    fontFamily: 'Monaco, Consolas, monospace',
-  },
-  stackBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '6px 12px',
-    background: '#f3f2f1',
-    borderRadius: '6px',
-    fontSize: '13px',
-    fontWeight: 500,
-    color: '#323130',
-    marginRight: '8px',
-    marginBottom: '8px',
-  },
-  footer: {
-    padding: '16px 32px',
-    background: '#f9f9f9',
-    borderTop: '1px solid #edebe9',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: '12px',
-    color: '#605e5c',
-  },
-  footerLink: {
-    fontSize: '12px',
-    color: '#0078d4',
-    textDecoration: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-    selectors: {
-      ':hover': {
-        textDecoration: 'underline',
-      },
-    },
-  },
-});
 
 interface IHomeProps {
   userName?: string;
@@ -166,41 +22,44 @@ const Home: React.FC<IHomeProps> = ({ userName }) => {
   ];
 
   return (
-    <div className={homeStyles.container}>
-      <div className={homeStyles.card}>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#667eea] to-[#764ba2] p-6">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
         {/* Header */}
-        <div className={homeStyles.header}>
-          <div className={homeStyles.headerIcon}>
-            <Rocket size={32} color="#ffffff" />
+        <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] p-8 text-center text-white">
+          <div className="inline-flex p-3 rounded-full bg-white/20 mb-4">
+            <Rocket size={32} className="text-white" />
           </div>
-          <h1 className={homeStyles.headerTitle}>
+          <h1 className="text-3xl font-semibold mb-2">
             {userName ? `Olá, ${userName}!` : 'Bem-vindo!'}
           </h1>
-          <p className={homeStyles.headerSubtitle}>
+          <p className="text-sm opacity-90">
             Seu template SPFx está pronto para desenvolvimento
           </p>
         </div>
 
         {/* Body */}
-        <div className={homeStyles.body}>
+        <div className="p-8">
           {/* Estrutura do Projeto */}
-          <div className={homeStyles.section}>
-            <div className={homeStyles.sectionTitle}>
-              <FolderOpen size={18} color="#0078d4" />
+          <div className="mb-6">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
+              <FolderOpen size={18} className="text-[#0078d4]" />
               <span>Estrutura do Projeto</span>
             </div>
-            <div className={homeStyles.structureList}>
+            <div className="flex flex-col gap-2">
               {structureItems.map((item, index) => (
-                <div key={index} className={homeStyles.structureItem}>
+                <div 
+                  key={index} 
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 transition-all hover:bg-gray-100 hover:translate-x-1"
+                >
                   <div 
-                    className={homeStyles.structureIcon}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                     style={{ background: item.colors.bg }}
                   >
                     <item.icon size={18} color={item.colors.color} />
                   </div>
-                  <div className={homeStyles.structureText}>
-                    <p className={homeStyles.structureLabel}>{item.label}</p>
-                    <p className={homeStyles.structurePath}>{item.path}</p>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-gray-800 mb-0.5">{item.label}</p>
+                    <p className="text-xs text-gray-600 font-mono">{item.path}</p>
                   </div>
                 </div>
               ))}
@@ -208,38 +67,38 @@ const Home: React.FC<IHomeProps> = ({ userName }) => {
           </div>
 
           {/* Stack de UI */}
-          <div className={homeStyles.section} style={{ marginBottom: 0 }}>
-            <div className={homeStyles.sectionTitle}>
-              <Sparkles size={18} color="#0078d4" />
+          <div className="mb-0">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-3">
+              <Sparkles size={18} className="text-[#0078d4]" />
               <span>Stack de UI</span>
             </div>
-            <div>
-              <span className={homeStyles.stackBadge}>
-                <span style={{ fontSize: '16px' }}>🎨</span> Fluent UI v8
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-md text-sm font-medium text-gray-800">
+                <span className="text-base">🎨</span> Tailwind CSS
               </span>
-              <span className={homeStyles.stackBadge}>
-                <span style={{ fontSize: '16px' }}>⚡</span> Radix UI
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-md text-sm font-medium text-gray-800">
+                <span className="text-base">⚡</span> Fluent UI v8
               </span>
-              <span className={homeStyles.stackBadge}>
-                <span style={{ fontSize: '16px' }}>📦</span> PnPjs 4.x
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-md text-sm font-medium text-gray-800">
+                <span className="text-base">📦</span> PnPjs 4.x
               </span>
-              <span className={homeStyles.stackBadge}>
-                <span style={{ fontSize: '16px' }}>🔄</span> TanStack Query
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-md text-sm font-medium text-gray-800">
+                <span className="text-base">🔄</span> TanStack Query
               </span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className={homeStyles.footer}>
-          <span className={homeStyles.footerText}>
+        <div className="px-8 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+          <span className="text-xs text-gray-600">
             SPFx 1.21.0 • React 17 • TypeScript
           </span>
           <a 
             href="https://learn.microsoft.com/en-us/sharepoint/dev/spfx/sharepoint-framework-overview" 
             target="_blank" 
             rel="noopener noreferrer"
-            className={homeStyles.footerLink}
+            className="text-xs text-[#0078d4] no-underline flex items-center gap-1 hover:underline"
           >
             Documentação <ExternalLink size={12} />
           </a>

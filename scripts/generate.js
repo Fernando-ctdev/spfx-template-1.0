@@ -55,29 +55,8 @@ const question = (query) => new Promise((resolve) => rl.question(query, resolve)
 
 const templates = {
   page: (name, withSharePoint) => `import * as React from 'react';
-import { mergeStyleSets, getTheme, Text, Spinner, SpinnerSize, MessageBar, MessageBarType } from '@fluentui/react';${withSharePoint ? `
+import { Text, Spinner, SpinnerSize, MessageBar, MessageBarType } from '@fluentui/react';${withSharePoint ? `
 import { useListItems } from '../../../core/hooks/useSharePoint';` : ''}
-
-const theme = getTheme();
-
-const styles = mergeStyleSets({
-  container: {
-    padding: theme.spacing.l2,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.l1,
-  },
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.m,
-  },
-  loading: {
-    display: 'flex',
-    justifyContent: 'center',
-    padding: theme.spacing.l2,
-  },
-});
 
 /**
  * Página ${name}
@@ -89,14 +68,20 @@ const ${name}: React.FC = () => {${withSharePoint ? `
   // Exemplo de uso do hook useListItems
   // const { items, loading, error } = useListItems('NomeDaLista', ['Id', 'Title']);
   
-  // if (loading) return <div className={styles.loading}><Spinner size={SpinnerSize.large} label="Carregando..." /></div>;
+  // if (loading) return <div className="flex justify-center p-8"><Spinner size={SpinnerSize.large} label="Carregando..." /></div>;
   // if (error) return <MessageBar messageBarType={MessageBarType.error}>{error.message}</MessageBar>;` : ''}
 
   return (
-    <div className={styles.container}>
-      <Text variant="xxLarge" block>${name}</Text>
-      <div className={styles.content}>
+    <div className="p-8 flex flex-col gap-4">
+      <Text variant="xxLarge" block className="text-gray-800 font-semibold mb-4">${name}</Text>
+      
+      <div className="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
         <Text variant="medium">Conteúdo da página ${name}</Text>
+        
+        {/* Exemplo de card com Tailwind */}
+        <div className="p-4 bg-blue-50 border border-blue-100 rounded text-blue-800">
+          Este é um componente estilizado com Tailwind CSS
+        </div>
         
         {/* Seu conteúdo aqui */}
       </div>
@@ -108,17 +93,6 @@ export default ${name};
 `,
 
   component: (name, withProps) => `import * as React from 'react';
-import { mergeStyleSets, getTheme } from '@fluentui/react';
-
-const theme = getTheme();
-
-const styles = mergeStyleSets({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.s1,
-  },
-});
 
 /**
  * Props do componente ${name}
@@ -136,10 +110,10 @@ export interface I${name}Props {${withProps ? `
  */
 const ${name}: React.FC<I${name}Props> = (${withProps ? '{ title, description }' : 'props'}) => {
   return (
-    <div className={styles.root}>
+    <div className="flex flex-col gap-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
       {/* Conteúdo do componente ${name} */}${withProps ? `
-      {title && <h3>{title}</h3>}
-      {description && <p>{description}</p>}` : ''}
+      {title && <h3 className="text-lg font-semibold text-gray-800">{title}</h3>}
+      {description && <p className="text-sm text-gray-600">{description}</p>}` : ''}
     </div>
   );
 };

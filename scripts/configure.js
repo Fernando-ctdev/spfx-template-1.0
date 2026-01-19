@@ -73,25 +73,34 @@ function getGuids() {
 // Ler configuração principal
 function readConfig() {
   const configPath = path.join(basePath, 'app.config.json');
+  const samplePath = path.join(basePath, 'app.config.sample.json');
   
+  // Se não existir config, tentar criar a partir do sample
   if (!fs.existsSync(configPath)) {
-    log.error('Arquivo app.config.json não encontrado!');
-    log.info('Crie o arquivo app.config.json na raiz do projeto.');
-    process.exit(1);
+    if (fs.existsSync(samplePath)) {
+      log.warn('app.config.json não encontrado. Criando a partir do modelo...');
+      fs.copyFileSync(samplePath, configPath);
+      log.success('Arquivo app.config.json criado com sucesso!');
+      log.info('⚠️  POR FAVOR, EDITE O ARQUIVO app.config.json COM SEUS DADOS REAIS ANTES DE CONTINUAR.');
+    } else {
+      log.error('Arquivo app.config.json e app.config.sample.json não encontrados!');
+      log.info('Crie o arquivo app.config.json na raiz do projeto manualmente.');
+      process.exit(1);
+    }
   }
   
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   
   // Validar e definir modo padrão se não especificado
   if (!config.mode) {
-    config.mode = 'fullpage';
-    log.warn('Modo não especificado. Usando "fullpage" como padrão.');
+    config.mode = 'page';
+    log.warn('Modo não especificado. Usando "page" como padrão.');
   }
   
   // Validar modo
-  const validModes = ['fullpage', 'webpart'];
+  const validModes = ['page', 'component'];
   if (!validModes.includes(config.mode)) {
-    log.error(`Modo inválido: "${config.mode}". Use "fullpage" ou "webpart".`);
+    log.error(`Modo inválido: "${config.mode}". Use "page" ou "component".`);
     process.exit(1);
   }
   
@@ -157,32 +166,32 @@ function updateManifest(config, guids) {
   log.success('src/webparts/app/AppWebPart.manifest.json');
 }
 
-// Configurar modo da aplicação (fullpage ou webpart)
+// Configurar modo da aplicação (page ou component)
 function configureAppMode(config) {
   const appWebPartPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.ts');
   let content = fs.readFileSync(appWebPartPath, 'utf8');
   
-  const fullPageImport = "import './shared/css/sharepoint.css';";
+  const fullPageImport = "import './shared/css/page-layout.css';";
   const hasFullPageImport = content.includes(fullPageImport);
   
-  if (config.mode === 'fullpage') {
-    // Modo Full Page - adicionar import do CSS se não existir
+  if (config.mode === 'page') {
+    // Modo Page - adicionar import do CSS se não existir
     if (!hasFullPageImport) {
       // Adicionar após o import do global.module.scss
       content = content.replace(
         "import './shared/css/global.module.scss';",
-        "import './shared/css/global.module.scss';\nimport './shared/css/sharepoint.css';"
+        "import './shared/css/global.module.scss';\nimport './shared/css/page-layout.css';"
       );
       fs.writeFileSync(appWebPartPath, content);
-      log.success('Modo Full Page ativado - CSS do SharePoint será ocultado');
+      log.success('Modo Página ativado - CSS do SharePoint será ocultado');
     }
-  } else if (config.mode === 'webpart') {
-    // Modo WebPart - remover import do CSS se existir
+  } else if (config.mode === 'component') {
+    // Modo Component - remover import do CSS se existir
     if (hasFullPageImport) {
       content = content.replace(`\n${fullPageImport}`, '');
       content = content.replace(fullPageImport, '');
       fs.writeFileSync(appWebPartPath, content);
-      log.success('Modo WebPart ativado - Elementos do SharePoint visíveis');
+      log.success('Modo Componente ativado - Elementos do SharePoint visíveis');
     }
   }
 }
@@ -190,8 +199,8 @@ function configureAppMode(config) {
 // Exibir resumo da configuração
 function showSummary(config) {
   const fullUrl = `https://${config.tenant}.sharepoint.com${config.siteUrl}`;
-  const modeText = config.mode === 'fullpage' ? 'Página Completa (Full Page)' : 'WebPart Tradicional';
-  const modeIcon = config.mode === 'fullpage' ? '🖥️' : '🧩';
+  const modeText = config.mode === 'page' ? 'Página (Full Viewport)' : 'Componente (WebPart)';
+  const modeIcon = config.mode === 'page' ? '🖥️' : '🧩';
   
   console.log(`
 ${colors.cyan}┌─────────────────────────────────────────────────────┐

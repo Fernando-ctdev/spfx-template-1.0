@@ -3,5 +3,5 @@
   "siteUrl": "/sites/your-site",
   "appName": "your-app-name",
   "appTitle": "Your App Title",
-  "mode": "fullpage"
+  "mode": "page"
 }
