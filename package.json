@@ -19,7 +19,7 @@
     "generate:model": "node scripts/generate.js model"
   },
   "engines": {
-    "node": ">=18.17.1 <19.0.0 || >=20.0.0 <21.0.0"
+    "node": ">=18.17.1 <19.0.0"
   },
   "dependencies": {
     "@fluentui/font-icons-mdl2": "^8.5.47",

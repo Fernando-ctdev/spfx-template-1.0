@@ -82,6 +82,7 @@ function readConfig() {
       fs.copyFileSync(samplePath, configPath);
       log.success('Arquivo app.config.json criado com sucesso!');
       log.info('⚠️  POR FAVOR, EDITE O ARQUIVO app.config.json COM SEUS DADOS REAIS ANTES DE CONTINUAR.');
+      process.exit(0);
     } else {
       log.error('Arquivo app.config.json e app.config.sample.json não encontrados!');
       log.info('Crie o arquivo app.config.json na raiz do projeto manualmente.');

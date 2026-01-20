@@ -1,0 +1,7 @@
+{
+  "tenant": "sua-empresa",
+  "siteUrl": "/sites/seu-site",
+  "appName": "spfx-app",
+  "appTitle": "Minha Aplicação SPFx",
+  "mode": "fullpage"
+}

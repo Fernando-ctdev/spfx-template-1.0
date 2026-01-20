@@ -1,169 +1,80 @@
-# 🎨 Gerador de Código
+# 🎨 Gerador de Código SPFx
 
-CLI para criar páginas, componentes, serviços e hooks automaticamente.
+Aumente sua produtividade gerando código padronizado instantaneamente.
 
-## 🚀 Uso Rápido
+## 🚀 Como Usar
 
-```bash
-npm run generate          # Modo interativo (recomendado)
-```
-
-### Comandos Diretos
-
-| Comando | Descrição | Exemplo |
-|---------|-----------|---------|
-| `npm run generate:page` | Cria página + rota | `npm run generate:page Dashboard` |
-| `npm run generate:component` | Cria componente | `npm run generate:component UserCard` |
-| `npm run generate:service` | Cria serviço CRUD | `npm run generate:service UserService` |
-| `npm run generate:hook` | Cria hook customizado | `npm run generate:hook useUserData` |
-| `npm run generate:model` | Cria interface | `npm run generate:model User` |
-
----
-
-## 📦 O Que é Criado
-
-### Página (`generate:page`)
-
-```bash
-npm run generate:page Dashboard
-```
-
-| Arquivo | Caminho |
-|---------|---------|
-| Página | `src/webparts/app/pages/Dashboard.tsx` |
-| Teste | `tests/pages/Dashboard.test.tsx` |
-| Rota | Adicionada automaticamente no `App.tsx` |
-
-**Acesse:** `http://localhost:4321/#/dashboard`
-
----
-
-### Componente (`generate:component`)
-
-```bash
-npm run generate:component UserCard
-```
-
-| Arquivo | Caminho |
-|---------|---------|
-| Componente | `src/webparts/app/components/UserCard.tsx` |
-| Teste | `tests/components/UserCard.test.tsx` |
-
-```typescript
-import UserCard from '../components/UserCard';
-
-<UserCard title="João Silva" description="Desenvolvedor" />
-```
-
----
-
-### Serviço (`generate:service`)
-
-```bash
-npm run generate:service UserService
-```
-
-| Arquivo | Caminho |
-|---------|---------|
-| Serviço | `src/core/services/UserService.ts` |
-| Teste | `tests/services/UserService.test.ts` |
-
-**Métodos inclusos:** `getAll`, `getById`, `create`, `update`, `delete`
-
-```typescript
-import { UserService } from '../../core/services/UserService';
-
-const users = await UserService.getAll('Users');
-await UserService.create('Users', { Title: 'João' });
-await UserService.update('Users', 1, { Title: 'João Jr.' });
-await UserService.delete('Users', 1);
-```
-
----
-
-### Hook (`generate:hook`)
-
-```bash
-npm run generate:hook useUsers
-```
-
-| Arquivo | Caminho |
-|---------|---------|
-| Hook | `src/core/hooks/useUsers.ts` |
-| Teste | `tests/hooks/useUsers.test.ts` |
-
-```typescript
-import { useUsers } from '../../core/hooks/useUsers';
-
-const { items, loading, create, update, remove } = useUsers('Users');
-```
-
----
-
-### Model (`generate:model`)
-
-```bash
-npm run generate:model User
-```
-
-| Arquivo | Caminho |
-|---------|---------|
-| Interface | `src/models/IUser.ts` |
-
-Inclui campos padrão SharePoint: `Id`, `Title`, `Created`, `Modified`, `Author`, `Editor`
-
----
-
-## 💡 Convenções de Nomes
-
-O gerador normaliza automaticamente:
-
-| Tipo | Input | Output |
-|------|-------|--------|
-| Página | `my-dashboard` | `MyDashboard.tsx` |
-| Componente | `user card` | `UserCard.tsx` |
-| Hook | `userData` | `useUserData.ts` |
-| Serviço | `User` | `UserService.ts` |
-| Model | `User` | `IUser.ts` |
-
----
-
-## 📁 Estrutura Gerada
-
-```
-src/
-├── webparts/app/
-│   ├── pages/          ← Páginas
-│   ├── components/     ← Componentes
-│   └── App.tsx         ← Rotas (auto)
-├── core/
-│   ├── services/       ← Serviços
-│   └── hooks/          ← Hooks
-└── models/             ← Interfaces
-
-tests/
-├── pages/
-├── components/
-├── services/
-└── hooks/
-```
-
----
-
-## ❓ FAQ
-
-| Pergunta | Resposta |
-|----------|----------|
-| Posso editar os arquivos? | Sim, são templates iniciais |
-| E se o arquivo existir? | Erro + escolha outro nome |
-| Rotas são automáticas? | Sim, para páginas |
-| Posso customizar templates? | Sim, edite `scripts/generate.js` |
-
----
+Recomendamos o **modo interativo**, que guia você pelas opções:
 
 ```bash
 npm run generate
 ```
 
-**Happy coding! 🚀**
+### Comandos Diretos (Para Scripts/CI)
 
+| O que você quer criar? | Comando | Exemplo |
+|------------------------|---------|---------|
+| **Página + Rota** | `npm run generate:page <Nome>` | `npm run generate:page Dashboard` |
+| **Componente** | `npm run generate:component <Nome>` | `npm run generate:component Header` |
+| **Serviço (CRUD)** | `npm run generate:service <Nome>` | `npm run generate:service Projetos` |
+| **Hook Customizado** | `npm run generate:hook <Nome>` | `npm run generate:hook usePermissoes` |
+| **Interface (Model)** | `npm run generate:model <Nome>` | `npm run generate:model Projeto` |
+
+---
+
+## 📦 O Que é Gerado?
+
+### 1. Página (`generate:page`)
+Cria uma nova tela e configura o roteamento automaticamente.
+*   **Arquivo:** `src/webparts/app/pages/Dashboard.tsx`
+*   **Rota:** Adiciona `<Route path="/dashboard" ... />` em `App.tsx`
+*   **Teste:** `tests/pages/Dashboard.test.tsx`
+*   **Acesso:** `https://seu-tenant.sharepoint.com/.../#/dashboard`
+
+### 2. Componente (`generate:component`)
+Componente React funcional limpo e tipado.
+*   **Arquivo:** `src/webparts/app/components/Header.tsx`
+*   **Teste:** `tests/components/Header.test.tsx`
+
+### 3. Serviço (`generate:service`)
+Classe estática com métodos CRUD prontos para SharePoint.
+*   **Arquivo:** `src/core/services/ProjetosService.ts`
+*   **Métodos:** `getAll`, `getById`, `create`, `update`, `delete`
+*   **Uso:** `await ProjetosService.getAll('ListaProjetos')`
+
+### 4. Hook (`generate:hook`)
+Hook React para encapsular lógica de estado ou efeitos.
+*   **Arquivo:** `src/core/hooks/usePermissoes.ts`
+*   **Estrutura:** Já vem com estados de `data`, `loading` e `error`.
+
+### 5. Model (`generate:model`)
+Interface TypeScript com campos padrão do SharePoint.
+*   **Arquivo:** `src/models/IProjeto.ts`
+*   **Campos Padrão:** `Id`, `Title`, `Created`, `Author`, etc.
+
+---
+
+## 💡 Padronização Automática
+
+O gerador ajusta automaticamente o nome dos arquivos para seguir as boas práticas:
+
+| Se você digitar... | O gerador cria... | Tipo |
+|--------------------|-------------------|------|
+| `minha pagina` | `MinhaPagina.tsx` | Página |
+| `header-top` | `HeaderTop.tsx` | Componente |
+| `projetos` | `ProjetosService.ts` | Serviço |
+| `get-dados` | `useGetDados.ts` | Hook |
+| `projeto` | `IProjeto.ts` | Model |
+
+---
+
+## ❓ Perguntas Frequentes
+
+**Posso editar os arquivos gerados?**
+Sim! Eles são apenas um ponto de partida para acelerar seu trabalho.
+
+**E se o arquivo já existir?**
+O gerador avisa e **não** sobrescreve nada. Você terá que escolher outro nome.
+
+**As rotas funcionam com parâmetros?**
+O gerador cria rotas simples. Para rotas com ID (ex: `/detalhe/:id`), edite o `App.tsx` manualmente após gerar.
