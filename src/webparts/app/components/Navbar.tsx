@@ -1,8 +1,8 @@
 
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { NAV_ITEMS } from '../../config/navigation';
-import { ThemeContext } from '../../App';
+import { NAV_ITEMS } from '../config/navigation';
+import { ThemeContext } from '../App';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 
 export const Navbar: React.FC = () => {

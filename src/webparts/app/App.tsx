@@ -3,6 +3,7 @@ import { HashRouter as Router, Route, Routes, useSearchParams, useNavigate } fro
 import { ThemeProvider, createTheme, ITheme, mergeStyleSets, Text, Stack } from '@fluentui/react';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
 import { getSP } from '../../config/pnpConfig';
+import { Layout } from './components/Layout';
 import Home from './pages/Home';
 
 // Inicializa ícones do Fluent UI
