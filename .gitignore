@@ -1,8 +1,5 @@
 # Arquivos e pastas que devem ser ignorados pelo Git
 
-# Configurações Locais (Sensíveis)
-app.config.json
-
 # Dependências
 node_modules/
 

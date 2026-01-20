@@ -1,7 +1,7 @@
 {
-  "tenant": "tvglobocorp",
-  "siteUrl": "/sites/your-site",
-  "appName": "your-app-name",
-  "appTitle": "Your App Title",
+  "tenant": "sua-empresa",
+  "siteUrl": "/sites/seu-site",
+  "appName": "spfx-app",
+  "appTitle": "Minha Aplicação SPFx",
   "mode": "page"
 }

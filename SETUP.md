@@ -21,23 +21,9 @@ nvm use 18
 
 ---
 
-## 2️⃣ Instalação Automática
+## 2️⃣ Configuração do Projeto
 
-Execute o comando mágico. Ele instala dependências e cria os arquivos necessários.
-
-```bash
-npm install
-```
-
-O script irá detectar que o `app.config.json` não existe e criará um automaticamente para você.
-
----
-
-## 3️⃣ Configuração do Projeto
-
-Agora que o arquivo foi criado, você **PRECISA** editá-lo com os dados do seu ambiente.
-
-Abra o arquivo `app.config.json` na raiz do projeto e ajuste:
+Abra o arquivo `app.config.json` na raiz do projeto (ele já vem criado) e ajuste com os dados do seu ambiente:
 
 ```json
 {
@@ -45,15 +31,25 @@ Abra o arquivo `app.config.json` na raiz do projeto e ajuste:
   "siteUrl": "/sites/intranet",   // URL relativa do site onde vai testar
   "appName": "minha-intranet",    // Nome interno do projeto (sem espaços)
   "appTitle": "Portal Corporativo", // Nome que aparece para o usuário
-  "mode": "fullpage"              // "fullpage" (App) ou "component" (Widget)
+  "mode": "page"              // "page" (App) ou "component" (Widget)
 }
 ```
 
 ### 🎯 Entendendo o `mode`
-*   **`fullpage`**: A WebPart assume a tela inteira. Remove cabeçalhos e menus do SharePoint. Ideal para sistemas e portais imersivos.
+*   **`page`**: A WebPart assume a tela inteira (Full Page). Remove cabeçalhos e menus do SharePoint. Ideal para sistemas e portais imersivos.
 *   **`component`**: A WebPart se comporta como um widget normal. Mantém a navegação do SharePoint. Ideal para dashboards e pedaços de funcionalidade.
 
-**Dica:** Se mudar algo nesse arquivo no futuro, rode `npm run configure` para aplicar as mudanças.
+---
+
+## 3️⃣ Instalação Automática
+
+Execute o comando mágico. Ele instala dependências e aplica suas configurações.
+
+```bash
+npm install
+```
+
+O script irá ler seu `app.config.json` e configurar todo o projeto automaticamente.
 
 ---
 

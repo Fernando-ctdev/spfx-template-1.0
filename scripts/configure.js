@@ -73,21 +73,11 @@ function getGuids() {
 // Ler configuração principal
 function readConfig() {
   const configPath = path.join(basePath, 'app.config.json');
-  const samplePath = path.join(basePath, 'app.config.sample.json');
   
-  // Se não existir config, tentar criar a partir do sample
   if (!fs.existsSync(configPath)) {
-    if (fs.existsSync(samplePath)) {
-      log.warn('app.config.json não encontrado. Criando a partir do modelo...');
-      fs.copyFileSync(samplePath, configPath);
-      log.success('Arquivo app.config.json criado com sucesso!');
-      log.info('⚠️  POR FAVOR, EDITE O ARQUIVO app.config.json COM SEUS DADOS REAIS ANTES DE CONTINUAR.');
-      process.exit(0);
-    } else {
-      log.error('Arquivo app.config.json e app.config.sample.json não encontrados!');
-      log.info('Crie o arquivo app.config.json na raiz do projeto manualmente.');
-      process.exit(1);
-    }
+    log.error('app.config.json não encontrado!');
+    log.info('O arquivo app.config.json deve existir na raiz do projeto.');
+    process.exit(1);
   }
   
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));

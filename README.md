@@ -17,7 +17,7 @@ Esqueça a edição manual de GUIDs, manifestos e arquivos de debug.
 
 ### 🦎 Modo Híbrido (Page vs Widget)
 Mude o comportamento da sua aplicação com uma linha de configuração:
-*   **Modo Full Page**: Injeção automática de CSS para remover a UI do SharePoint. Perfeito para sistemas e quiosques.
+*   **Modo Page (Full Page)**: Injeção automática de CSS para remover a UI do SharePoint. Perfeito para sistemas e quiosques.
 *   **Modo Component**: Comportamento padrão de WebPart. Perfeito para dashboards e widgets.
 
 ### ⚡ Developer Experience (DX)
@@ -64,7 +64,6 @@ src/
 ## 📐 Regras de Ouro (Governança)
 
 ### 1. UI e Componentes
-*   **Consulte o [Guia de Estilos (STYLE_GUIDE.md)](./STYLE_GUIDE.md)** para detalhes da estratégia híbrida.
 *   **Use Fluent UI v8** para tudo que for possível (Botões, Inputs, Dialogs).
 *   **Use Tailwind CSS** apenas para layout (margens, paddings, grids) e customizações finas.
 *   **Evite CSS global**. Use Modules ou classes utilitárias do Tailwind.
