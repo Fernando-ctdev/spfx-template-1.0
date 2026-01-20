@@ -1,14 +1,14 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "spfx-app",
-    "id": "DEF319D0-A01C-404D-A1E3-9E89E3B6D4B5",
+    "name": "spfx-template-name",
+    "id": "00000000-0000-0000-0000-000000000000",
     "version": "1.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "developer": {
-      "name": "Seu Nome ou Empresa",
+      "name": "Template Developer",
       "websiteUrl": "",
       "privacyUrl": "",
       "termsOfUseUrl": "",
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "Descrição curta do seu aplicativo"
+        "default": "Template Description"
       },
       "longDescription": {
-        "default": "Descrição longa e detalhada do seu aplicativo SharePoint SPFx"
+        "default": "Template Long Description"
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,9 +27,9 @@
     },
     "features": [
       {
-        "title": "App Features",
-        "description": "Features and components of the solution.",
-        "id": "7F102E12-4C51-4C44-9E57-AA55A6380977",
+        "title": "Template Feature",
+        "description": "The feature that activates the web part",
+        "id": "00000000-0000-0000-0000-000000000000",
         "version": "1.0.0.0",
         "assets": {
           "elementManifests": [
@@ -40,6 +40,6 @@
     ]
   },
   "paths": {
-    "zippedPackage": "solution/spfx-app.sppkg"
+    "zippedPackage": "solution/spfx-template-name.sppkg"
   }
 }

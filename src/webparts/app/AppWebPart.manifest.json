@@ -1,6 +1,6 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
-  "id": "8C77B800-E62B-4DD9-93AA-4D5AFA023EAD",
+  "id": "00000000-0000-0000-0000-000000000000",
   "alias": "AppWebPart",
   "componentType": "WebPart",
   "version": "*",
@@ -21,14 +21,14 @@
         "default": "Advanced"
       },
       "title": {
-        "default": "Minha Aplicação SPFx"
+        "default": "SPFx Template App"
       },
       "description": {
-        "default": "Minha Aplicação SPFx"
+        "default": "A template for SPFx applications"
       },
       "officeFabricIconFontName": "Page",
       "properties": {
-        "description": "My App"
+        "description": "App Description"
       }
     }
   ]

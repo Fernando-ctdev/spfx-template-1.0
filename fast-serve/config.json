@@ -1,10 +1,18 @@
 {
-  "$schema": "https://raw.githubusercontent.com/s-KaiNet/spfx-fast-serve/master/schema/config.v2.schema.json",
+  "cli": {
+    "isLibraryComponent": false,
+    "ipAddress": "localhost"
+  },
   "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://{tenant}.sharepoint.com/sites/{siteUrl}/_layouts/15/workbench.aspx",
+      "customHelloMessage": "Fast Serve is running!"
+    },
     "serve": {
-      "openUrl": "https://sua-empresa.sharepoint.com/sites/seu-site?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js",
-      "fullScreenErrors": false,
-      "eslint": true
+      "openUrl": "https://{tenant}.sharepoint.com/sites/{siteUrl}/_layouts/15/workbench.aspx",
+      "fullScreenErrors": true,
+      "loggingLevel": "minimal",
+      "swc": true
     }
   }
 }

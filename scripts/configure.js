@@ -20,6 +20,8 @@
 
 const fs = require('fs');
 const path = require('path');
+// Carregar variáveis de ambiente do arquivo .env
+require('dotenv').config();
 const crypto = require('crypto');
 
 // Gera um GUID válido
