@@ -190,8 +190,10 @@ const App: React.FC<IAppProps> = (props) => {
           <div className="spfx-app-root">
             <Router>
               <Routes>
-                <Route path="/" element={<Home userName={userDisplayName} />} />
-                <Route path="*" element={<NotFound />} />
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Home userName={userDisplayName} />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
               </Routes>
             </Router>
           </div>

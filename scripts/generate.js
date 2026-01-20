@@ -55,35 +55,119 @@ const question = (query) => new Promise((resolve) => rl.question(query, resolve)
 
 const templates = {
   page: (name, withSharePoint) => `import * as React from 'react';
-import { Text, Spinner, SpinnerSize, MessageBar, MessageBarType } from '@fluentui/react';${withSharePoint ? `
-import { useListItems } from '../../../core/hooks/useSharePoint';` : ''}
+import { FileText, Plus, MoreHorizontal, Search, Filter } from 'lucide-react';
+${withSharePoint ? `import { useListItems } from '../../../core/hooks/useSharePoint';
+import { Spinner, SpinnerSize, MessageBar, MessageBarType } from '@fluentui/react';` : ''}
 
 /**
  * Página ${name}
  * 
- * @description Descrição da página ${name}
+ * @description Página gerada automaticamente via CLI
  */
-const ${name}: React.FC = () => {${withSharePoint ? `
+const ${name}: React.FC = () => {
+${withSharePoint ? `  // Exemplo de hook (descomente para usar)
+  // const { items, loading, error } = useListItems('SitePages', ['Id', 'Title']);
   
-  // Exemplo de uso do hook useListItems
-  // const { items, loading, error } = useListItems('NomeDaLista', ['Id', 'Title']);
-  
-  // if (loading) return <div className="flex justify-center p-8"><Spinner size={SpinnerSize.large} label="Carregando..." /></div>;
-  // if (error) return <MessageBar messageBarType={MessageBarType.error}>{error.message}</MessageBar>;` : ''}
+  // Mock para visualização inicial (remova ao integrar)
+  const loading = false;
+  const error = null;
+  const items = [1, 2, 3, 4, 5];` : ''}
 
   return (
-    <div className="p-8 flex flex-col gap-4">
-      <Text variant="xxLarge" block className="text-gray-800 font-semibold mb-4">${name}</Text>
-      
-      <div className="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <Text variant="medium">Conteúdo da página ${name}</Text>
-        
-        {/* Exemplo de card com Tailwind */}
-        <div className="p-4 bg-blue-50 border border-blue-100 rounded text-blue-800">
-          Este é um componente estilizado com Tailwind CSS
+    <div className="space-y-6 animate-fade-in">
+      {/* Header da Página */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <FileText className="text-blue-600 dark:text-blue-400" size={28} />
+            ${name}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
+            Gerencie as informações de ${name} aqui.
+          </p>
         </div>
         
-        {/* Seu conteúdo aqui */}
+        <div className="flex items-center gap-2">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
+            <Filter size={16} />
+            Filtrar
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm text-sm font-medium">
+            <Plus size={16} />
+            Novo Item
+          </button>
+        </div>
+      </div>
+
+      {/* Área de Conteúdo */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col">
+        
+        {/* Toolbar de Busca */}
+        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Buscar em ${name}..." 
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Conteúdo Principal */}
+        <div className="p-0">
+          ${withSharePoint ? `{loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Spinner size={SpinnerSize.large} label="Carregando dados..." />
+            </div>
+          ) : error ? (
+            <div className="p-6">
+              <MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-800/50">
+                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Título</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {items.map((item) => (
+                    <tr key={item} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">#{item}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">Exemplo de Item {item}</td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                          Ativo
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                          <MoreHorizontal size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}` : `<div className="p-12 text-center">
+            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400">
+              <FileText size={32} />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Comece por aqui</h3>
+            <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
+              Esta página foi gerada com sucesso. Agora é com você: adicione seus componentes e lógica.
+            </p>
+            <button className="text-blue-600 hover:text-blue-700 font-medium text-sm hover:underline">
+              Ver documentação &rarr;
+            </button>
+          </div>`}
+        </div>
       </div>
     </div>
   );
@@ -625,6 +709,54 @@ function addRouteToApp(pageName, routePath) {
   
   fs.writeFileSync(appPath, content);
   log.success(`Rota adicionada ao App.tsx: ${routePath}`);
+}
+
+// ============================================
+// ADICIONAR ITEM AO MENU DE NAVEGAÇÃO
+// ============================================
+
+function addNavigationItem(name, routePath) {
+  const navPath = path.join(basePath, 'src', 'webparts', 'app', 'config', 'navigation.ts');
+  
+  if (!fileExists(navPath)) {
+    log.warn('navigation.ts não encontrado. Item de menu não adicionado.');
+    return;
+  }
+  
+  let content = fs.readFileSync(navPath, 'utf8');
+  
+  // Verificar se já existe
+  if (content.includes(`path: '${routePath}'`)) {
+    log.warn('Rota já existe na navegação.');
+    return;
+  }
+
+  // 1. Garantir import do ícone
+  // Verifica se FileText já está importado, se não, adiciona
+  if (!content.includes('FileText')) {
+    content = content.replace(/import { (.*?) } from 'lucide-react';/, (match, p1) => {
+      return `import { ${p1}, FileText } from 'lucide-react';`;
+    });
+  }
+
+  // 2. Adicionar o item ao array
+  const newItem = `
+  {
+    title: '${name}',
+    path: '${routePath}',
+    icon: FileText
+  },`;
+
+  // Encontra o fechamento do array ];
+  const lastBracketIndex = content.lastIndexOf('];');
+  
+  if (lastBracketIndex !== -1) {
+    content = content.slice(0, lastBracketIndex) + newItem + '\n' + content.slice(lastBracketIndex);
+    fs.writeFileSync(navPath, content);
+    log.success(`Item adicionado ao menu: ${name}`);
+  } else {
+    log.error('Não foi possível encontrar o array de navegação em navigation.ts');
+  }
 }
 
 // ============================================

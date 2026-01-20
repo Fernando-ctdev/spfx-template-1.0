@@ -22,57 +22,67 @@ nvm use 18
 ---
 
 ## 2️⃣ Configuração do Projeto
-
-Abra o arquivo `app.config.json` na raiz do projeto (ele já vem criado) e ajuste com os dados do seu ambiente:
-
-```json
-{
-  "tenant": "sua-empresa",        // Ex: "microsoft" (sem .sharepoint.com)
-  "siteUrl": "/sites/intranet",   // URL relativa do site onde vai testar
-  "appName": "minha-intranet",    // Nome interno do projeto (sem espaços)
-  "appTitle": "Portal Corporativo", // Nome que aparece para o usuário
-  "mode": "page"              // "page" (App) ou "component" (Widget)
-}
+ 
+1.  Copie o arquivo `.env.example` para `.env` na raiz do projeto.
+2.  Preencha as variáveis com os dados do seu ambiente:
+ 
+```ini
+# Tenant do SharePoint (apenas o subdomínio)
+# Ex: https://minhaempresa.sharepoint.com -> minhaempresa
+SPFX_TENANT=sua-empresa
+ 
+# URL relativa do site
+# Ex: /sites/meu-projeto
+SPFX_SITE_URL=/sites/seu-site
+ 
+# Nome interno da aplicação (sem espaços, kebab-case)
+SPFX_APP_NAME=spfx-app
+ 
+# Título de exibição da aplicação
+SPFX_APP_TITLE=Minha Aplicação SPFx
+ 
+# Modo de execução: 'page' (Tela cheia) ou 'component' (WebPart padrão)
+SPFX_MODE=page
 ```
-
-### 🎯 Entendendo o `mode`
+ 
+### 🎯 Entendendo o `SPFX_MODE`
 *   **`page`**: A WebPart assume a tela inteira (Full Page). Remove cabeçalhos e menus do SharePoint. Ideal para sistemas e portais imersivos.
 *   **`component`**: A WebPart se comporta como um widget normal. Mantém a navegação do SharePoint. Ideal para dashboards e pedaços de funcionalidade.
-
+ 
 ---
-
+ 
 ## 3️⃣ Instalação Automática
-
+ 
 Execute o comando mágico. Ele instala dependências e aplica suas configurações.
-
+ 
 ```bash
 npm install
 ```
-
-O script irá ler seu `app.config.json` e configurar todo o projeto automaticamente.
-
+ 
+O script irá ler seu arquivo `.env` e configurar todo o projeto automaticamente.
+ 
 ---
-
+ 
 ## 4️⃣ Rodando o Projeto
-
+ 
 Inicie o servidor de desenvolvimento local com Hot Reload (Fast Serve).
-
+ 
 ```bash
 npm run serve
 ```
-
+ 
 O navegador abrirá automaticamente em:
-`https://{tenant}.sharepoint.com{siteUrl}/_layouts/workbench.aspx`
-
+`https://{SPFX_TENANT}.sharepoint.com{SPFX_SITE_URL}/_layouts/workbench.aspx`
+ 
 ---
-
+ 
 ## 🆘 Resolução de Problemas Comuns
-
+ 
 **Erro: "Versão do Node incompatível"**
 Rode `nvm use 18` e tente novamente.
-
+ 
 **Erro: "A página não abre ou dá 404"**
-Verifique se o `siteUrl` no `app.config.json` existe no seu tenant.
-
-**Erro: "Mudanças no app.config.json não surtem efeito"**
+Verifique se o `SPFX_SITE_URL` no `.env` existe no seu tenant.
+ 
+**Erro: "Mudanças no .env não surtem efeito"**
 Rode `npm run configure` para aplicar as novas configurações.

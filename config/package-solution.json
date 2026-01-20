@@ -1,8 +1,8 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "spfx-template",
-    "id": "00000000-0000-0000-0000-000000000000",
+    "name": "spfx-app",
+    "id": "DEF319D0-A01C-404D-A1E3-9E89E3B6D4B5",
     "version": "1.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
@@ -29,7 +29,7 @@
       {
         "title": "App Features",
         "description": "Features and components of the solution.",
-        "id": "00000000-0000-0000-0000-000000000001",
+        "id": "7F102E12-4C51-4C44-9E57-AA55A6380977",
         "version": "1.0.0.0",
         "assets": {
           "elementManifests": [
@@ -40,6 +40,6 @@
     ]
   },
   "paths": {
-    "zippedPackage": "solution/spfx-template.sppkg"
+    "zippedPackage": "solution/spfx-app.sppkg"
   }
 }

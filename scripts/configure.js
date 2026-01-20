@@ -3,7 +3,7 @@
  * 🔧 SCRIPT DE CONFIGURAÇÃO DO PROJETO SPFx
  * ===============================================
  * 
- * Este script lê o arquivo app.config.json e atualiza
+ * Este script lê as variáveis de ambiente (.env) e atualiza
  * automaticamente todos os arquivos de configuração.
  * 
  * O que ele faz:
@@ -70,22 +70,35 @@ function getGuids() {
   return guids;
 }
 
-// Ler configuração principal
+// Ler configuração principal (Apenas variáveis de ambiente)
 function readConfig() {
-  const configPath = path.join(basePath, 'app.config.json');
+  const config = {};
   
-  if (!fs.existsSync(configPath)) {
-    log.error('app.config.json não encontrado!');
-    log.info('O arquivo app.config.json deve existir na raiz do projeto.');
+  // 1. Carregar variáveis de ambiente (.env)
+  if (process.env.SPFX_TENANT) config.tenant = process.env.SPFX_TENANT;
+  if (process.env.SPFX_SITE_URL) config.siteUrl = process.env.SPFX_SITE_URL;
+  if (process.env.SPFX_APP_NAME) config.appName = process.env.SPFX_APP_NAME;
+  if (process.env.SPFX_APP_TITLE) config.appTitle = process.env.SPFX_APP_TITLE;
+  if (process.env.SPFX_MODE) config.mode = process.env.SPFX_MODE;
+
+  // 2. Validações críticas
+  const missingVars = [];
+  if (!config.tenant) missingVars.push('tenant (SPFX_TENANT)');
+  if (!config.siteUrl) missingVars.push('siteUrl (SPFX_SITE_URL)');
+  if (!config.appName) missingVars.push('appName (SPFX_APP_NAME)');
+  if (!config.appTitle) missingVars.push('appTitle (SPFX_APP_TITLE)');
+
+  if (missingVars.length > 0) {
+    log.error('Variáveis de ambiente obrigatórias ausentes:');
+    missingVars.forEach(v => console.log(`   - ${v}`));
+    log.info('Certifique-se de que o arquivo .env existe e contém essas variáveis.');
     process.exit(1);
   }
-  
-  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   
   // Validar e definir modo padrão se não especificado
   if (!config.mode) {
     config.mode = 'page';
-    log.warn('Modo não especificado. Usando "page" como padrão.');
+    log.warn('Modo não especificado (SPFX_MODE). Usando "page" como padrão.');
   }
   
   // Validar modo
