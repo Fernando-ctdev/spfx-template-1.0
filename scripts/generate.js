@@ -70,7 +70,7 @@ ${withSharePoint ? `  // Exemplo de hook (descomente para usar)
   
   // Mock para visualização inicial (remova ao integrar)
   const loading = false;
-  const error = null;
+  const error: string | null = null;
   const items = [1, 2, 3, 4, 5];` : ''}
 
   return (
@@ -532,6 +532,11 @@ async function generatePage(name, options = {}) {
     addRouteToApp(pageName, routePath);
   }
   
+  // Adicionar ao menu de navegação
+  if (options.addToNav) {
+    addNavigationItem(name, routePath);
+  }
+  
   // Criar teste
   if (options.withTest !== false) {
     const testsDir = path.join(basePath, 'tests', 'pages');
@@ -791,11 +796,13 @@ async function interactiveMode() {
         : null;
       
       const withSP = await question('Incluir exemplo com SharePoint? (S/n): ');
+      const addToNav = await question('Adicionar ao menu de navegação? (S/n): ');
       
       const result = await generatePage(name, {
         addRoute: addRoute.toLowerCase() !== 'n',
         route: routePath,
-        withSharePoint: withSP.toLowerCase() !== 'n'
+        withSharePoint: withSP.toLowerCase() !== 'n',
+        addToNav: addToNav.toLowerCase() !== 'n'
       });
       
       if (result) {
