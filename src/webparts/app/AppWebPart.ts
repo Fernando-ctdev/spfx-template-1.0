@@ -57,65 +57,85 @@ export default class AppWebPart extends BaseClientSideWebPart<IAppWebPartProps> 
   }
 
   /**
-   * Injeta estilos globais diretamente no head do documento
-   * Essa abordagem é mais agressiva e eficaz para esconder elementos nativos
-   * que são carregados fora do ciclo de vida do WebPart
-   */
-  private _injectGlobalStyles(): void {
-    const styleId = 'spfx-app-global-styles';
-    if (document.getElementById(styleId)) return;
+ * Injeta estilos globais diretamente no head do documento
+ * Abordagem agressiva para esconder UI nativa do SharePoint
+ */
+private _injectGlobalStyles(): void {
+  const styleId = 'spfx-app-global-styles';
+  if (document.getElementById(styleId)) return;
 
-    const style = document.createElement("style");
-    style.id = styleId;
-    style.innerHTML = `
-      /* Ocultar Suite Bar e Header de forma agressiva */
-      #SuiteNavWrapper,
-      #SuiteNavPlaceholder,
-      #O365_SuiteBranding_container,
-      .ms-SuiteNav-wrapper,
-      div[data-automationid="SiteHeader"],
-      div[class*="headerRow-"],
-      div[class*="mainHeader-"],
-      #spSiteHeader,
-      .sp-page-header,
-      #sp-appBar,
-      .sp-appBar,
-      #HeaderButtonRegion,
-      .od-TopBar-header {
-        display: none !important;
-        height: 0 !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        position: absolute !important;
-        z-index: -9999 !important;
-      }
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.innerHTML = `
+    /* ===============================
+       SUITE BAR + HEADER
+       =============================== */
+    #SuiteNavWrapper,
+    #SuiteNavPlaceholder,
+    #O365_SuiteBranding_container,
+    .ms-SuiteNav-wrapper,
+    div[data-automationid="SiteHeader"],
+    div[class*="headerRow-"],
+    div[class*="mainHeader-"],
+    #spSiteHeader,
+    .sp-page-header,
+    #sp-appBar,
+    .sp-appBar,
+    #HeaderButtonRegion,
+    .od-TopBar-header {
+      display: none !important;
+      height: 0 !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      position: absolute !important;
+      z-index: -9999 !important;
+    }
 
-      /* Reset de margens e paddings do conteiner */
-      #contentBox,
-      #workbenchPageContent,
-      .CanvasZone,
-      .CanvasComponent,
-      #spPageCanvasContent {
-        margin: 0 !important;
-        padding: 0 !important;
-        max-width: 100% !important;
-        border: none !important;
-      }
-      
-      /* Ajuste específico para remover o espaço superior deixado pelos elementos ocultos */
-      body {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      
-      .CanvasZone {
-        padding-left: 0px !important;
-        padding-right: 0px !important;
-      }
-    `;
-    document.head.appendChild(style);
-  }
+    /* ===============================
+       COMMAND BAR (Editar / + Novo / Republicar)
+       =============================== */
+    [data-automation-id="pageCommandBar"],
+    [data-automation-id="commandBar"],
+    .ms-CommandBar,
+    div[class*="commandBarWrapper"],
+    div[class*="commandBar"] {
+      display: none !important;
+      height: 0 !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      position: absolute !important;
+      z-index: -9999 !important;
+    }
+
+    /* ===============================
+       RESET DE LAYOUT
+       =============================== */
+    #contentBox,
+    #workbenchPageContent,
+    #spPageCanvasContent,
+    .CanvasZone,
+    .CanvasComponent {
+      margin: 0 !important;
+      padding: 0 !important;
+      max-width: 100% !important;
+      border: none !important;
+    }
+
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .CanvasZone {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
 
   private _getEnvironmentMessage(): Promise<string> {
     if (this.context.sdks.microsoftTeams) {
