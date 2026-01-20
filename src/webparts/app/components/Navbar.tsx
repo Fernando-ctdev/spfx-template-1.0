@@ -1,13 +1,10 @@
-
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
-import { ThemeContext } from '../App';
-import { Menu, X, Moon, Sun } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { isDark, toggleTheme } = React.useContext(ThemeContext);
   const location = useLocation();
 
   return (
@@ -50,17 +47,6 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Actions (Theme Toggle) */}
-          <div className="hidden md:flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800 transition-colors"
-              aria-label="Alternar tema"
-            >
-              {isDark ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-          </div>
-
           {/* Mobile menu button */}
           <div className="-mr-2 flex md:hidden">
             <button
@@ -97,13 +83,6 @@ export const Navbar: React.FC = () => {
                 </NavLink>
               );
             })}
-             <button
-              onClick={toggleTheme}
-              className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-slate-800"
-            >
-              {isDark ? <Sun size={20} /> : <Moon size={20} />}
-              Alternar Tema
-            </button>
           </div>
         </div>
       )}

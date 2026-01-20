@@ -1,4 +1,3 @@
-// @ts-ignore
 import { Home, FileText, Settings } from 'lucide-react';
 
 export interface INavItem {

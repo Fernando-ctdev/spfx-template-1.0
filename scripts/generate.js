@@ -681,7 +681,8 @@ function addRouteToApp(pageName, routePath) {
   
   // Adicionar import
   const importStatement = `import ${pageName} from './pages/${pageName}';`;
-  const importRegex = /import.*from ['"]\.\/pages\//g;
+  // Regex ajustada para capturar a linha inteira do import (até o ; ou fim da linha)
+  const importRegex = /import.*from ['"]\.\/pages\/.*['"];?/g;
   const imports = content.match(importRegex);
   
   if (imports && imports.length > 0) {
