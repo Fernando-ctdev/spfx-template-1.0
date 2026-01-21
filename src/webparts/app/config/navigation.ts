@@ -1,4 +1,4 @@
-import { Home, FileText, Settings } from 'lucide-react';
+import { Home } from 'lucide-react';
 
 export interface INavItem {
   title: string;

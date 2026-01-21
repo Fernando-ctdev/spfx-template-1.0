@@ -1,45 +1,50 @@
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Bell, Grid, User } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
 
+  // Efeito de scroll para aumentar o blur/opacidade se desejar, 
+  // mas aqui vamos manter o estilo fixo glassmorphism solicitado.
+
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors duration-200">
+    <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-blue-600/90 to-purple-600/90 backdrop-blur-md shadow-lg border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
           {/* Logo / Brand */}
-          <div className="flex-shrink-0 flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-              SP
+          <div className="flex-shrink-0 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-white/20 to-white/5 border border-white/20 flex items-center justify-center backdrop-blur-sm shadow-inner">
+               <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                 <rect x="3" y="3" width="7" height="7"></rect>
+                 <rect x="14" y="3" width="7" height="7"></rect>
+                 <rect x="14" y="14" width="7" height="7"></rect>
+                 <rect x="3" y="14" width="7" height="7"></rect>
+               </svg>
             </div>
-            <span className="text-xl font-bold text-gray-800 dark:text-white hidden sm:block">
-              Portal
+            <span className="text-xl font-bold text-white tracking-tight">
+              CorpPortal
             </span>
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+          <div className="hidden md:flex items-center gap-8">
+            <div className="flex items-baseline space-x-1">
               {NAV_ITEMS.map((item) => {
-                const Icon = item.icon;
+                const isActive = item.path === location.pathname || (item.path === '/' && location.pathname === '/');
                 return (
                   <NavLink
                     key={item.path}
                     to={item.path}
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                        isActive || (item.path === '/' && location.pathname === '/')
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800'
-                      }`
-                    }
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-white/20 text-white shadow-sm backdrop-blur-sm'
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    }`}
                   >
-                    {Icon && <Icon size={18} />}
                     {item.title}
                   </NavLink>
                 );
@@ -47,11 +52,27 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
 
+          {/* Right Icons */}
+          <div className="hidden md:flex items-center gap-4">
+             <button className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+               <Grid size={20} />
+             </button>
+             <button className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors relative">
+               <Bell size={20} />
+               <span className="absolute top-2 right-2 w-2 h-2 bg-red-400 rounded-full border border-purple-600"></span>
+             </button>
+             <div className="flex items-center gap-2 pl-2 border-l border-white/20">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30 text-white font-medium text-xs">
+                  JP
+                </div>
+             </div>
+          </div>
+
           {/* Mobile menu button */}
           <div className="-mr-2 flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800 focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white/10 focus:outline-none"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -61,24 +82,21 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-800">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-slate-900">
+        <div className="md:hidden bg-purple-900/95 backdrop-blur-xl border-t border-white/10">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {NAV_ITEMS.map((item) => {
-              const Icon = item.icon;
+              const isActive = item.path === location.pathname;
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 block px-3 py-2 rounded-md text-base font-medium ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                        : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-slate-800'
-                    }`
-                  }
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  }`}
                 >
-                  {Icon && <Icon size={20} />}
                   {item.title}
                 </NavLink>
               );
