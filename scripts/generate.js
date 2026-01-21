@@ -11,14 +11,14 @@
  *   npm run generate:component NomeDoComponente
  *   npm run generate:service NomeDoServico
  *   npm run generate:hook useNomeDoHook
- *   npm run generate (modo interativo)
+ *   npm run generate (modo interativo com menu)
  * 
  * ===============================================
  */
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
+const prompts = require('prompts');
 
 // Cores para o console
 const colors = {
@@ -28,7 +28,8 @@ const colors = {
   blue: '\x1b[34m',
   red: '\x1b[31m',
   cyan: '\x1b[36m',
-  magenta: '\x1b[35m'
+  magenta: '\x1b[35m',
+  dim: '\x1b[2m'
 };
 
 const log = {
@@ -36,21 +37,13 @@ const log = {
   success: (msg) => console.log(`${colors.green}✔${colors.reset} ${msg}`),
   warn: (msg) => console.log(`${colors.yellow}⚠${colors.reset} ${msg}`),
   error: (msg) => console.log(`${colors.red}✖${colors.reset} ${msg}`),
-  title: (msg) => console.log(`\n${colors.cyan}${'='.repeat(50)}\n${msg}\n${'='.repeat(50)}${colors.reset}\n`)
+  title: (msg) => console.log(`\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n${colors.cyan}   ${msg}   ${colors.reset}\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n`)
 };
 
 const basePath = path.resolve(__dirname, '..');
 
-// Interface readline
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-const question = (query) => new Promise((resolve) => rl.question(query, resolve));
-
 // ============================================
-// TEMPLATES (Fluent UI v8 - Padrão | Radix UI - Apenas exceções)
+// TEMPLATES
 // ============================================
 
 const templates = {
@@ -766,124 +759,111 @@ function addNavigationItem(name, routePath) {
 }
 
 // ============================================
-// MODO INTERATIVO
+// MODO INTERATIVO (PROMPTS)
 // ============================================
 
 async function interactiveMode() {
   log.title('🎨 GERADOR INTERATIVO SPFx');
   
-  console.log('Escolha o que deseja gerar:\n');
-  console.log('  1. Página (Page)');
-  console.log('  2. Componente (Component)');
-  console.log('  3. Serviço (Service)');
-  console.log('  4. Hook Customizado (Hook)');
-  console.log('  5. Model/Interface (Model)');
-  console.log('  0. Sair\n');
-  
-  const choice = await question('Digite o número da opção: ');
-  
-  switch (choice.trim()) {
-    case '1': {
-      const name = await question('\nNome da página (ex: Dashboard): ');
-      if (!name) {
-        log.error('Nome não pode ser vazio!');
-        break;
-      }
-      
-      const addRoute = await question('Adicionar rota automaticamente? (S/n): ');
-      const routePath = addRoute.toLowerCase() !== 'n' 
-        ? await question(`Caminho da rota (padrão: /${toKebabCase(name)}): `) || `/${toKebabCase(name)}`
-        : null;
-      
-      const withSP = await question('Incluir exemplo com SharePoint? (S/n): ');
-      const addToNav = await question('Adicionar ao menu de navegação? (S/n): ');
-      
-      const result = await generatePage(name, {
-        addRoute: addRoute.toLowerCase() !== 'n',
-        route: routePath,
-        withSharePoint: withSP.toLowerCase() !== 'n',
-        addToNav: addToNav.toLowerCase() !== 'n'
-      });
-      
-      if (result) {
-        showSummary('Página', result);
-      }
-      break;
-    }
-    
-    case '2': {
-      const name = await question('\nNome do componente (ex: UserCard): ');
-      if (!name) {
-        log.error('Nome não pode ser vazio!');
-        break;
-      }
-      
-      const withProps = await question('Incluir props de exemplo? (S/n): ');
-      
-      const result = await generateComponent(name, {
-        withProps: withProps.toLowerCase() !== 'n'
-      });
-      
-      if (result) {
-        showSummary('Componente', result);
-      }
-      break;
-    }
-    
-    case '3': {
-      const name = await question('\nNome do serviço (ex: UserService): ');
-      if (!name) {
-        log.error('Nome não pode ser vazio!');
-        break;
-      }
-      
-      const result = await generateService(name);
-      
-      if (result) {
-        showSummary('Serviço', result);
-      }
-      break;
-    }
-    
-    case '4': {
-      const name = await question('\nNome do hook (ex: useUserData): ');
-      if (!name) {
-        log.error('Nome não pode ser vazio!');
-        break;
-      }
-      
-      const result = await generateHook(name);
-      
-      if (result) {
-        showSummary('Hook', result);
-      }
-      break;
-    }
-    
-    case '5': {
-      const name = await question('\nNome do model (ex: User): ');
-      if (!name) {
-        log.error('Nome não pode ser vazio!');
-        break;
-      }
-      
-      const result = await generateModel(name);
-      
-      if (result) {
-        showSummary('Model', result);
-      }
-      break;
-    }
-    
-    case '0':
-      log.info('Saindo...');
-      break;
-      
-    default:
-      log.error('Opção inválida!');
+  const { artifactType } = await prompts({
+    type: 'select',
+    name: 'artifactType',
+    message: 'O que você deseja criar?',
+    choices: [
+      { title: 'Página (Page)', value: 'page', description: 'Nova tela com rota e componente' },
+      { title: 'Componente (Component)', value: 'component', description: 'Componente React reutilizável' },
+      { title: 'Serviço (Service)', value: 'service', description: 'Classe de serviço PnP/SharePoint' },
+      { title: 'Hook (Hook)', value: 'hook', description: 'React Hook customizado (use...)' },
+      { title: 'Modelo (Model)', value: 'model', description: 'Interface TypeScript' },
+      { title: 'Sair', value: 'exit' }
+    ]
+  });
+
+  if (!artifactType || artifactType === 'exit') {
+    log.info('Operação cancelada.');
+    process.exit(0);
   }
+
+  // Perguntas comuns
+  const { name } = await prompts({
+    type: 'text',
+    name: 'name',
+    message: `Qual o nome do(a) ${artifactType}?`,
+    validate: value => value.length < 2 ? 'Nome muito curto' : true
+  });
+
+  if (!name) process.exit(0);
+
+  // Perguntas específicas por tipo
+  let options = {};
+
+  if (artifactType === 'page') {
+    const pageOptions = await prompts([
+      {
+        type: 'confirm',
+        name: 'addRoute',
+        message: 'Criar rota automaticamente no App.tsx?',
+        initial: true
+      },
+      {
+        type: 'text',
+        name: 'route',
+        message: 'Caminho da rota (ex: /minha-pagina)',
+        initial: `/${toKebabCase(name)}`,
+        active: prev => prev // Só pergunta se addRoute for true? Não, melhor perguntar sempre caso o user queira definir
+      },
+      {
+        type: 'confirm',
+        name: 'addToNav',
+        message: 'Adicionar ao menu lateral/topo?',
+        initial: true
+      },
+      {
+        type: 'confirm',
+        name: 'withSharePoint',
+        message: 'Incluir código de exemplo do SharePoint?',
+        initial: true
+      }
+    ]);
+    options = pageOptions;
+  } 
   
-  rl.close();
+  else if (artifactType === 'component') {
+    const compOptions = await prompts([
+      {
+        type: 'confirm',
+        name: 'withProps',
+        message: 'Incluir interface de Props de exemplo?',
+        initial: true
+      }
+    ]);
+    options = compOptions;
+  }
+
+  // Executar Geração
+  let result;
+  switch (artifactType) {
+    case 'page':
+      result = await generatePage(name, options);
+      if (result) showSummary('Página', result);
+      break;
+    case 'component':
+      result = await generateComponent(name, options);
+      if (result) showSummary('Componente', result);
+      break;
+    case 'service':
+      result = await generateService(name);
+      if (result) showSummary('Serviço', result);
+      break;
+    case 'hook':
+      result = await generateHook(name);
+      if (result) showSummary('Hook', result);
+      break;
+    case 'model':
+      result = await generateModel(name);
+      if (result) showSummary('Model', result);
+      break;
+  }
 }
 
 // ============================================
@@ -901,8 +881,7 @@ ${colors.cyan}└─────────────────────
 
 ${colors.green}📝 Próximos passos:${colors.reset}
   1. Edite o arquivo criado
-  2. ${result.routePath ? `Acesse http://localhost:4321/#${result.routePath}` : 'Importe e use em seus componentes'}
-  3. Execute os testes: npm test
+  2. ${result.routePath ? `Acesse a rota #${result.routePath}` : 'Importe e use em seus componentes'}
 `);
 }
 
@@ -920,8 +899,9 @@ async function main() {
     return;
   }
   
+  // Suporte a modo legacy (argumentos via CLI)
   if (!name) {
-    log.error('Nome é obrigatório!');
+    log.error('Nome é obrigatório no modo CLI!');
     log.info('Uso: npm run generate:page NomeDaPagina');
     process.exit(1);
   }
@@ -956,16 +936,12 @@ async function main() {
       
     default:
       log.error(`Comando desconhecido: ${command}`);
-      log.info('Comandos disponíveis: page, component, service, hook, model');
+      log.info('Use "npm run generate" para o modo interativo.');
       process.exit(1);
   }
-  
-  rl.close();
 }
 
 main().catch((error) => {
   log.error(`Erro: ${error.message}`);
-  rl.close();
   process.exit(1);
 });
-
