@@ -5,7 +5,6 @@
   "main": "lib/index.js",
   "scripts": {
     "configure": "node scripts/configure.js",
-    "postinstall": "node scripts/configure.js",
     "build": "gulp bundle",
     "build:prod": "gulp clean && gulp bundle --ship && gulp package-solution --ship",
     "clean": "gulp clean",

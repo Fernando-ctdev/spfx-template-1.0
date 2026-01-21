@@ -1,33 +1,27 @@
 /**
  * ===============================================
- * 🔧 SCRIPT DE CONFIGURAÇÃO DO PROJETO SPFx
+ * 🔧 WIZARD DE CONFIGURAÇÃO INTERATIVA SPFx
  * ===============================================
  * 
- * Este script lê as variáveis de ambiente (.env) e atualiza
- * automaticamente todos os arquivos de configuração.
+ * Este script guia o desenvolvedor na configuração inicial do projeto.
  * 
- * O que ele faz:
- * ✅ Gera GUIDs únicos na primeira execução (.guids.json)
- * ✅ Atualiza package-solution.json
- * ✅ Atualiza fast-serve/config.json
- * ✅ Atualiza config/serve.json
- * ✅ Atualiza AppWebPart.manifest.json
- * ✅ Configura modo fullpage ou webpart
+ * Fluxo:
+ * 1. Coleta informações via perguntas interativas (CLI)
+ * 2. Gera o arquivo .env com as respostas
+ * 3. Configura GUIDs, manifestos e arquivos JSON
+ * 4. Ajusta o código fonte (Modo e Layout)
  * 
- * Execute: npm run configure (ou automático após npm install)
+ * Execute: npm run configure
  * ===============================================
  */
 
 const fs = require('fs');
 const path = require('path');
-// Carregar variáveis de ambiente do arquivo .env
-require('dotenv').config();
+const prompts = require('prompts');
 const crypto = require('crypto');
 
-// Gera um GUID válido
-function generateGuid() {
-  return crypto.randomUUID().toUpperCase();
-}
+// Caminho base do projeto
+const basePath = path.resolve(__dirname, '..');
 
 // Cores para o console
 const colors = {
@@ -36,7 +30,8 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   red: '\x1b[31m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
+  dim: '\x1b[2m'
 };
 
 const log = {
@@ -44,22 +39,21 @@ const log = {
   success: (msg) => console.log(`${colors.green}✔${colors.reset} ${msg}`),
   warn: (msg) => console.log(`${colors.yellow}⚠${colors.reset} ${msg}`),
   error: (msg) => console.log(`${colors.red}✖${colors.reset} ${msg}`),
-  title: (msg) => console.log(`\n${colors.cyan}${'='.repeat(50)}\n${msg}\n${'='.repeat(50)}${colors.reset}\n`)
+  title: (msg) => console.log(`\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n${colors.cyan}   ${msg}   ${colors.reset}\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n`)
 };
 
-// Caminho base do projeto
-const basePath = path.resolve(__dirname, '..');
-
-// Arquivo para armazenar GUIDs gerados (não precisa editar)
-const guidsFile = path.join(basePath, '.guids.json');
+// Gera um GUID válido
+function generateGuid() {
+  return crypto.randomUUID().toUpperCase();
+}
 
 // Ler ou gerar GUIDs
 function getGuids() {
+  const guidsFile = path.join(basePath, '.guids.json');
   if (fs.existsSync(guidsFile)) {
     return JSON.parse(fs.readFileSync(guidsFile, 'utf8'));
   }
   
-  // Gerar novos GUIDs na primeira execução
   const guids = {
     appId: generateGuid(),
     webPartId: generateGuid(),
@@ -67,50 +61,7 @@ function getGuids() {
   };
   
   fs.writeFileSync(guidsFile, JSON.stringify(guids, null, 2));
-  log.success('GUIDs gerados automaticamente!');
-  
   return guids;
-}
-
-// Ler configuração principal (Apenas variáveis de ambiente)
-function readConfig() {
-  const config = {};
-  
-  // 1. Carregar variáveis de ambiente (.env)
-  if (process.env.SPFX_TENANT) config.tenant = process.env.SPFX_TENANT;
-  if (process.env.SPFX_SITE_URL) config.siteUrl = process.env.SPFX_SITE_URL;
-  if (process.env.SPFX_APP_NAME) config.appName = process.env.SPFX_APP_NAME;
-  if (process.env.SPFX_APP_TITLE) config.appTitle = process.env.SPFX_APP_TITLE;
-  if (process.env.SPFX_MODE) config.mode = process.env.SPFX_MODE;
-
-  // 2. Validações críticas
-  const missingVars = [];
-  if (!config.tenant) missingVars.push('tenant (SPFX_TENANT)');
-  if (!config.siteUrl) missingVars.push('siteUrl (SPFX_SITE_URL)');
-  if (!config.appName) missingVars.push('appName (SPFX_APP_NAME)');
-  if (!config.appTitle) missingVars.push('appTitle (SPFX_APP_TITLE)');
-
-  if (missingVars.length > 0) {
-    log.error('Variáveis de ambiente obrigatórias ausentes:');
-    missingVars.forEach(v => console.log(`   - ${v}`));
-    log.info('Certifique-se de que o arquivo .env existe e contém essas variáveis.');
-    process.exit(1);
-  }
-  
-  // Validar e definir modo padrão se não especificado
-  if (!config.mode) {
-    config.mode = 'page';
-    log.warn('Modo não especificado (SPFX_MODE). Usando "page" como padrão.');
-  }
-  
-  // Validar modo
-  const validModes = ['page', 'component'];
-  if (!validModes.includes(config.mode)) {
-    log.error(`Modo inválido: "${config.mode}". Use "page" ou "component".`);
-    process.exit(1);
-  }
-  
-  return config;
 }
 
 // Escrever arquivo JSON formatado
@@ -118,135 +69,278 @@ function writeJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
 }
 
-// Atualizar package-solution.json
-function updatePackageSolution(config, guids) {
-  const filePath = path.join(basePath, 'config', 'package-solution.json');
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+// 1. Perguntas Interativas
+async function askQuestions() {
+  // Tentar ler .env existente ou .env.example para usar como default
+  let currentEnv = {};
   
-  data.solution.name = config.appName;
-  data.solution.id = guids.appId;
-  data.solution.features[0].id = guids.featureId;
-  data.paths.zippedPackage = `solution/${config.appName}.sppkg`;
+  const envPath = path.join(basePath, '.env');
+  const examplePath = path.join(basePath, '.env.example');
   
-  writeJson(filePath, data);
-  log.success('config/package-solution.json');
+  // Prioridade: .env > .env.example > vazio
+  const fileToRead = fs.existsSync(envPath) ? envPath : (fs.existsSync(examplePath) ? examplePath : null);
+
+  if (fileToRead) {
+    const envContent = fs.readFileSync(fileToRead, 'utf8');
+    envContent.split('\n').forEach(line => {
+      // Ignora comentários
+      if (line.trim().startsWith('#')) return;
+      
+      const [key, value] = line.split('=');
+      if (key && value) currentEnv[key.trim()] = value.trim();
+    });
+  }
+
+  const questions = [
+    {
+      type: 'text',
+      name: 'tenant',
+      message: 'Qual o nome do seu Tenant? (ex: empresa)',
+      initial: currentEnv.SPFX_TENANT || '',
+      validate: value => value.length < 3 ? 'O nome do tenant é muito curto' : true
+    },
+    {
+      type: 'text',
+      name: 'siteUrl',
+      message: 'Qual a URL relativa do site? (ex: /sites/meu-projeto)',
+      initial: currentEnv.SPFX_SITE_URL || '/sites/dev',
+      validate: value => value.startsWith('/') ? true : 'Deve começar com /'
+    },
+    {
+      type: 'text',
+      name: 'appName',
+      message: 'Nome técnico da App (sem espaços, ex: minha-app)',
+      initial: currentEnv.SPFX_APP_NAME || 'minha-app',
+      format: val => val.toLowerCase().replace(/\s+/g, '-')
+    },
+    {
+      type: 'text',
+      name: 'appTitle',
+      message: 'Título de exibição da App',
+      initial: currentEnv.SPFX_APP_TITLE || 'Minha Aplicação'
+    },
+    {
+      type: 'select',
+      name: 'mode',
+      message: 'Qual o modo de execução?',
+      choices: [
+        { title: 'Página (Full Page) - Oculta menus do SharePoint', value: 'page' },
+        { title: 'Componente (WebPart) - Mantém menus nativos', value: 'component' }
+      ],
+      initial: currentEnv.SPFX_MODE === 'component' ? 1 : 0
+    },
+    {
+      type: 'select',
+      name: 'layout',
+      message: 'Qual estrutura de layout inicial?',
+      choices: [
+        { title: 'Navbar (Menu Superior)', value: 'navbar' },
+        { title: 'Sidebar (Menu Lateral)', value: 'sidebar' },
+        { title: 'Blank (Apenas Conteúdo)', value: 'blank' }
+      ],
+      initial: 0
+    }
+  ];
+
+  const response = await prompts(questions);
+  
+  if (!response.tenant) {
+    log.error('Configuração cancelada pelo usuário.');
+    process.exit(0);
+  }
+
+  return response;
 }
 
-// Atualizar fast-serve/config.json
-function updateFastServe(config) {
-  const filePath = path.join(basePath, 'fast-serve', 'config.json');
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  
-  const fullUrl = `https://${config.tenant}.sharepoint.com${config.siteUrl}`;
-  const debugUrl = `${fullUrl}?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`;
-  
-  data.serveConfigurations.serve.openUrl = debugUrl;
-  
-  writeJson(filePath, data);
-  log.success('fast-serve/config.json');
+// 2. Gerar arquivo .env
+function generateEnvFile(answers) {
+  const envContent = `
+# Configurações do Ambiente SPFx
+# Gerado automaticamente em ${new Date().toISOString()}
+
+SPFX_TENANT=${answers.tenant}
+SPFX_SITE_URL=${answers.siteUrl}
+SPFX_APP_NAME=${answers.appName}
+SPFX_APP_TITLE=${answers.appTitle}
+SPFX_MODE=${answers.mode}
+
+# Configurações de Build
+NODE_ENV=development
+`.trim();
+
+  fs.writeFileSync(path.join(basePath, '.env'), envContent);
+  log.success('Arquivo .env gerado com sucesso!');
 }
 
-// Atualizar config/serve.json
-function updateServe(config) {
-  const filePath = path.join(basePath, 'config', 'serve.json');
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  
-  const fullUrl = `https://${config.tenant}.sharepoint.com`;
-  
-  data.initialPage = `${fullUrl}/_layouts/workbench.aspx`;
-  
-  writeJson(filePath, data);
-  log.success('config/serve.json');
+// 3. Atualizar Arquivos de Configuração (JSONs)
+function updateConfigs(answers, guids) {
+  // package-solution.json
+  const pkgSolPath = path.join(basePath, 'config', 'package-solution.json');
+  const pkgSol = JSON.parse(fs.readFileSync(pkgSolPath, 'utf8'));
+  pkgSol.solution.name = answers.appName;
+  pkgSol.solution.id = guids.appId;
+  pkgSol.solution.features[0].id = guids.featureId;
+  pkgSol.paths.zippedPackage = `solution/${answers.appName}.sppkg`;
+  writeJson(pkgSolPath, pkgSol);
+
+  // fast-serve/config.json
+  const fastServePath = path.join(basePath, 'fast-serve', 'config.json');
+  const fastServe = JSON.parse(fs.readFileSync(fastServePath, 'utf8'));
+  const fullUrl = `https://${answers.tenant}.sharepoint.com${answers.siteUrl}`;
+  fastServe.serveConfigurations.serve.openUrl = `${fullUrl}?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`;
+  writeJson(fastServePath, fastServe);
+
+  // config/serve.json
+  const servePath = path.join(basePath, 'config', 'serve.json');
+  const serve = JSON.parse(fs.readFileSync(servePath, 'utf8'));
+  serve.initialPage = `https://${answers.tenant}.sharepoint.com/_layouts/workbench.aspx`;
+  writeJson(servePath, serve);
+
+  // AppWebPart.manifest.json
+  const manifestPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  manifest.id = guids.webPartId;
+  manifest.preconfiguredEntries[0].title.default = answers.appTitle;
+  manifest.preconfiguredEntries[0].description.default = answers.appTitle;
+  writeJson(manifestPath, manifest);
 }
 
-// Atualizar AppWebPart.manifest.json
-function updateManifest(config, guids) {
-  const filePath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.manifest.json');
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  
-  data.id = guids.webPartId;
-  data.preconfiguredEntries[0].title.default = config.appTitle;
-  data.preconfiguredEntries[0].description.default = config.appTitle;
-  
-  writeJson(filePath, data);
-  log.success('src/webparts/app/AppWebPart.manifest.json');
-}
-
-// Configurar modo da aplicação (page ou component)
-function configureAppMode(config) {
+// 4. Configurar Modo (Page/Component) e Corrigir Bug
+function configureAppMode(answers) {
   const appWebPartPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.ts');
   let content = fs.readFileSync(appWebPartPath, 'utf8');
   
+  // 4.1 Configurar CSS
   const fullPageImport = "import './shared/css/page-layout.css';";
   const hasFullPageImport = content.includes(fullPageImport);
   
-  if (config.mode === 'page') {
-    // Modo Page - adicionar import do CSS se não existir
-    if (!hasFullPageImport) {
-      // Adicionar após o import do global.module.scss
-      content = content.replace(
-        "import './shared/css/global.module.scss';",
-        "import './shared/css/global.module.scss';\nimport './shared/css/page-layout.css';"
-      );
-      fs.writeFileSync(appWebPartPath, content);
-      log.success('Modo Página ativado - CSS do SharePoint será ocultado');
+  if (answers.mode === 'page' && !hasFullPageImport) {
+    content = content.replace(
+      "import './shared/css/global.module.scss';",
+      "import './shared/css/global.module.scss';\nimport './shared/css/page-layout.css';"
+    );
+  } else if (answers.mode === 'component' && hasFullPageImport) {
+    content = content.replace(`\n${fullPageImport}`, '');
+    content = content.replace(fullPageImport, '');
+  }
+
+  // 4.2 Corrigir Injeção de Estilos Globais (BUG FIX)
+  // Procura pela chamada do método
+  const injectCall = "this._injectGlobalStyles();";
+  const commentedInjectCall = "// this._injectGlobalStyles();";
+
+  if (answers.mode === 'page') {
+    // Garante que está descomentado
+    if (content.includes(commentedInjectCall)) {
+      content = content.replace(commentedInjectCall, injectCall);
     }
-  } else if (config.mode === 'component') {
-    // Modo Component - remover import do CSS se existir
-    if (hasFullPageImport) {
-      content = content.replace(`\n${fullPageImport}`, '');
-      content = content.replace(fullPageImport, '');
-      fs.writeFileSync(appWebPartPath, content);
-      log.success('Modo Componente ativado - Elementos do SharePoint visíveis');
+  } else {
+    // Garante que está comentado no modo component
+    if (content.includes(injectCall) && !content.includes(commentedInjectCall)) {
+      content = content.replace(injectCall, commentedInjectCall);
     }
   }
+
+  fs.writeFileSync(appWebPartPath, content);
+  log.success(`Modo ${answers.mode.toUpperCase()} configurado (CSS e Scripts ajustados).`);
 }
 
-// Exibir resumo da configuração
-function showSummary(config) {
-  const fullUrl = `https://${config.tenant}.sharepoint.com${config.siteUrl}`;
-  const modeText = config.mode === 'page' ? 'Página (Full Viewport)' : 'Componente (WebPart)';
-  const modeIcon = config.mode === 'page' ? '🖥️' : '🧩';
+// 5. Configurar Layout (Navbar/Sidebar/Blank)
+function configureLayout(answers) {
+  const layoutPath = path.join(basePath, 'src', 'webparts', 'app', 'components', 'Layout.tsx');
   
-  console.log(`
-${colors.cyan}┌─────────────────────────────────────────────────────┐
-│              📋 CONFIGURAÇÃO APLICADA               │
-├─────────────────────────────────────────────────────┤${colors.reset}
-│ ${colors.yellow}Site:${colors.reset}  ${fullUrl}
-│ ${colors.yellow}App:${colors.reset}   ${config.appTitle} (${config.appName})
-│ ${colors.yellow}Modo:${colors.reset}  ${modeIcon} ${modeText}
-${colors.cyan}└─────────────────────────────────────────────────────┘${colors.reset}
-`);
+  let layoutContent = '';
+
+  if (answers.layout === 'navbar') {
+    layoutContent = `
+import * as React from 'react';
+import { Outlet } from 'react-router-dom';
+import { Navbar } from './Navbar';
+
+export const Layout: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="animate-fade-in">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+};
+`;
+  } else if (answers.layout === 'sidebar') {
+    layoutContent = `
+import * as React from 'react';
+import { Outlet } from 'react-router-dom';
+import { Sidebar } from './Sidebar';
+
+export const Layout: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200 flex">
+      <aside className="w-64 flex-shrink-0 hidden md:block h-screen sticky top-0">
+        <Sidebar />
+      </aside>
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
+        <div className="animate-fade-in">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+};
+`;
+  } else { // blank
+    layoutContent = `
+import * as React from 'react';
+import { Outlet } from 'react-router-dom';
+
+export const Layout: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
+      <main className="w-full px-4 py-8">
+        <div className="animate-fade-in">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+};
+`;
+  }
+
+  fs.writeFileSync(layoutPath, layoutContent.trim());
+  log.success(`Layout ${answers.layout.toUpperCase()} aplicado.`);
 }
 
-
-
-// Função principal
-function main() {
-  log.title('🔧 CONFIGURANDO PROJETO SPFx');
-  
-  const config = readConfig();
-  const guids = getGuids();
-  
-  log.info('Atualizando arquivos...\n');
+// Função Principal
+async function main() {
+  log.title('WIZARD DE CONFIGURAÇÃO DO PROJETO');
   
   try {
-    updatePackageSolution(config, guids);
-    updateFastServe(config);
-    updateServe(config);
-    updateManifest(config, guids);
-    configureAppMode(config);
+    const answers = await askQuestions();
+    const guids = getGuids();
     
-    showSummary(config);
+    console.log('\nAplicando configurações...\n');
     
-    console.log('');
-    log.success('🎉 Configuração concluída!');
-    log.info('Próximos passos:');
-    console.log('   1. npm run serve\n');
+    generateEnvFile(answers);
+    updateConfigs(answers, guids);
+    configureAppMode(answers);
+    configureLayout(answers);
+    
+    console.log(`
+${colors.cyan}┌─────────────────────────────────────────────────────┐
+│              🚀 PRONTO PARA CODAR!                  │
+├─────────────────────────────────────────────────────┤${colors.reset}
+│ ${colors.green}npm run serve${colors.reset}  Para iniciar o servidor
+│ ${colors.green}npm run build${colors.reset}  Para gerar o pacote
+${colors.cyan}└─────────────────────────────────────────────────────┘${colors.reset}
+`);
     
   } catch (error) {
-    log.error(`Erro: ${error.message}`);
-    process.exit(1);
+    log.error('Erro durante a configuração: ' + error.message);
+    console.error(error);
   }
 }
 

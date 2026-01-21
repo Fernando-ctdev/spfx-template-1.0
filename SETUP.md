@@ -1,6 +1,6 @@
 # 🛠️ Guia de Instalação e Configuração
 
-Configure seu ambiente SPFx em menos de 5 minutos.
+Configure seu ambiente SPFx em menos de 5 minutos com nosso Wizard interativo.
 
 ## 📋 Pré-requisitos
 *   **Node.js**: Versão 18.x (LTS) recomendada.
@@ -21,68 +21,62 @@ nvm use 18
 
 ---
 
-## 2️⃣ Configuração do Projeto
- 
-1.  Copie o arquivo `.env.example` para `.env` na raiz do projeto.
-2.  Preencha as variáveis com os dados do seu ambiente:
- 
-```ini
-# Tenant do SharePoint (apenas o subdomínio)
-# Ex: https://minhaempresa.sharepoint.com -> minhaempresa
-SPFX_TENANT=sua-empresa
- 
-# URL relativa do site
-# Ex: /sites/meu-projeto
-SPFX_SITE_URL=/sites/seu-site
- 
-# Nome interno da aplicação (sem espaços, kebab-case)
-SPFX_APP_NAME=spfx-app
- 
-# Título de exibição da aplicação
-SPFX_APP_TITLE=Minha Aplicação SPFx
- 
-# Modo de execução: 'page' (Tela cheia) ou 'component' (WebPart padrão)
-SPFX_MODE=page
-```
- 
-### 🎯 Entendendo o `SPFX_MODE`
-*   **`page`**: A WebPart assume a tela inteira (Full Page). Remove cabeçalhos e menus do SharePoint. Ideal para sistemas e portais imersivos.
-*   **`component`**: A WebPart se comporta como um widget normal. Mantém a navegação do SharePoint. Ideal para dashboards e pedaços de funcionalidade.
- 
+## 2️⃣ Instalação e Configuração Interativa
+
+Este template possui um assistente que configura tudo para você. Não é necessário editar arquivos manualmente.
+
+1.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+
+2.  **Execute o assistente de configuração:**
+    ```bash
+    npm run configure
+    ```
+
+3.  **Responda às perguntas no terminal:**
+    O assistente solicitará:
+    *   **Tenant**: O subdomínio da sua empresa (ex: https://`minhaempresa`.sharepoint.com/sites/meu-site).
+    *   **Site URL**: Onde a app será testada (ex: https://minhaempresa.sharepoint.com`/sites/meu-site`).
+    *   **Nome e Título**: Identificação da aplicação no Gerenciador de aplicativos Sharepoint.
+    *   **Modo**: `Page` (Tela cheia) ou `Componente` (Widget padrão).
+    *   **Layout**: `Navbar`, `Sidebar` ou `Blank` (Apenas o conteúdo).
+
 ---
- 
-## 3️⃣ Instalação Automática
- 
-Execute o comando mágico. Ele instala dependências e aplica suas configurações.
- 
-```bash
-npm install
-```
- 
-O script irá ler seu arquivo `.env` e configurar todo o projeto automaticamente.
- 
+
+## 3️⃣ Entendendo as Opções
+
+### 🎯 Modos de Execução (`SPFX_MODE`)
+*   **`page` (Full Page)**: A WebPart assume a tela inteira. Remove cabeçalhos e menus nativos do SharePoint. Ideal para sistemas e Single Page Applications (SPA).
+*   **`component` (WebPart)**: A WebPart se comporta como um widget normal. Mantém a navegação e menus do SharePoint. Ideal para dashboards e funcionalidades integradas.
+
+### 📐 Opções de Layout
+*   **Navbar**: Menu superior fixo (Padrão).
+*   **Sidebar**: Menu lateral esquerdo fixo (Novo).
+*   **Blank**: Sem menu, apenas a área de conteúdo limpa.
+
 ---
- 
+
 ## 4️⃣ Rodando o Projeto
- 
+
 Inicie o servidor de desenvolvimento local com Hot Reload (Fast Serve).
- 
+
 ```bash
 npm run serve
 ```
- 
-O navegador abrirá automaticamente em:
-`https://{SPFX_TENANT}.sharepoint.com{SPFX_SITE_URL}/_layouts/workbench.aspx`
- 
+
+O navegador abrirá automaticamente no Workbench do SharePoint configurado.
+
 ---
- 
+
 ## 🆘 Resolução de Problemas Comuns
- 
+
 **Erro: "Versão do Node incompatível"**
 Rode `nvm use 18` e tente novamente.
- 
+
 **Erro: "A página não abre ou dá 404"**
-Verifique se o `SPFX_SITE_URL` no `.env` existe no seu tenant.
- 
-**Erro: "Mudanças no .env não surtem efeito"**
-Rode `npm run configure` para aplicar as novas configurações.
+Verifique se o `SPFX_SITE_URL` informado existe no seu tenant.
+
+**Erro: "Quero mudar o Layout ou Modo depois de configurar"**
+Basta rodar `npm run configure` novamente e escolher as novas opções. O script irá atualizar o projeto automaticamente.
