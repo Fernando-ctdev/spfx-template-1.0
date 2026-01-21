@@ -333,8 +333,8 @@ async function main() {
 ${colors.cyan}┌─────────────────────────────────────────────────────┐
 │              🚀 PRONTO PARA CODAR!                  │
 ├─────────────────────────────────────────────────────┤${colors.reset}
-│ ${colors.green}npm run serve${colors.reset}  Para iniciar o servidor
-│ ${colors.green}npm run build${colors.reset}  Para gerar o pacote
+│ ${colors.green}pnpm run serve${colors.reset}  Para iniciar o servidor
+│ ${colors.green}pnpm run build${colors.reset}  Para gerar o pacote
 ${colors.cyan}└─────────────────────────────────────────────────────┘${colors.reset}
 `);
     

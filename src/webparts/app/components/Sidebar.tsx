@@ -21,15 +21,30 @@ const navStyles: Partial<INavStyles> = {
       },
       '.ms-Nav-compositeLink:hover &': { 
          color: '#ffffff'
+      },
+      // Estilo para o item selecionado (movido de linkIsSelected que não existe na tipagem)
+      '&.is-selected': {
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        color: '#ffffff',
+        selectors: {
+          ':after': {
+            borderLeftColor: '#ffffff'
+          },
+          ':hover': {
+              backgroundColor: 'rgba(255,255,255,0.25)',
+              color: '#ffffff'
+          }
+        }
       }
     }
   },
   linkText: {
     color: 'inherit'
   },
-  groupHeader: {
-    color: '#ffffff'
-  },
+  // groupHeader removido pois não existe na interface INavStyles
+  // groupHeader: {
+  //   color: '#ffffff'
+  // },
   chevronButton: {
     color: 'rgba(255,255,255,0.7)',
     selectors: {
@@ -37,20 +52,6 @@ const navStyles: Partial<INavStyles> = {
             color: '#ffffff',
             backgroundColor: 'transparent'
         }
-    }
-  },
-  // Estilo para o item selecionado
-  linkIsSelected: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    color: '#ffffff',
-    selectors: {
-      ':after': {
-        borderLeftColor: '#ffffff'
-      },
-      ':hover': {
-          backgroundColor: 'rgba(255,255,255,0.25)',
-          color: '#ffffff'
-      }
     }
   }
 };
@@ -85,6 +86,9 @@ export const Sidebar: React.FC = () => {
   };
 
   // Renderização customizada para suportar ícones Lucide dentro do Nav do Fluent UI
+  // OBS: onRenderLinkPrefix não existe no Nav do Fluent UI 8. Removido para corrigir erro de build.
+  // Se quiser usar ícones customizados, deve-se usar onRenderLink.
+  /*
   const onRenderLinkPrefix = (link: INavLink): JSX.Element | null => {
     if (link.data && link.data.iconComponent) {
       const Icon = link.data.iconComponent;
@@ -92,6 +96,7 @@ export const Sidebar: React.FC = () => {
     }
     return null;
   };
+  */
 
   return (
     <div className="h-full bg-gradient-to-b from-blue-600 to-purple-700 text-white shadow-xl">
@@ -108,7 +113,7 @@ export const Sidebar: React.FC = () => {
           ariaLabel="Navegação lateral"
           styles={navStyles}
           groups={groups}
-          onRenderLinkPrefix={onRenderLinkPrefix}
+          // onRenderLinkPrefix={onRenderLinkPrefix}
         />
       </div>
     </div>
