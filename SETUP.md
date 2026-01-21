@@ -4,7 +4,7 @@ Configure seu ambiente SPFx em menos de 5 minutos com nosso Wizard interativo.
 
 ## 📋 Pré-requisitos
 *   **Node.js**: Versão 18.x (LTS) recomendada.
-*   **Gerenciador de Pacotes**: NPM (vem com o Node).
+*   **Gerenciador de Pacotes**: PNPM (Instale com `npm install -g pnpm`).
 *   **Acesso**: Um tenant do SharePoint Online.
 
 ---
@@ -17,6 +17,9 @@ O SPFx exige versões específicas do Node. Use o NVM para evitar dores de cabe�
 # Instala e usa a versão correta (18)
 nvm install 18
 nvm use 18
+
+# Instala o pnpm globalmente (se ainda não tiver)
+npm install -g pnpm
 ```
 
 ---
@@ -27,12 +30,12 @@ Este template possui um assistente que configura tudo para você. Não é necess
 
 1.  **Instale as dependências:**
     ```bash
-    npm install
+    pnpm install
     ```
 
 2.  **Execute o assistente de configuração:**
     ```bash
-    npm run configure
+    pnpm run configure
     ```
 
 3.  **Responda às perguntas no terminal:**
@@ -63,7 +66,7 @@ Este template possui um assistente que configura tudo para você. Não é necess
 Inicie o servidor de desenvolvimento local com Hot Reload (Fast Serve).
 
 ```bash
-npm run serve
+pnpm run serve
 ```
 
 O navegador abrirá automaticamente no Workbench do SharePoint configurado.
@@ -79,4 +82,4 @@ Rode `nvm use 18` e tente novamente.
 Verifique se o `SPFX_SITE_URL` informado existe no seu tenant.
 
 **Erro: "Quero mudar o Layout ou Modo depois de configurar"**
-Basta rodar `npm run configure` novamente e escolher as novas opções. O script irá atualizar o projeto automaticamente.
+Basta rodar `pnpm run configure` novamente e escolher as novas opções. O script irá atualizar o projeto automaticamente.

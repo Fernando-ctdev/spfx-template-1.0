@@ -72,7 +72,7 @@ Combinamos o melhor de dois mundos para produtividade e compatibilidade:
 
 O projeto inclui uma CLI interna (`scripts/generate.js`) para padronizar a criação de artefatos.
 
-*   **Comando**: `npm run generate`
+*   **Comando**: `pnpm run generate`
 *   **Filosofia**: "Convention over Configuration". O gerador impõe a estrutura de pastas correta, garantindo que todos os desenvolvedores sigam o mesmo padrão arquitetural.
 
 ---

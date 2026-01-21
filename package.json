@@ -9,7 +9,7 @@
     "build:prod": "gulp clean && gulp bundle --ship && gulp package-solution --ship",
     "clean": "gulp clean",
     "test": "gulp test",
-    "serve": "npx fast-serve",
+    "serve": "pnpm dlx fast-serve",
     "generate": "node scripts/generate.js",
     "generate:page": "node scripts/generate.js page",
     "generate:component": "node scripts/generate.js component",
@@ -17,8 +17,10 @@
     "generate:hook": "node scripts/generate.js hook",
     "generate:model": "node scripts/generate.js model"
   },
+  "packageManager": "pnpm@10.2.0",
   "engines": {
-    "node": ">=18.17.1 <19.0.0"
+    "node": ">=18.17.1 <19.0.0",
+    "pnpm": ">=9.0.0"
   },
   "dependencies": {
     "@fluentui/font-icons-mdl2": "^8.5.47",
@@ -49,7 +51,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "lucide-react": "^0.477.0",
+    "lucide-react": "0.477.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-hook-form": "^7.53.0",

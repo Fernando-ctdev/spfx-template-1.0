@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Nav, INavLink, INavStyles, INavLinkGroup } from '@fluentui/react/lib/Nav';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { NAV_ITEMS } from '../config/navigation';
 
 // Estilos customizados para o Nav do Fluent UI se adaptar ao fundo escuro/gradiente
 const navStyles: Partial<INavStyles> = {
@@ -18,7 +19,7 @@ const navStyles: Partial<INavStyles> = {
         backgroundColor: 'rgba(255,255,255,0.1)',
         color: '#ffffff'
       },
-      '.ms-Nav-compositeLink:hover &': { // Garante hover correto no ícone
+      '.ms-Nav-compositeLink:hover &': { 
          color: '#ffffff'
       }
     }
@@ -44,7 +45,7 @@ const navStyles: Partial<INavStyles> = {
     color: '#ffffff',
     selectors: {
       ':after': {
-        borderLeftColor: '#ffffff' // Barra lateral indicadora
+        borderLeftColor: '#ffffff'
       },
       ':hover': {
           backgroundColor: 'rgba(255,255,255,0.25)',
@@ -58,36 +59,38 @@ export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const groups: INavLinkGroup[] = [
-    {
-      links: [
-        {
-          name: 'Dashboard',
-          url: '/',
-          key: 'home',
-          icon: 'Home',
-        },
-        {
-          name: 'Relatórios',
-          url: '/reports',
-          key: 'reports',
-          icon: 'PieDouble',
-        },
-        {
-          name: 'Configurações',
-          url: '/settings',
-          key: 'settings',
-          icon: 'Settings',
-        },
-      ],
-    },
-  ];
+  // Converte os itens de navegação do config para o formato do Fluent UI
+  const groups: INavLinkGroup[] = React.useMemo(() => {
+    return [
+      {
+        links: NAV_ITEMS.map(item => ({
+          name: item.title,
+          url: item.path,
+          key: item.path === '/' ? 'home' : item.path.replace('/', ''),
+          iconProps: {
+            iconName: 'Page' // Fallback genérico para manter compatibilidade com Fluent sem quebrar tipagem
+          },
+          // Hack para passar o componente Lucide via data se quisermos renderizar customizado depois
+          data: { iconComponent: item.icon }
+        }))
+      }
+    ];
+  }, []);
 
   const onLinkClick = (ev?: React.MouseEvent<HTMLElement>, item?: INavLink) => {
     ev?.preventDefault();
     if (item && item.url) {
       navigate(item.url);
     }
+  };
+
+  // Renderização customizada para suportar ícones Lucide dentro do Nav do Fluent UI
+  const onRenderLinkPrefix = (link: INavLink): JSX.Element | null => {
+    if (link.data && link.data.iconComponent) {
+      const Icon = link.data.iconComponent;
+      return <Icon size={20} className="mr-3" />;
+    }
+    return null;
   };
 
   return (
@@ -105,6 +108,7 @@ export const Sidebar: React.FC = () => {
           ariaLabel="Navegação lateral"
           styles={navStyles}
           groups={groups}
+          onRenderLinkPrefix={onRenderLinkPrefix}
         />
       </div>
     </div>

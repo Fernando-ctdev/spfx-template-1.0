@@ -8,7 +8,7 @@ Este template não é apenas um ponto de partida; é uma **plataforma de acelera
 
 *   **⚡ Arquitetura SPA Real**: Navegação instantânea sem recarregar a página.
 *   **🎨 Design System Híbrido**: O poder do **Tailwind CSS** com a conformidade do **Fluent UI**.
-*   **🤖 CLI Integrada**: Gerador de código (`npm run generate`) para criar páginas, componentes e serviços em segundos.
+*   **🤖 CLI Integrada**: Gerador de código (`pnpm run generate`) para criar páginas, componentes e serviços em segundos.
 *   **🛡️ Enterprise Ready**: Estrutura escalável, Tipagem forte e Configuração centralizada.
 
 ---
@@ -22,7 +22,7 @@ Para manter a organização, a documentação está dividida em guias especializ
 | [🛠️ Guia de Instalação](./SETUP.md) | Pré-requisitos e setup do ambiente em 5 min. | Todos |
 | [🏗️ Arquitetura](./ARCHITECTURE.md) | Decisões técnicas, estrutura de pastas e padrões. | Arquitetos/Seniores |
 | [🎨 Style Guide](./STYLE_GUIDE.md) | Padrões de código, nomenclatura e boas práticas. | Todos |
-| [⚡ Gerador CLI](./GENERATOR.md) | Como usar o comando `npm run generate` para voar baixo. | Todos |
+| [⚡ Gerador CLI](./GENERATOR.md) | Como usar o comando `pnpm run generate` para voar baixo. | Todos |
 
 ---
 

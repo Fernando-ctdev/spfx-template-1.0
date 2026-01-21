@@ -7,18 +7,18 @@ Aumente sua produtividade gerando código padronizado instantaneamente.
 Recomendamos o **modo interativo**, que guia você pelas opções:
 
 ```bash
-npm run generate
+pnpm run generate
 ```
 
 ### Comandos Diretos (Para Scripts/CI)
 
 | O que você quer criar? | Comando | Exemplo |
 |------------------------|---------|---------|
-| **Página + Rota** | `npm run generate:page <Nome>` | `npm run generate:page Dashboard` |
-| **Componente** | `npm run generate:component <Nome>` | `npm run generate:component Header` |
-| **Serviço (CRUD)** | `npm run generate:service <Nome>` | `npm run generate:service Projetos` |
-| **Hook Customizado** | `npm run generate:hook <Nome>` | `npm run generate:hook usePermissoes` |
-| **Interface (Model)** | `npm run generate:model <Nome>` | `npm run generate:model Projeto` |
+| **Página + Rota** | `pnpm run generate:page <Nome>` | `pnpm run generate:page Dashboard` |
+| **Componente** | `pnpm run generate:component <Nome>` | `pnpm run generate:component Header` |
+| **Serviço (CRUD)** | `pnpm run generate:service <Nome>` | `pnpm run generate:service Projetos` |
+| **Hook Customizado** | `pnpm run generate:hook <Nome>` | `pnpm run generate:hook usePermissoes` |
+| **Interface (Model)** | `pnpm run generate:model <Nome>` | `pnpm run generate:model Projeto` |
 
 ---
 

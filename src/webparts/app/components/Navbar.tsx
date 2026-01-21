@@ -7,9 +7,6 @@ export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
 
-  // Efeito de scroll para aumentar o blur/opacidade se desejar, 
-  // mas aqui vamos manter o estilo fixo glassmorphism solicitado.
-
   return (
     <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-blue-600/90 to-purple-600/90 backdrop-blur-md shadow-lg border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
