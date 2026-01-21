@@ -6,7 +6,8 @@
   "scripts": {
     "configure": "node scripts/configure.js",
     "build": "gulp bundle",
-    "build:prod": "gulp clean && gulp bundle --ship && gulp package-solution --ship",
+    "version:bump": "node scripts/bump-version.js",
+    "build:prod": "pnpm version:bump && gulp clean && gulp bundle --ship && gulp package-solution --ship",
     "clean": "gulp clean",
     "test": "gulp test",
     "serve": "fast-serve",
