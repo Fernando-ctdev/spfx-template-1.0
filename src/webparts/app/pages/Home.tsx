@@ -57,8 +57,8 @@ const Home: React.FC<IHomeProps> = ({ userName }) => {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 mt-1">Bem-vindo ao seu portal corporativo</p>
+        <h1 className="text-3xl font-bold text-gray-600">Dashboard</h1>
+        <p className="text-gray-500 mt-1">Bem-vindo ao setup inicial do seu portal corporativo</p>
       </div>
 
       {/* Stats Cards Row */}
@@ -107,11 +107,6 @@ const Home: React.FC<IHomeProps> = ({ userName }) => {
                 </div>
               ))}
             </div>
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <button className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
-                Ver todas as atividades →
-              </button>
-            </div>
           </div>
         </div>
 
@@ -140,11 +135,6 @@ const Home: React.FC<IHomeProps> = ({ userName }) => {
                   </span>
                 </div>
               ))}
-            </div>
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <button className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
-                Ver todas as tarefas →
-              </button>
             </div>
           </div>
         </div>

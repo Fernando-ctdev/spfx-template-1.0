@@ -23,7 +23,7 @@ export const Navbar: React.FC = () => {
                </svg>
             </div>
             <span className="text-xl font-bold text-white tracking-tight">
-              CorpPortal
+              Portal
             </span>
           </div>
 
@@ -51,13 +51,6 @@ export const Navbar: React.FC = () => {
 
           {/* Right Icons */}
           <div className="hidden md:flex items-center gap-4">
-             <button className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors">
-               <Grid size={20} />
-             </button>
-             <button className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors relative">
-               <Bell size={20} />
-               <span className="absolute top-2 right-2 w-2 h-2 bg-red-400 rounded-full border border-purple-600"></span>
-             </button>
              <div className="flex items-center gap-2 pl-2 border-l border-white/20">
                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border border-white/30 text-white font-medium text-xs">
                   JP
