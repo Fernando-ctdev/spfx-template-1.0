@@ -12,12 +12,6 @@ initializeIcons();
 // Context para SharePoint
 export const SharePointContext = React.createContext<ReturnType<typeof getSP> | null>(null);
 
-// Context para controle de tema
-export const ThemeContext = React.createContext<{
-  isDark: boolean;
-  toggleTheme: () => void;
-}>({ isDark: false, toggleTheme: () => {} });
-
 // Tema Light (Fluent UI v8)
 const lightTheme: ITheme = createTheme({
   palette: {
@@ -46,44 +40,14 @@ const lightTheme: ITheme = createTheme({
   },
 });
 
-// Tema Dark (Fluent UI v8)
-const darkTheme: ITheme = createTheme({
-  palette: {
-    themePrimary: '#2899f5',
-    themeLighterAlt: '#02060a',
-    themeLighter: '#061827',
-    themeLight: '#0c2d49',
-    themeTertiary: '#185a93',
-    themeSecondary: '#2284d7',
-    themeDarkAlt: '#3da3f6',
-    themeDark: '#5db2f7',
-    themeDarker: '#8ac7f9',
-    neutralLighterAlt: '#2b2b2b',
-    neutralLighter: '#333333',
-    neutralLight: '#414141',
-    neutralQuaternaryAlt: '#4a4a4a',
-    neutralQuaternary: '#515151',
-    neutralTertiaryAlt: '#6f6f6f',
-    neutralTertiary: '#c8c8c8',
-    neutralSecondary: '#d0d0d0',
-    neutralPrimaryAlt: '#dadada',
-    neutralPrimary: '#ffffff',
-    neutralDark: '#f4f4f4',
-    black: '#f8f8f8',
-    white: '#1f1f1f',
-  },
-});
-
 /**
  * Helper para sincronizar rotas com querystring
- * Resolve o problema de deep links e compartilhamento de URLs
  */
 export const useRouteSync = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const syncRoute = React.useCallback((route: string) => {
-    // Atualiza querystring para permitir deep link
     setSearchParams({ page: route.replace('/', '') || 'home' });
   }, [setSearchParams]);
 
@@ -97,7 +61,6 @@ export const useRouteSync = () => {
 
 export interface IAppProps {
   description: string;
-  isDarkTheme: boolean;
   environmentMessage: string;
   hasTeamsContext: boolean;
   userDisplayName: string;
@@ -150,23 +113,12 @@ const NotFound: React.FC = () => {
 };
 
 const App: React.FC<IAppProps> = (props) => {
-  const { userDisplayName, isDarkTheme } = props;
-  const [darkMode, setDarkMode] = React.useState(isDarkTheme);
+  const { userDisplayName } = props;
 
   // Obter o SP inicializado
   const sp = React.useMemo(() => {
     return getSP();
   }, []);
-
-  // Toggle tema
-  const toggleTheme = React.useCallback(() => {
-    setDarkMode(prev => !prev);
-  }, []);
-
-  // Atualiza quando prop muda
-  React.useEffect(() => {
-    setDarkMode(isDarkTheme);
-  }, [isDarkTheme]);
 
   // Scroll helper
   React.useEffect(() => {
@@ -185,21 +137,19 @@ const App: React.FC<IAppProps> = (props) => {
   }, []);
 
   return (
-    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-      <ThemeContext.Provider value={{ isDark: darkMode, toggleTheme }}>
-        <SharePointContext.Provider value={sp}>
-          <div className="spfx-app-root">
-            <Router>
-              <Routes>
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Home userName={userDisplayName} />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-            </Router>
-          </div>
-        </SharePointContext.Provider>
-      </ThemeContext.Provider>
+    <ThemeProvider theme={lightTheme}>
+      <SharePointContext.Provider value={sp}>
+        <div className="spfx-app-root">
+          <Router>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Home userName={userDisplayName} />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </Router>
+        </div>
+      </SharePointContext.Provider>
     </ThemeProvider>
   );
 };

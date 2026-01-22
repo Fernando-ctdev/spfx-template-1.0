@@ -23,7 +23,6 @@ export interface IAppWebPartProps {
 
 export default class AppWebPart extends BaseClientSideWebPart<IAppWebPartProps> {
 
-  private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
 
   public render(): void {
@@ -31,7 +30,6 @@ export default class AppWebPart extends BaseClientSideWebPart<IAppWebPartProps> 
       App,
       {
         description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName
@@ -168,7 +166,6 @@ private _injectGlobalStyles(): void {
       return;
     }
 
-    this._isDarkTheme = !!currentTheme.isInverted;
     const { semanticColors } = currentTheme;
 
     if (semanticColors) {

@@ -11,7 +11,7 @@
  * 3. Configura GUIDs, manifestos e arquivos JSON
  * 4. Ajusta o código fonte (Modo e Layout)
  * 
- * Execute: npm run configure
+ * Execute: pnpm run configure
  * ===============================================
  */
 
@@ -64,26 +64,26 @@ function getGuids() {
   return guids;
 }
 
-// Escrever arquivo JSON formatado
+
 function writeJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
 }
 
-// 1. Perguntas Interativas
+
 async function askQuestions() {
-  // Tentar ler .env existente ou .env.example para usar como default
+
   let currentEnv = {};
   
   const envPath = path.join(basePath, '.env');
   const examplePath = path.join(basePath, '.env.example');
   
-  // Prioridade: .env > .env.example > vazio
+
   const fileToRead = fs.existsSync(envPath) ? envPath : (fs.existsSync(examplePath) ? examplePath : null);
 
   if (fileToRead) {
     const envContent = fs.readFileSync(fileToRead, 'utf8');
     envContent.split('\n').forEach(line => {
-      // Ignora comentários
+
       if (line.trim().startsWith('#')) return;
       
       const [key, value] = line.split('=');
@@ -152,7 +152,7 @@ async function askQuestions() {
   return response;
 }
 
-// 2. Gerar arquivo .env
+
 function generateEnvFile(answers) {
   const envContent = `
 # Configurações do Ambiente SPFx
@@ -172,9 +172,9 @@ NODE_ENV=development
   log.success('Arquivo .env gerado com sucesso!');
 }
 
-// 3. Atualizar Arquivos de Configuração (JSONs)
+
 function updateConfigs(answers, guids) {
-  // package-solution.json
+
   const pkgSolPath = path.join(basePath, 'config', 'package-solution.json');
   const pkgSol = JSON.parse(fs.readFileSync(pkgSolPath, 'utf8'));
   pkgSol.solution.name = answers.appName;
@@ -183,20 +183,20 @@ function updateConfigs(answers, guids) {
   pkgSol.paths.zippedPackage = `solution/${answers.appName}.sppkg`;
   writeJson(pkgSolPath, pkgSol);
 
-  // fast-serve/config.json
+
   const fastServePath = path.join(basePath, 'fast-serve', 'config.json');
   const fastServe = JSON.parse(fs.readFileSync(fastServePath, 'utf8'));
   const fullUrl = `https://${answers.tenant}.sharepoint.com${answers.siteUrl}`;
   fastServe.serveConfigurations.serve.openUrl = `${fullUrl}?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`;
   writeJson(fastServePath, fastServe);
 
-  // config/serve.json
+
   const servePath = path.join(basePath, 'config', 'serve.json');
   const serve = JSON.parse(fs.readFileSync(servePath, 'utf8'));
   serve.initialPage = `https://${answers.tenant}.sharepoint.com/_layouts/workbench.aspx`;
   writeJson(servePath, serve);
 
-  // AppWebPart.manifest.json
+
   const manifestPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   manifest.id = guids.webPartId;
@@ -205,12 +205,12 @@ function updateConfigs(answers, guids) {
   writeJson(manifestPath, manifest);
 }
 
-// 4. Configurar Modo (Page/Component) e Corrigir Bug
+
 function configureAppMode(answers) {
   const appWebPartPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.ts');
   let content = fs.readFileSync(appWebPartPath, 'utf8');
   
-  // 4.1 Configurar CSS
+
   const fullPageImport = "import './shared/css/page-layout.css';";
   const hasFullPageImport = content.includes(fullPageImport);
   
@@ -224,18 +224,17 @@ function configureAppMode(answers) {
     content = content.replace(fullPageImport, '');
   }
 
-  // 4.2 Corrigir Injeção de Estilos Globais (BUG FIX)
-  // Procura pela chamada do método
+
   const injectCall = "this._injectGlobalStyles();";
   const commentedInjectCall = "// this._injectGlobalStyles();";
 
   if (answers.mode === 'page') {
-    // Garante que está descomentado
+
     if (content.includes(commentedInjectCall)) {
       content = content.replace(commentedInjectCall, injectCall);
     }
   } else {
-    // Garante que está comentado no modo component
+
     if (content.includes(injectCall) && !content.includes(commentedInjectCall)) {
       content = content.replace(injectCall, commentedInjectCall);
     }
@@ -245,7 +244,7 @@ function configureAppMode(answers) {
   log.success(`Modo ${answers.mode.toUpperCase()} configurado (CSS e Scripts ajustados).`);
 }
 
-// 5. Configurar Layout (Navbar/Sidebar/Blank)
+
 function configureLayout(answers) {
   const layoutPath = path.join(basePath, 'src', 'webparts', 'app', 'components', 'Layout.tsx');
   
