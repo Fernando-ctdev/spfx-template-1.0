@@ -132,12 +132,12 @@ async function askQuestions() {
       message: 'Qual o modo de execução?',
       choices: [
         { title: 'Página (Full Page) - Oculta menus do SharePoint', value: 'page' },
-        { title: 'Componente (WebPart) - Mantém menus nativos', value: 'component' }
+        { title: 'Componente (WebPart widget) - Mantém menus nativos', value: 'component' }
       ],
       initial: currentEnv.SPFX_MODE === 'component' ? 1 : 0
     },
     {
-      type: 'select',
+      type: (prev) => prev === 'component' ? null : 'select',
       name: 'layout',
       message: 'Qual estrutura de layout inicial?',
       choices: [
@@ -150,6 +150,11 @@ async function askQuestions() {
   ];
 
   const response = await prompts(questions);
+  
+  // Normalizar resposta do layout se foi pulada
+  if (!response.layout && response.mode === 'component') {
+    response.layout = 'blank';
+  }
   
   if (!response.tenant) {
     log.error('Configuração cancelada pelo usuário.');
@@ -269,6 +274,51 @@ function configureLayout(answers) {
   log.success(`Layout ${answers.layout.toUpperCase()} aplicado.`);
 }
 
+async function configureWidgetStructure(answers) {
+  log.info('Ajustando estrutura para modo Widget...');
+
+  // 1. Substituir App.tsx
+  const appWidgetTemplate = require('./templates/app-widget');
+  const appPath = path.join(basePath, 'src', 'webparts', 'app', 'App.tsx');
+  fs.writeFileSync(appPath, appWidgetTemplate.trim());
+  log.success('App.tsx otimizado para Widget (sem roteamento).');
+
+  // 2. Mover/Renomear Home.tsx -> MainWidget.tsx
+  const pagesDir = path.join(basePath, 'src', 'webparts', 'app', 'pages');
+  const componentsDir = path.join(basePath, 'src', 'webparts', 'app', 'components');
+  
+  const oldHomePath = path.join(pagesDir, 'Home.tsx');
+  const newWidgetPath = path.join(componentsDir, 'MainWidget.tsx');
+  const widgetTemplate = require('./templates/widget-example');
+
+  // Sempre sobrescreve com o template limpo para garantir que não sobra lixo do dashboard
+  if (!fs.existsSync(componentsDir)) {
+    fs.mkdirSync(componentsDir, { recursive: true });
+  }
+  
+  fs.writeFileSync(newWidgetPath, widgetTemplate.trim());
+  log.success('Criado componente principal: src/webparts/app/components/MainWidget.tsx');
+
+  // 3. Limpar pasta pages se existir Home.tsx lá
+  if (fs.existsSync(oldHomePath)) {
+    fs.unlinkSync(oldHomePath);
+    log.info('Arquivo Home.tsx removido de pages/.');
+  }
+
+  // Tenta remover a pasta pages se estiver vazia
+  if (fs.existsSync(pagesDir)) {
+    try {
+      const files = fs.readdirSync(pagesDir);
+      if (files.length === 0) {
+        fs.rmdirSync(pagesDir);
+        log.info('Pasta pages/ removida (não necessária para widgets).');
+      }
+    } catch (e) {
+      // Ignora erro se não conseguir remover pasta
+    }
+  }
+}
+
 // Função Principal
 async function main() {
   log.title('WIZARD DE CONFIGURAÇÃO DO PROJETO');
@@ -283,6 +333,10 @@ async function main() {
     updateConfigs(answers, guids);
     configureAppMode(answers);
     configureLayout(answers);
+
+    if (answers.mode === 'component') {
+      await configureWidgetStructure(answers);
+    }
     
     console.log(`
 ${colors.cyan}┌─────────────────────────────────────────────────────┐
