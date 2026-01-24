@@ -207,6 +207,13 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
                 fieldGroup: {
                   borderRadius: '8px',
                   border: '2px solid #e2e8f0',
+                  outline: 'none',
+                },
+                field: {
+                  borderRadius: '8px',
+                },
+                wrapper: {
+                  borderRadius: '8px',
                 },
               }}
             />
@@ -274,6 +281,13 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
             fieldGroup: {
               borderRadius: '8px',
               border: '2px solid #e2e8f0',
+              outline: 'none',
+            },
+            field: {
+              borderRadius: '8px',
+            },
+            wrapper: {
+              borderRadius: '8px',
             },
           }}
         />
@@ -330,6 +344,13 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
             fieldGroup: {
               borderRadius: '8px',
               border: '2px solid #e2e8f0',
+              outline: 'none',
+            },
+            field: {
+              borderRadius: '8px',
+            },
+            wrapper: {
+              borderRadius: '8px',
             },
           }}
         />

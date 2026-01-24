@@ -16,7 +16,7 @@ export const SharePointContext = React.createContext<ReturnType<typeof getSP> | 
 // Tema Light (Fluent UI v8)
 const lightTheme: ITheme = createTheme({
   palette: {
-    themePrimary: '#0078d4',
+    themePrimary: '#462da1ff',
     themeLighterAlt: '#eff6fc',
     themeLighter: '#deecf9',
     themeLight: '#c7e0f4',
