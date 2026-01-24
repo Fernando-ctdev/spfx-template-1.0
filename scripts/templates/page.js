@@ -162,13 +162,29 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
         </div>
         
         <div className="flex items-center gap-2">
-          <DefaultButton iconProps={{ iconName: 'Filter' }}>
+          <DefaultButton
+            iconProps={{ iconName: 'Filter' }}
+            styles={{
+              root: {
+                borderRadius: '12px',
+                height: '44px',
+              },
+            }}
+          >
             Filtrar
           </DefaultButton>
           ${isFullCRUD ? `<PrimaryButton
             iconProps={{ iconName: 'Add' }}
             onClick={() => setIsCreateDialogVisible(true)}
             disabled={isCreating}
+            styles={{
+              root: {
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
+                height: '44px',
+                fontWeight: 600,
+              },
+            }}
           >
             Novo Item
           </PrimaryButton>` : ''}
@@ -176,7 +192,7 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
       </div>
 
       {/* Área de Conteúdo */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col">
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-slate-900 dark:to-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col">
         
         {/* Toolbar de Busca */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
@@ -187,6 +203,12 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
               onChange={${crudInfo ? '(e, value) => setFilterText(value || "")' : '() => {}'}}
               iconProps={{ iconName: 'Search' }}
               underlined
+              styles={{
+                fieldGroup: {
+                  borderRadius: '8px',
+                  border: '2px solid #e2e8f0',
+                },
+              }}
             />
           </div>
         </div>
@@ -234,6 +256,13 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           type: DialogType.normal,
           title: 'Novo Item',
         }}
+        styles={{
+          main: {
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            maxWidth: '480px',
+          },
+        }}
       >
         <TextField
           label="Título"
@@ -241,10 +270,37 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           onChange={(e, value) => setNewItemTitle(value || '')}
           placeholder="Digite o título do item"
           required
+          styles={{
+            fieldGroup: {
+              borderRadius: '8px',
+              border: '2px solid #e2e8f0',
+            },
+          }}
         />
         <DialogFooter>
-          <PrimaryButton onClick={handleCreate} text="Salvar" disabled={isCreating || !newItemTitle.trim()} />
-          <DefaultButton onClick={() => setIsCreateDialogVisible(false)} text="Cancelar" />
+          <PrimaryButton 
+            onClick={handleCreate} 
+            text="Salvar" 
+            disabled={isCreating || !newItemTitle.trim()}
+            styles={{
+              root: {
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
+                height: '44px',
+                fontWeight: 600,
+              },
+            }}
+          />
+          <DefaultButton 
+            onClick={() => setIsCreateDialogVisible(false)} 
+            text="Cancelar"
+            styles={{
+              root: {
+                borderRadius: '12px',
+                height: '44px',
+              },
+            }}
+          />
         </DialogFooter>
       </Dialog>
 
@@ -256,6 +312,13 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           type: DialogType.normal,
           title: 'Editar Item',
         }}
+        styles={{
+          main: {
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            maxWidth: '480px',
+          },
+        }}
       >
         <TextField
           label="Título"
@@ -263,10 +326,37 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           onChange={(e, value) => setEditingItemTitle(value || '')}
           placeholder="Digite o título do item"
           required
+          styles={{
+            fieldGroup: {
+              borderRadius: '8px',
+              border: '2px solid #e2e8f0',
+            },
+          }}
         />
         <DialogFooter>
-          <PrimaryButton onClick={handleUpdate} text="Salvar" disabled={!editingItemTitle.trim()} />
-          <DefaultButton onClick={() => setIsEditDialogVisible(false)} text="Cancelar" />
+          <PrimaryButton 
+            onClick={handleUpdate} 
+            text="Salvar" 
+            disabled={!editingItemTitle.trim()}
+            styles={{
+              root: {
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
+                height: '44px',
+                fontWeight: 600,
+              },
+            }}
+          />
+          <DefaultButton 
+            onClick={() => setIsEditDialogVisible(false)} 
+            text="Cancelar"
+            styles={{
+              root: {
+                borderRadius: '12px',
+                height: '44px',
+              },
+            }}
+          />
         </DialogFooter>
       </Dialog>
 
@@ -279,10 +369,38 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           title: 'Confirmar exclusão',
           subText: \`Tem certeza que deseja excluir o item "\${selectedItem?.Title}"? Esta ação não pode ser desfeita.\`,
         }}
+        styles={{
+          main: {
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            maxWidth: '480px',
+          },
+        }}
       >
         <DialogFooter>
-          <PrimaryButton onClick={confirmDelete} text="Excluir" disabled={isDeleting} />
-          <DefaultButton onClick={() => setIsDeleteDialogVisible(false)} text="Cancelar" />
+          <PrimaryButton 
+            onClick={confirmDelete} 
+            text="Excluir" 
+            disabled={isDeleting}
+            styles={{
+              root: {
+                borderRadius: '12px',
+                boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
+                height: '44px',
+                fontWeight: 600,
+              },
+            }}
+          />
+          <DefaultButton 
+            onClick={() => setIsDeleteDialogVisible(false)} 
+            text="Cancelar"
+            styles={{
+              root: {
+                borderRadius: '12px',
+                height: '44px',
+              },
+            }}
+          />
         </DialogFooter>
       </Dialog>` : ''}
     </div>
