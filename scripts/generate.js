@@ -70,6 +70,9 @@ async function generatePage(name, options = {}) {
   if (options.createCRUD) {
     log.info(`🚀 Iniciando geração da stack CRUD para ${pageName}...`);
     
+    // Garantir QueryClientProvider no App.tsx
+    ensureQueryClientProvider();
+    
     // 1. Model
     await generateModel(name);
     
@@ -83,7 +86,8 @@ async function generatePage(name, options = {}) {
     options.crudInfo = {
       listName: options.listName || name,
       modelName: `I${pageName}`,
-      hookName: `use${pageName}`
+      hookName: `use${pageName}`,
+      crudMode: options.crudMode || 'read'
     };
     
     // Desativar exemplo básico se CRUD foi selecionado
@@ -249,6 +253,75 @@ async function generateModel(name, options = {}) {
   log.success(`Arquivo criado: src/models/${modelName}.ts`);
   
   return { modelName, filePath };
+}
+
+// ============================================
+// GARANTIR QUERYCLIENTPROVIDER NO APP.TSX
+// ============================================
+
+function ensureQueryClientProvider() {
+  const appPath = path.join(basePath, 'src', 'webparts', 'app', 'App.tsx');
+  
+  if (!fileExists(appPath)) {
+    log.warn('App.tsx não encontrado. QueryClientProvider não adicionado.');
+    return;
+  }
+  
+  let content = fs.readFileSync(appPath, 'utf8');
+  
+  // Verifica se já tem QueryClientProvider
+  if (content.includes('QueryClientProvider')) {
+    log.info('QueryClientProvider já configurado no App.tsx.');
+    return;
+  }
+  
+  // Adiciona import do TanStack Query
+  const importRegex = /import { (.*?) } from '@fluentui\/react';/;
+  if (importRegex.test(content)) {
+    content = content.replace(importRegex, (match, p1) => {
+      return `import { QueryClient, QueryClientProvider } from '@tanstack/react-query';\nimport { ${p1} } from '@fluentui/react';`;
+    });
+  } else {
+    log.warn('Não foi possível adicionar import do QueryClient automaticamente.');
+    return;
+  }
+  
+  // Adiciona QueryClient antes do sp initialization
+  const spInitRegex = /(const sp = React\.useMemo\(\) => \{)/;
+  if (spInitRegex.test(content)) {
+    content = content.replace(spInitRegex, `const queryClient = React.useMemo(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        refetchOnWindowFocus: false,
+      },
+    },
+  }), []);\n\n  $1`);
+  } else {
+    log.warn('Não foi possível adicionar QueryClient automaticamente.');
+    return;
+  }
+  
+  // Envolve o componente principal com QueryClientProvider
+  const themeProviderStart = '<ThemeProvider theme={lightTheme}>';
+  const themeProviderEnd = '</ThemeProvider>';
+  
+  if (content.includes(themeProviderStart) && content.includes(themeProviderEnd)) {
+    content = content.replace(
+      `<${themeProviderStart}>\n      <SharePointContext.Provider value={sp}>`,
+      `<QueryClientProvider client={queryClient}>\n      <ThemeProvider theme={lightTheme}>\n        <SharePointContext.Provider value={sp}>`
+    );
+    content = content.replace(
+      `</SharePointContext.Provider>\n      </ThemeProvider>`,
+      `</SharePointContext.Provider>\n        </ThemeProvider>\n    </QueryClientProvider>`
+    );
+  } else {
+    log.warn('Não foi possível envolver componentes com QueryClientProvider.');
+    return;
+  }
+  
+  fs.writeFileSync(appPath, content);
+  log.success('QueryClientProvider adicionado ao App.tsx.');
 }
 
 // ============================================
