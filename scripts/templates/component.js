@@ -12,7 +12,17 @@ export interface I${name}Props {${withProps ? `
 /**
  * Componente ${name}
  * 
- * @description Descrição do componente ${name}
+ * @description Componente gerado automaticamente.
+ * 
+ * ARQUITETURA HÍBRIDA:
+ * - Tailwind CSS para layout (flex, grid, spacing, containers)
+ * - Fluent UI para componentes interativos (botões, inputs, diálogos)
+ * 
+ * Exemplos de uso de Fluent UI:
+ * - PrimaryButton, DefaultButton para ações
+ * - TextField para inputs
+ * - Dialog para modais
+ * - DetailsList para tabelas
  */
 const ${name}: React.FC<I${name}Props> = (${withProps ? '{ title, description }' : 'props'}) => {
   return (

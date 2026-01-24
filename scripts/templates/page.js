@@ -10,19 +10,19 @@ module.exports = (name, options) => {
 
     // Imports base
     let imports = `import * as React from 'react';
-import { FileText, Search, Filter${isFullCRUD ? ', Plus, Trash2, Edit' : ''} } from 'lucide-react';`;
+import { FileText } from 'lucide-react';
+import { DefaultButton, TextField } from '@fluentui/react';`;
 
     // Imports condicionais
     if (crudInfo) {
       imports += `
-import { Spinner, SpinnerSize, MessageBar, MessageBarType${isFullCRUD ? ', IconButton, Dialog, DialogType, DialogFooter, PrimaryButton, DefaultButton' : ''} } from '@fluentui/react';
+import { Spinner, SpinnerSize, MessageBar, MessageBarType, PrimaryButton, DetailsList, SelectionMode, Dialog, DialogType, DialogFooter${isFullCRUD ? ', IconButton' : ''} } from '@fluentui/react';
 import { ${hookName} } from '../../../core/hooks/${hookName}';
 import { ${modelName} } from '../../../models/${modelName}';`;
     } else if (withSharePoint) {
       imports += `
 import { useListItems } from '../../../core/hooks/useSharePoint';
-import { Spinner, SpinnerSize, MessageBar, MessageBarType, IconButton } from '@fluentui/react';
-import { MoreHorizontal } from 'lucide-react';`;
+import { Spinner, SpinnerSize, MessageBar, MessageBarType, DetailsList, SelectionMode, IconButton } from '@fluentui/react';`;
     }
 
     const content = `
@@ -45,7 +45,11 @@ ${crudInfo ? `  // Hook CRUD gerado automaticamente
   } = ${hookName}<${modelName}>('${listName}');
 
 ${isFullCRUD ? `  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = React.useState(false);
-  const [selectedItem, setSelectedItem] = React.useState<${modelName} | null>(null);` : ''}
+  const [isCreateDialogVisible, setIsCreateDialogVisible] = React.useState(false);
+  const [isEditDialogVisible, setIsEditDialogVisible] = React.useState(false);
+  const [selectedItem, setSelectedItem] = React.useState<${modelName} | null>(null);
+  const [newItemTitle, setNewItemTitle] = React.useState('');
+  const [editingItemTitle, setEditingItemTitle] = React.useState('');` : ''}
   const [filterText, setFilterText] = React.useState('');
 
   // Filtragem local
@@ -66,7 +70,76 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
       setIsDeleteDialogVisible(false);
       setSelectedItem(null);
     }
-  };` : ''}` : withSharePoint ? `  // Exemplo de hook (descomente para usar)
+  };
+
+  const handleCreate = async () => {
+    if (!newItemTitle.trim()) return;
+    await create({ Title: newItemTitle });
+    setIsCreateDialogVisible(false);
+    setNewItemTitle('');
+  };
+
+  const handleEditClick = (item: ${modelName}) => {
+    setSelectedItem(item);
+    setEditingItemTitle(item.Title);
+    setIsEditDialogVisible(true);
+  };
+
+  const handleUpdate = async () => {
+    if (!selectedItem || !editingItemTitle.trim()) return;
+    await update({ id: selectedItem.Id, data: { Title: editingItemTitle } });
+    setIsEditDialogVisible(false);
+    setSelectedItem(null);
+    setEditingItemTitle('');
+  };` : ''}
+
+${crudInfo || withSharePoint ? `  // Colunas para DetailsList
+  const columns = React.useMemo(() => [
+    {
+      key: 'id',
+      name: 'ID',
+      fieldName: 'Id',
+      minWidth: 80,
+      maxWidth: 100,
+    },
+    {
+      key: 'title',
+      name: 'Título',
+      fieldName: 'Title',
+      minWidth: 200,
+      isResizable: true,
+    },
+    {
+      key: 'created',
+      name: 'Criado em',
+      fieldName: 'Created',
+      minWidth: 150,
+      onRender: (item: any) => item.Created ? new Date(item.Created).toLocaleDateString() : '-',
+    },
+    ${isFullCRUD || withSharePoint ? `{
+      key: 'actions',
+      name: 'Ações',
+      minWidth: 100,
+      onRender: (item: ${crudInfo ? modelName : 'any'}) => (
+        <div className="flex gap-2 justify-end">
+          ${isFullCRUD ? `<IconButton
+            iconProps={{ iconName: 'Edit' }}
+            onClick={() => handleEditClick(item)}
+            title="Editar"
+          />
+          <IconButton
+            iconProps={{ iconName: 'Delete' }}
+            onClick={() => handleDeleteClick(item)}
+            title="Excluir"
+          />` : `<IconButton
+            iconProps={{ iconName: 'More' }}
+            onClick={() => console.log('Mais opções:', item)}
+            title="Mais opções"
+          />`}
+        </div>
+      ),
+    },` : ''}
+  ], []);` : ''}` : withSharePoint ? `  // Exemplo de hook (descomente para usar)
   // const { items, loading, error } = useListItems('SitePages', ['Id', 'Title']);
   
   // Mock para visualização inicial (remova ao integrar)
@@ -89,18 +162,16 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
         </div>
         
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-            <Filter size={16} />
+          <DefaultButton iconProps={{ iconName: 'Filter' }}>
             Filtrar
-          </button>
-          ${isFullCRUD ? `<button 
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm text-sm font-medium"
-            onClick={() => console.log('Implementar criação')}
+          </DefaultButton>
+          ${isFullCRUD ? `<PrimaryButton
+            iconProps={{ iconName: 'Add' }}
+            onClick={() => setIsCreateDialogVisible(true)}
             disabled={isCreating}
           >
-            <Plus size={16} />
             Novo Item
-          </button>` : ''}
+          </PrimaryButton>` : ''}
         </div>
       </div>
 
@@ -109,14 +180,13 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
         
         {/* Toolbar de Busca */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar em ${name}..." 
+          <div className="flex-1 max-w-md">
+            <TextField
+              placeholder="Buscar em ${name}..."
               value={${crudInfo ? 'filterText' : "''"}}
-              onChange={${crudInfo ? '(e) => setFilterText(e.target.value)' : '() => {}'}}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              onChange={${crudInfo ? '(e, value) => setFilterText(value || "")' : '() => {}'}}
+              iconProps={{ iconName: 'Search' }}
+              underlined
             />
           </div>
         </div>
@@ -133,49 +203,21 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-800/50">
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Título</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Criado em</th>
-                    ${isFullCRUD || withSharePoint ? `<th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>` : ''}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {${crudInfo ? 'filteredItems' : 'items'}.map((item) => (
-                    <tr key={typeof item === 'number' ? item : item.Id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">#{item.Id || item}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{item.Title || \`Item \${item}\`}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        {${crudInfo ? 'item.Created ? new Date(item.Created).toLocaleDateString() : "-"' : '"Hoje"'}}
-                      </td>
-                      ${isFullCRUD || withSharePoint ? `<td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          ${isFullCRUD ? `<button className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                            <Edit size={16} />
-                          </button>
-                          <button 
-                            className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
-                            onClick={() => handleDeleteClick(item)}
-                          >
-                            <Trash2 size={16} />
-                          </button>` : `<button className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                            <MoreHorizontal size={18} />
-                          </button>`}
-                        </div>
-                      </td>` : ''}
-                    </tr>
-                  ))}
-                  {${crudInfo ? 'filteredItems' : 'items'}.length === 0 && (
-                    <tr>
-                      <td colSpan={${isFullCRUD || withSharePoint ? 4 : 3}} className="px-6 py-12 text-center text-gray-500">
-                        Nenhum item encontrado.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+              <DetailsList
+                items={${crudInfo ? 'filteredItems' : 'items'}}
+                columns={columns}
+                selectionMode={SelectionMode.none}
+                compact={true}
+              />
+              ${crudInfo ? `{filteredItems.length === 0 && (
+                <div className="p-12 text-center text-gray-500">
+                  Nenhum item encontrado.
+                </div>
+              )}` : `{items.length === 0 && (
+                <div className="p-12 text-center text-gray-500">
+                  Nenhum item encontrado.
+                </div>
+              )}`}
             </div>
           )}` : `<div className="p-12 text-center">
             {/* ... Conteúdo vazio ... */}
@@ -184,7 +226,51 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
         </div>
       </div>
 
-      ${isFullCRUD ? `{/* Dialog de Confirmação de Exclusão */}
+      ${isFullCRUD ? `{/* Dialog de Criação */}
+      <Dialog
+        hidden={!isCreateDialogVisible}
+        onDismiss={() => setIsCreateDialogVisible(false)}
+        dialogContentProps={{
+          type: DialogType.normal,
+          title: 'Novo Item',
+        }}
+      >
+        <TextField
+          label="Título"
+          value={newItemTitle}
+          onChange={(e, value) => setNewItemTitle(value || '')}
+          placeholder="Digite o título do item"
+          required
+        />
+        <DialogFooter>
+          <PrimaryButton onClick={handleCreate} text="Salvar" disabled={isCreating || !newItemTitle.trim()} />
+          <DefaultButton onClick={() => setIsCreateDialogVisible(false)} text="Cancelar" />
+        </DialogFooter>
+      </Dialog>
+
+      {/* Dialog de Edição */}
+      <Dialog
+        hidden={!isEditDialogVisible}
+        onDismiss={() => setIsEditDialogVisible(false)}
+        dialogContentProps={{
+          type: DialogType.normal,
+          title: 'Editar Item',
+        }}
+      >
+        <TextField
+          label="Título"
+          value={editingItemTitle}
+          onChange={(e, value) => setEditingItemTitle(value || '')}
+          placeholder="Digite o título do item"
+          required
+        />
+        <DialogFooter>
+          <PrimaryButton onClick={handleUpdate} text="Salvar" disabled={!editingItemTitle.trim()} />
+          <DefaultButton onClick={() => setIsEditDialogVisible(false)} text="Cancelar" />
+        </DialogFooter>
+      </Dialog>
+
+      {/* Dialog de Confirmação de Exclusão */}
       <Dialog
         hidden={!isDeleteDialogVisible}
         onDismiss={() => setIsDeleteDialogVisible(false)}
