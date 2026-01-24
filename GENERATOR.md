@@ -4,11 +4,13 @@ Aumente sua produtividade gerando código padronizado instantaneamente.
 
 ## 🚀 Como Usar
 
-Recomendamos o **modo interativo**, que guia você pelas opções:
+Recomendamos o **modo interativo**, que é inteligente e se adapta ao modo do seu projeto:
 
 ```bash
 pnpm run generate
 ```
+
+> 💡 **Nota:** O menu de opções muda automaticamente dependendo se você configurou o projeto como **Aplicação (SPA)** ou **Widget (WebPart)**.
 
 ### Comandos Diretos (Para Scripts/CI)
 
@@ -22,19 +24,42 @@ pnpm run generate
 
 ---
 
+## 🧠 Modos de Operação
+
+O gerador respeita a arquitetura definida no `configure`.
+
+### 1. Modo Página (SPA)
+Se seu projeto é uma Aplicação de Tela Cheia (com roteamento):
+*   Você verá a opção **"Página (Page)"**.
+*   Ao criar uma página, ela é automaticamente conectada ao Router (`App.tsx`) e Menu (`navigation.ts`).
+*   Suporta geração automática de **CRUD Completo** (Model + Service + Hook + UI).
+
+### 2. Modo Componente (Widget)
+Se seu projeto é um Widget isolado (WebPart):
+*   A opção **"Página (Page)"** fica **oculta** (pois Widgets não têm roteamento interno).
+*   **Fluxo Recomendado para Widgets Inteligentes:**
+    1.  Gere o **Serviço** (`generate:service Noticias`) para a lógica de dados.
+    2.  Gere o **Hook** (`generate:hook useNoticias`) para gerenciar o estado.
+    3.  Gere o **Componente** (`generate:component NoticiasWidget`) para a interface.
+    4.  Conecte manualmente importando o hook no componente.
+    5.  Adicione o componente no `MainWidget.tsx`.
+
+---
+
 ## 📦 O Que é Gerado?
 
 ### 1. Página (`generate:page`)
+*(Apenas Modo SPA)*
 Cria uma nova tela e configura o roteamento automaticamente.
 *   **Arquivo:** `src/webparts/app/pages/Dashboard.tsx`
 *   **Rota:** Adiciona `<Route path="/dashboard" ... />` em `App.tsx`
 *   **Teste:** `tests/pages/Dashboard.test.tsx`
-*   **Acesso:** `https://seu-tenant.sharepoint.com/.../#/dashboard`
 
 ### 2. Componente (`generate:component`)
 Componente React funcional limpo e tipado.
 *   **Arquivo:** `src/webparts/app/components/Header.tsx`
 *   **Teste:** `tests/components/Header.test.tsx`
+*   **Uso:** Ideal para pedaços de UI reutilizáveis ou Widgets autônomos.
 
 ### 3. Serviço (`generate:service`)
 Classe estática com métodos CRUD prontos para SharePoint.
@@ -45,7 +70,7 @@ Classe estática com métodos CRUD prontos para SharePoint.
 ### 4. Hook (`generate:hook`)
 Hook React para encapsular lógica de estado ou efeitos.
 *   **Arquivo:** `src/core/hooks/usePermissoes.ts`
-*   **Estrutura:** Já vem com estados de `data`, `loading` e `error` via TanStack Query.
+*   **Estrutura:** Já vem com estados de `data`, `loading` e `error`.
 
 ### 5. Model (`generate:model`)
 Interface TypeScript com campos padrão do SharePoint.
@@ -54,30 +79,19 @@ Interface TypeScript com campos padrão do SharePoint.
 
 ---
 
-## ⚡ Conexão com Listas SharePoint
+## ⚡ Conexão com Listas SharePoint (Modo SPA)
 
-O gerador agora possui uma inteligência de orquestração. Ao criar uma **Página**, você pode conectá-la diretamente a uma lista do SharePoint.
+O gerador possui uma inteligência de orquestração para páginas.
 
 **O Fluxo Automatizado:**
 1. Rode `pnpm run generate` e escolha **Página**.
 2. Responda **SIM** para "Deseja conectar essa página a uma lista SharePoint?".
-3. Informe o nome da lista (ex: `site_produtos`).
-4. Escolha o **Nível de Integração**:
+3. Informe o nome da lista e escolha o **Nível de Integração**:
 
-### Opção A: Apenas Leitura (Tabela)
-Ideal para dashboards e relatórios.
-*   ✅ Gera Model + Service + Hook (Query).
-*   ✅ Página exibe tabela com dados e filtro de busca.
-*   ❌ Sem botões de editar/excluir ou formulários.
+*   **Apenas Leitura:** Tabela com busca e filtros (sem botões de edição).
+*   **CRUD Completo:** Tabela + Formulários + Botões de Ação + Dialog de Confirmação.
 
-### Opção B: CRUD Completo
-Ideal para cadastros e gestão de dados.
-*   ✅ Gera tudo da opção A.
-*   ✅ Adiciona métodos de Create/Update/Delete no Hook.
-*   ✅ Página inclui botões de ação, dialog de exclusão e estrutura para formulários.
-
-**Resultado:**
-Em ambos os casos, você ganha 4 arquivos conectados e funcionando (`Model` -> `Service` -> `Hook` -> `Page`) em segundos.
+**Resultado:** 4 arquivos conectados (`Model` -> `Service` -> `Hook` -> `Page`) prontos para uso.
 
 ---
 
@@ -91,7 +105,7 @@ O gerador utiliza comentários especiais (marcadores) para injetar código de fo
 *   `/* GENERATOR: IMPORT_ICON */`
 *   `/* GENERATOR: NAV_ITEM */`
 
-Se removidos, o gerador tentará usar um método de fallback, mas a precisão não é garantida.
+Se removidos, o gerador não conseguirá injetar rotas automaticamente.
 
 ---
 
@@ -106,16 +120,3 @@ O gerador ajusta automaticamente o nome dos arquivos para seguir as boas prátic
 | `projetos` | `ProjetosService.ts` | Serviço |
 | `get-dados` | `useGetDados.ts` | Hook |
 | `projeto` | `IProjeto.ts` | Model |
-
----
-
-## ❓ Perguntas Frequentes
-
-**Posso editar os arquivos gerados?**
-Sim! Eles são apenas um ponto de partida para acelerar seu trabalho.
-
-**E se o arquivo já existir?**
-O gerador avisa e **não** sobrescreve nada. Você terá que escolher outro nome.
-
-**As rotas funcionam com parâmetros?**
-O gerador cria rotas simples. Para rotas com ID (ex: `/detalhe/:id`), edite o `App.tsx` manualmente após gerar.
