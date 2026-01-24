@@ -144,7 +144,7 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {${crudInfo ? 'filteredItems' : 'items'}.map((item) => (
-                    <tr key={item.Id || item} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
+                    <tr key={typeof item === 'number' ? item : item.Id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
                       <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">#{item.Id || item}</td>
                       <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{item.Title || \`Item \${item}\`}</td>
                       <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
