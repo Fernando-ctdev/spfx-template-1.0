@@ -385,18 +385,40 @@ function addNavigationItem(name, routePath) {
 async function interactiveMode() {
   log.title('🎨 GERADOR INTERATIVO SPFx');
   
+  // 1. Ler modo do projeto do .env
+  let projectMode = 'page'; // default
+  try {
+    const envPath = path.join(basePath, '.env');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf8');
+      const match = envContent.match(/SPFX_MODE=(.*)/);
+      if (match && match[1]) {
+        projectMode = match[1].trim();
+      }
+    }
+  } catch (e) {
+    // Ignora erro, usa default
+  }
+
+  // 2. Filtrar opções baseado no modo
+  const allChoices = [
+    { title: 'Página (Page)', value: 'page', description: 'Nova tela com rota e componente' },
+    { title: 'Componente (Component)', value: 'component', description: 'Componente React reutilizável' },
+    { title: 'Serviço (Service)', value: 'service', description: 'Classe de serviço PnP/SharePoint' },
+    { title: 'Hook (Hook)', value: 'hook', description: 'React Hook customizado (use...)' },
+    { title: 'Modelo (Model)', value: 'model', description: 'Interface TypeScript' },
+    { title: 'Sair', value: 'exit' }
+  ];
+
+  const availableChoices = projectMode === 'component' 
+    ? allChoices.filter(c => c.value !== 'page') // Remove 'Page' se for modo Widget
+    : allChoices;
+
   const { artifactType } = await prompts({
     type: 'select',
     name: 'artifactType',
-    message: 'O que você deseja criar?',
-    choices: [
-      { title: 'Página (Page)', value: 'page', description: 'Nova tela com rota e componente' },
-      { title: 'Componente (Component)', value: 'component', description: 'Componente React reutilizável' },
-      { title: 'Serviço (Service)', value: 'service', description: 'Classe de serviço PnP/SharePoint' },
-      { title: 'Hook (Hook)', value: 'hook', description: 'React Hook customizado (use...)' },
-      { title: 'Modelo (Model)', value: 'model', description: 'Interface TypeScript' },
-      { title: 'Sair', value: 'exit' }
-    ]
+    message: `O que você deseja criar? [Modo: ${projectMode.toUpperCase()}]`,
+    choices: availableChoices
   });
 
   if (!artifactType || artifactType === 'exit') {
@@ -435,7 +457,7 @@ async function interactiveMode() {
       {
         type: 'confirm',
         name: 'addToNav',
-        message: 'Adicionar ao menu lateral/topo?',
+        message: 'Adicionar ao menu de navegação?',
         initial: true
       },
       {
