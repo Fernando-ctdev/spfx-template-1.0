@@ -3,8 +3,8 @@
 Configure seu ambiente SPFx em menos de 5 minutos com nosso Wizard interativo.
 
 ## 📋 Pré-requisitos
-*   **Node.js**: Versão 18.x (LTS) recomendada.
-*   **Gerenciador de Pacotes**: PNPM (Instale com `npm install -g pnpm`).
+*   **Node.js**: Versão 18.x (LTS) obrigatória (>= 18.17.1).
+*   **Gerenciador de Pacotes**: PNPM (Obrigatório). O projeto não suporta npm/yarn.
 *   **Acesso**: Um tenant do SharePoint Online.
 
 ---
@@ -73,6 +73,24 @@ O navegador abrirá automaticamente no Workbench do SharePoint configurado.
 
 ---
 
+## 📦 Gerando Versão de Produção
+
+Para gerar o pacote `.sppkg` final para deploy:
+
+```bash
+pnpm run build:prod
+```
+
+**Este comando executa automaticamente:**
+1.  Limpeza da pasta `dist` e `temp`.
+2.  **Bump Version**: Incrementa a versão (revision) no `package-solution.json` automaticamente (ex: `1.0.0.0` -> `1.0.0.1`).
+3.  Build otimizado (minificado).
+4.  Empacotamento da solução.
+
+O arquivo final estará em: `sharepoint/solution/seu-projeto.sppkg`
+
+---
+
 ## 🆘 Resolução de Problemas Comuns
 
 **Erro: "Versão do Node incompatível"**
@@ -82,4 +100,4 @@ Rode `nvm use 18` e tente novamente.
 Verifique se o `SPFX_SITE_URL` informado existe no seu tenant.
 
 **Erro: "Quero mudar o Layout ou Modo depois de configurar"**
-Basta rodar `pnpm run configure` novamente e escolher as novas opções. O script irá atualizar o projeto automaticamente.
+Basta rodar `pnpm run configure` novamente e escolher as novas opções. O script irá atualizar o projeto automaticamente preservando seus GUIDs.

@@ -7,11 +7,11 @@
  * para projetos SharePoint SPFx.
  * 
  * Uso:
- *   npm run generate:page NomeDaPagina
- *   npm run generate:component NomeDoComponente
- *   npm run generate:service NomeDoServico
- *   npm run generate:hook useNomeDoHook
- *   npm run generate (modo interativo com menu)
+ *   pnpm run generate:page NomeDaPagina
+ *   pnpm run generate:component NomeDoComponente
+ *   pnpm run generate:service NomeDoServico
+ *   pnpm run generate:hook useNomeDoHook
+ *   pnpm run generate (modo interativo com menu)
  * 
  * ===============================================
  */
@@ -19,447 +19,10 @@
 const fs = require('fs');
 const path = require('path');
 const prompts = require('prompts');
-
-// Cores para o console
-const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  red: '\x1b[31m',
-  cyan: '\x1b[36m',
-  magenta: '\x1b[35m',
-  dim: '\x1b[2m'
-};
-
-const log = {
-  info: (msg) => console.log(`${colors.blue}ℹ${colors.reset} ${msg}`),
-  success: (msg) => console.log(`${colors.green}✔${colors.reset} ${msg}`),
-  warn: (msg) => console.log(`${colors.yellow}⚠${colors.reset} ${msg}`),
-  error: (msg) => console.log(`${colors.red}✖${colors.reset} ${msg}`),
-  title: (msg) => console.log(`\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n${colors.cyan}   ${msg}   ${colors.reset}\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n`)
-};
+const templates = require('./templates');
+const { log, colors } = require('./utils/logger');
 
 const basePath = path.resolve(__dirname, '..');
-
-// ============================================
-// TEMPLATES
-// ============================================
-
-const templates = {
-  page: (name, withSharePoint) => `import * as React from 'react';
-import { FileText, Plus, MoreHorizontal, Search, Filter } from 'lucide-react';
-${withSharePoint ? `import { useListItems } from '../../../core/hooks/useSharePoint';
-import { Spinner, SpinnerSize, MessageBar, MessageBarType } from '@fluentui/react';` : ''}
-
-/**
- * Página ${name}
- * 
- * @description Página gerada automaticamente via CLI
- */
-const ${name}: React.FC = () => {
-${withSharePoint ? `  // Exemplo de hook (descomente para usar)
-  // const { items, loading, error } = useListItems('SitePages', ['Id', 'Title']);
-  
-  // Mock para visualização inicial (remova ao integrar)
-  const loading = false;
-  const error: string | null = null;
-  const items = [1, 2, 3, 4, 5];` : ''}
-
-  return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header da Página */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-600 flex items-center gap-2">
-            <FileText className="text-blue-600 dark:text-blue-400" size={28} />
-            ${name}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Pagina ${name} criada.
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium">
-            <Filter size={16} />
-            Filtrar
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm text-sm font-medium">
-            <Plus size={16} />
-            Novo Item
-          </button>
-        </div>
-      </div>
-
-      {/* Área de Conteúdo */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col">
-        
-        {/* Toolbar de Busca */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar em ${name}..." 
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Conteúdo Principal */}
-        <div className="p-0">
-          ${withSharePoint ? `{loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Spinner size={SpinnerSize.large} label="Carregando dados..." />
-            </div>
-          ) : error ? (
-            <div className="p-6">
-              <MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-800/50">
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Título</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {items.map((item) => (
-                    <tr key={item} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">#{item}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">Exemplo de Item {item}</td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                          Ativo
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                          <MoreHorizontal size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}` : `<div className="p-12 text-center">
-            <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400">
-              <FileText size={32} />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Comece por aqui</h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mb-6">
-              Esta página foi gerada com sucesso. Agora é com você: adicione seus componentes e lógica.
-            </p>
-            <button className="text-blue-600 hover:text-blue-700 font-medium text-sm hover:underline">
-              Ver documentação &rarr;
-            </button>
-          </div>`}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ${name};
-`,
-
-  component: (name, withProps) => `import * as React from 'react';
-
-/**
- * Props do componente ${name}
- */
-export interface I${name}Props {${withProps ? `
-  title?: string;
-  description?: string;` : `
-  // Adicione suas props aqui`}
-}
-
-/**
- * Componente ${name}
- * 
- * @description Descrição do componente ${name}
- */
-const ${name}: React.FC<I${name}Props> = (${withProps ? '{ title, description }' : 'props'}) => {
-  return (
-    <div className="flex flex-col gap-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-      {/* Conteúdo do componente ${name} */}${withProps ? `
-      {title && <h3 className="text-lg font-semibold text-gray-800">{title}</h3>}
-      {description && <p className="text-sm text-gray-600">{description}</p>}` : ''}
-    </div>
-  );
-};
-
-export default ${name};
-`,
-
-  service: (name) => `import { getSP } from '../../config/pnpConfig';
-import '@pnp/sp/webs';
-import '@pnp/sp/lists';
-import '@pnp/sp/items';
-import '@pnp/sp/batching';
-
-/**
- * ${name}
- * 
- * @description Serviço para operações relacionadas a ${name.replace('Service', '')}
- */
-export class ${name} {
-  private static sp = getSP();
-
-  /**
-   * Obtém todos os itens
-   * @param listName Nome da lista do SharePoint
-   * @param select Campos a serem retornados
-   * @returns Promise com array de itens
-   */
-  public static async getAll<T = any>(
-    listName: string,
-    select: string[] = ['Id', 'Title']
-  ): Promise<T[]> {
-    try {
-      const items = await this.sp.web.lists
-        .getByTitle(listName)
-        .items
-        .select(...select)
-        .top(5000)();
-      
-      return items as T[];
-    } catch (error) {
-      console.error(\`Erro ao buscar itens de \${listName}:\`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Obtém um item por ID
-   * @param listName Nome da lista do SharePoint
-   * @param id ID do item
-   * @param select Campos a serem retornados
-   * @returns Promise com o item
-   */
-  public static async getById<T = any>(
-    listName: string,
-    id: number,
-    select: string[] = ['Id', 'Title']
-  ): Promise<T> {
-    try {
-      const item = await this.sp.web.lists
-        .getByTitle(listName)
-        .items
-        .getById(id)
-        .select(...select)();
-      
-      return item as T;
-    } catch (error) {
-      console.error(\`Erro ao buscar item \${id} de \${listName}:\`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Cria um novo item
-   * @param listName Nome da lista do SharePoint
-   * @param data Dados do item a ser criado
-   * @returns Promise com o item criado
-   */
-  public static async create<T = any>(
-    listName: string,
-    data: Partial<T>
-  ): Promise<T> {
-    try {
-      const result = await this.sp.web.lists
-        .getByTitle(listName)
-        .items
-        .add(data);
-      
-      return result.data as T;
-    } catch (error) {
-      console.error(\`Erro ao criar item em \${listName}:\`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Atualiza um item existente
-   * @param listName Nome da lista do SharePoint
-   * @param id ID do item
-   * @param data Dados a serem atualizados
-   * @returns Promise com o item atualizado
-   */
-  public static async update<T = any>(
-    listName: string,
-    id: number,
-    data: Partial<T>
-  ): Promise<T> {
-    try {
-      await this.sp.web.lists
-        .getByTitle(listName)
-        .items
-        .getById(id)
-        .update(data);
-      
-      return this.getById<T>(listName, id);
-    } catch (error) {
-      console.error(\`Erro ao atualizar item \${id} em \${listName}:\`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Deleta um item
-   * @param listName Nome da lista do SharePoint
-   * @param id ID do item
-   * @returns Promise void
-   */
-  public static async delete(
-    listName: string,
-    id: number
-  ): Promise<void> {
-    try {
-      await this.sp.web.lists
-        .getByTitle(listName)
-        .items
-        .getById(id)
-        .delete();
-    } catch (error) {
-      console.error(\`Erro ao deletar item \${id} de \${listName}:\`, error);
-      throw error;
-    }
-  }
-}
-`,
-
-  hook: (name) => `import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSP } from '../../config/pnpConfig';
-
-/**
- * Hook customizado ${name}
- * 
- * @description Hook para gerenciar dados do SharePoint com cache
- */
-export const ${name} = <T = any>(listName: string, select: string[] = ['Id', 'Title']) => {
-  const sp = getSP();
-  const queryClient = useQueryClient();
-
-  // Query para buscar dados
-  const {
-    data: items,
-    isLoading: loading,
-    error,
-    refetch
-  } = useQuery({
-    queryKey: ['${name.replace('use', '').toLowerCase()}', listName],
-    queryFn: async () => {
-      const result = await sp.web.lists
-        .getByTitle(listName)
-        .items
-        .select(...select)
-        .top(5000)();
-      return result as T[];
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutos
-  });
-
-  // Mutation para criar item
-  const createMutation = useMutation({
-    mutationFn: async (data: Partial<T>) => {
-      const result = await sp.web.lists
-        .getByTitle(listName)
-        .items
-        .add(data);
-      return result.data as T;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['${name.replace('use', '').toLowerCase()}', listName] });
-    },
-  });
-
-  // Mutation para atualizar item
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<T> }) => {
-      await sp.web.lists
-        .getByTitle(listName)
-        .items
-        .getById(id)
-        .update(data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['${name.replace('use', '').toLowerCase()}', listName] });
-    },
-  });
-
-  // Mutation para deletar item
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await sp.web.lists
-        .getByTitle(listName)
-        .items
-        .getById(id)
-        .delete();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['${name.replace('use', '').toLowerCase()}', listName] });
-    },
-  });
-
-  return {
-    items: items || [],
-    loading,
-    error: error ? String(error) : null,
-    refetch,
-    create: createMutation.mutateAsync,
-    update: updateMutation.mutateAsync,
-    delete: deleteMutation.mutateAsync,
-    isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
-  };
-};
-`,
-
-  test: (name, type) => `import * as React from 'react';
-import { render, screen } from '@testing-library/react';
-import ${name} from '../src/${type === 'page' ? 'webparts/app/pages' : type === 'component' ? 'webparts/app/components' : 'core/hooks'}/${name}';
-
-describe('${name}', () => {
-  it('deve renderizar sem erros', () => {
-    ${type === 'page' || type === 'component' ? `render(<${name} />);
-    expect(screen.getByText(/${name}/i)).toBeInTheDocument();` : `// Adicione seus testes aqui`}
-  });
-
-  // Adicione mais testes aqui
-});
-`,
-
-  model: (name) => `/**
- * Interface ${name}
- * 
- * @description Model para ${name}
- */
-export interface ${name} {
-  Id: number;
-  Title: string;
-  Created?: Date;
-  Modified?: Date;
-  Author?: {
-    Title: string;
-    EMail: string;
-  };
-  Editor?: {
-    Title: string;
-    EMail: string;
-  };
-  
-  // Adicione seus campos customizados aqui
-}
-`
-};
 
 // ============================================
 // FUNÇÕES AUXILIARES
@@ -502,6 +65,31 @@ function fileExists(filePath) {
 async function generatePage(name, options = {}) {
   const pageName = toPascalCase(name);
   const routePath = options.route || `/${toKebabCase(name)}`;
+  
+  // Orquestração CRUD
+  if (options.createCRUD) {
+    log.info(`🚀 Iniciando geração da stack CRUD para ${pageName}...`);
+    
+    // 1. Model
+    await generateModel(name);
+    
+    // 2. Service
+    await generateService(name);
+    
+    // 3. Hook
+    await generateHook(name);
+    
+    // Configurar metadados para o template da página
+    options.crudInfo = {
+      listName: options.listName || name,
+      modelName: `I${pageName}`,
+      hookName: `use${pageName}`
+    };
+    
+    // Desativar exemplo básico se CRUD foi selecionado
+    options.withSharePoint = false;
+  }
+
   const withSharePoint = options.withSharePoint !== false;
   
   // Criar diretório se não existir
@@ -517,7 +105,7 @@ async function generatePage(name, options = {}) {
   }
   
   // Criar arquivo
-  fs.writeFileSync(filePath, templates.page(pageName, withSharePoint));
+  fs.writeFileSync(filePath, templates.page(pageName, options));
   log.success(`Arquivo criado: src/webparts/app/pages/${pageName}.tsx`);
   
   // Adicionar rota ao App.tsx
@@ -676,33 +264,45 @@ function addRouteToApp(pageName, routePath) {
   }
   
   let content = fs.readFileSync(appPath, 'utf8');
+  const importMarker = '/* GENERATOR: IMPORT_PAGE */';
+  const routeMarker = '{/* GENERATOR: ROUTE_PAGE */}';
   
-  // Adicionar import
+  // 1. Adicionar Import
   const importStatement = `import ${pageName} from './pages/${pageName}';`;
-  const importRegex = /import.*from ['"]\.\/pages\/.*['"];?/g;
-  const imports = content.match(importRegex);
   
-  if (imports && imports.length > 0) {
-    const lastImport = imports[imports.length - 1];
-    const lastImportIndex = content.lastIndexOf(lastImport);
-    const insertPosition = lastImportIndex + lastImport.length;
-    content = content.slice(0, insertPosition) + '\n' + importStatement + content.slice(insertPosition);
+  if (content.includes(importMarker)) {
+    content = content.replace(importMarker, `${importStatement}\n${importMarker}`);
   } else {
-    // Adicionar após os outros imports
-    const lastImportIndex = content.lastIndexOf('import');
-    const nextLineIndex = content.indexOf('\n', lastImportIndex);
-    content = content.slice(0, nextLineIndex + 1) + importStatement + '\n' + content.slice(nextLineIndex + 1);
+    // Fallback: Tenta adicionar após o último import (modo legado)
+    const importRegex = /import.*from ['"]\.\/pages\/.*['"];?/g;
+    const imports = content.match(importRegex);
+    if (imports && imports.length > 0) {
+      const lastImport = imports[imports.length - 1];
+      const insertPosition = content.lastIndexOf(lastImport) + lastImport.length;
+      content = content.slice(0, insertPosition) + '\n' + importStatement + content.slice(insertPosition);
+    } else {
+      log.warn(`Marcador '${importMarker}' não encontrado. Import adicionado de forma genérica.`);
+      const lastImportIndex = content.lastIndexOf('import');
+      const nextLineIndex = content.indexOf('\n', lastImportIndex);
+      content = content.slice(0, nextLineIndex + 1) + importStatement + '\n' + content.slice(nextLineIndex + 1);
+    }
   }
   
-  // Adicionar rota antes do NotFound (Route path="*")
-  const routeStatement = `          <Route path="${routePath}" element={<${pageName} />} />`;
-  const notFoundIndex = content.indexOf('<Route path="*"');
+  // 2. Adicionar Rota
+  const routeStatement = `<Route path="${routePath}" element={<${pageName} />} />`;
   
-  if (notFoundIndex !== -1) {
-    content = content.slice(0, notFoundIndex) + routeStatement + '\n          ' + content.slice(notFoundIndex);
+  if (content.includes(routeMarker)) {
+    content = content.replace(routeMarker, `${routeStatement}\n                ${routeMarker}`);
   } else {
-    log.warn('Não foi possível adicionar a rota automaticamente. Adicione manualmente ao App.tsx');
-    return;
+    // Fallback: Tenta adicionar antes do NotFound
+    const notFoundIndex = content.indexOf('<Route path="*"');
+    if (notFoundIndex !== -1) {
+      log.warn(`Marcador '${routeMarker}' não encontrado. Rota adicionada antes do NotFound.`);
+      content = content.slice(0, notFoundIndex) + routeStatement + '\n          ' + content.slice(notFoundIndex);
+    } else {
+      log.error('Não foi possível adicionar a rota automaticamente. Adicione manualmente ao App.tsx');
+      return;
+    }
   }
   
   fs.writeFileSync(appPath, content);
@@ -722,6 +322,8 @@ function addNavigationItem(name, routePath) {
   }
   
   let content = fs.readFileSync(navPath, 'utf8');
+  const iconMarker = '/* GENERATOR: IMPORT_ICON */';
+  const itemMarker = '/* GENERATOR: NAV_ITEM */';
   
   // Verificar se já existe
   if (content.includes(`path: '${routePath}'`)) {
@@ -730,11 +332,24 @@ function addNavigationItem(name, routePath) {
   }
 
   // 1. Garantir import do ícone
-  // Verifica se FileText já está importado, se não, adiciona
+  // Tenta usar o marcador primeiro
   if (!content.includes('FileText')) {
-    content = content.replace(/import { (.*?) } from 'lucide-react';/, (match, p1) => {
-      return `import { ${p1}, FileText } from 'lucide-react';`;
-    });
+    if (content.includes(iconMarker)) {
+       // Se o ícone FileText não estiver importado, importamos ele de uma nova linha ou editamos o existente?
+       // Por simplicidade e segurança, vamos editar o import existente se possível
+       if (content.includes("from 'lucide-react'")) {
+         content = content.replace(/import { (.*?) } from 'lucide-react';/, (match, p1) => {
+           return `import { ${p1}, FileText } from 'lucide-react';`;
+         });
+       } else {
+         content = content.replace(iconMarker, `import { FileText } from 'lucide-react';\n${iconMarker}`);
+       }
+    } else {
+      // Fallback regex antigo
+      content = content.replace(/import { (.*?) } from 'lucide-react';/, (match, p1) => {
+        return `import { ${p1}, FileText } from 'lucide-react';`;
+      });
+    }
   }
 
   // 2. Adicionar o item ao array
@@ -745,15 +360,21 @@ function addNavigationItem(name, routePath) {
     icon: FileText
   },`;
 
-  // Encontra o fechamento do array ];
-  const lastBracketIndex = content.lastIndexOf('];');
-  
-  if (lastBracketIndex !== -1) {
-    content = content.slice(0, lastBracketIndex) + newItem + '\n' + content.slice(lastBracketIndex);
+  if (content.includes(itemMarker)) {
+    content = content.replace(itemMarker, `${newItem}\n  ${itemMarker}`);
     fs.writeFileSync(navPath, content);
     log.success(`Item adicionado ao menu: ${name}`);
   } else {
-    log.error('Não foi possível encontrar o array de navegação em navigation.ts');
+    // Fallback antigo
+    const lastBracketIndex = content.lastIndexOf('];');
+    if (lastBracketIndex !== -1) {
+      log.warn(`Marcador '${itemMarker}' não encontrado. Item adicionado ao final do array.`);
+      content = content.slice(0, lastBracketIndex) + newItem + '\n' + content.slice(lastBracketIndex);
+      fs.writeFileSync(navPath, content);
+      log.success(`Item adicionado ao menu: ${name}`);
+    } else {
+      log.error('Não foi possível encontrar o array de navegação em navigation.ts');
+    }
   }
 }
 
@@ -819,11 +440,42 @@ async function interactiveMode() {
       },
       {
         type: 'confirm',
+        name: 'connectToList',
+        message: 'Deseja conectar essa página a uma lista SharePoint?',
+        initial: false
+      },
+      {
+        type: 'text',
+        name: 'listName',
+        message: 'Qual o nome da lista no SharePoint?',
+        initial: name,
+        active: (prev, values) => values.connectToList // Só pergunta se conectou a lista
+      },
+      {
+        type: 'select',
+        name: 'crudType',
+        message: 'Qual o nível de integração desejado?',
+        choices: [
+          { title: 'Apenas Leitura (Tabela)', value: 'read' },
+          { title: 'CRUD Completo (Tabela + Formulários)', value: 'crud' }
+        ],
+        active: (prev, values) => values.connectToList
+      },
+      {
+        type: 'confirm',
         name: 'withSharePoint',
         message: 'Incluir código de exemplo do SharePoint?',
-        initial: true
+        initial: true,
+        active: (prev, values) => !values.connectToList // Se não conectou a lista, pergunta do exemplo básico
       }
     ]);
+    
+    // Mapear respostas novas para o formato esperado pelo gerador
+    if (pageOptions.connectToList) {
+      pageOptions.createCRUD = true; // Flag interna para disparar geração de artefatos
+      pageOptions.crudMode = pageOptions.crudType; // 'read' ou 'crud'
+    }
+    
     options = pageOptions;
   } 
   
@@ -901,7 +553,7 @@ async function main() {
   // Suporte a modo legacy (argumentos via CLI)
   if (!name) {
     log.error('Nome é obrigatório no modo CLI!');
-    log.info('Uso: npm run generate:page NomeDaPagina');
+    log.info('Uso: pnpm run generate:page NomeDaPagina');
     process.exit(1);
   }
   
@@ -935,7 +587,7 @@ async function main() {
       
     default:
       log.error(`Comando desconhecido: ${command}`);
-      log.info('Use "npm run generate" para o modo interativo.');
+      log.info('Use "pnpm run generate" para o modo interativo.');
       process.exit(1);
   }
 }

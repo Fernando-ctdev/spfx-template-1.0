@@ -19,28 +19,18 @@ const fs = require('fs');
 const path = require('path');
 const prompts = require('prompts');
 const crypto = require('crypto');
+const { log, colors } = require('./utils/logger');
+
+// Carregar templates
+const templates = {
+  navbar: require('./templates/layouts/navbar'),
+  sidebar: require('./templates/layouts/sidebar'),
+  blank: require('./templates/layouts/blank'),
+  env: require('./templates/env')
+};
 
 // Caminho base do projeto
 const basePath = path.resolve(__dirname, '..');
-
-// Cores para o console
-const colors = {
-  reset: '\x1b[0m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  red: '\x1b[31m',
-  cyan: '\x1b[36m',
-  dim: '\x1b[2m'
-};
-
-const log = {
-  info: (msg) => console.log(`${colors.blue}ℹ${colors.reset} ${msg}`),
-  success: (msg) => console.log(`${colors.green}✔${colors.reset} ${msg}`),
-  warn: (msg) => console.log(`${colors.yellow}⚠${colors.reset} ${msg}`),
-  error: (msg) => console.log(`${colors.red}✖${colors.reset} ${msg}`),
-  title: (msg) => console.log(`\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n${colors.cyan}   ${msg}   ${colors.reset}\n${colors.cyan}${colors.dim}===============================================${colors.reset}\n`)
-};
 
 // Gera um GUID válido
 function generateGuid() {
@@ -51,7 +41,11 @@ function generateGuid() {
 function getGuids() {
   const guidsFile = path.join(basePath, '.guids.json');
   if (fs.existsSync(guidsFile)) {
-    return JSON.parse(fs.readFileSync(guidsFile, 'utf8'));
+    try {
+      return JSON.parse(fs.readFileSync(guidsFile, 'utf8'));
+    } catch (e) {
+      log.warn('Arquivo .guids.json corrompido. Gerando novos GUIDs.');
+    }
   }
   
   const guids = {
@@ -64,31 +58,44 @@ function getGuids() {
   return guids;
 }
 
-
-function writeJson(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
+function readJson(filePath) {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Arquivo não encontrado: ${filePath}`);
+  }
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    throw new Error(`Erro ao ler JSON ${filePath}: ${e.message}`);
+  }
 }
 
+function writeJson(filePath, data) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
+  } catch (e) {
+    throw new Error(`Erro ao escrever JSON ${filePath}: ${e.message}`);
+  }
+}
 
 async function askQuestions() {
-
   let currentEnv = {};
   
   const envPath = path.join(basePath, '.env');
   const examplePath = path.join(basePath, '.env.example');
   
-
   const fileToRead = fs.existsSync(envPath) ? envPath : (fs.existsSync(examplePath) ? examplePath : null);
 
   if (fileToRead) {
-    const envContent = fs.readFileSync(fileToRead, 'utf8');
-    envContent.split('\n').forEach(line => {
-
-      if (line.trim().startsWith('#')) return;
-      
-      const [key, value] = line.split('=');
-      if (key && value) currentEnv[key.trim()] = value.trim();
-    });
+    try {
+      const envContent = fs.readFileSync(fileToRead, 'utf8');
+      envContent.split('\n').forEach(line => {
+        if (line.trim().startsWith('#')) return;
+        const [key, value] = line.split('=');
+        if (key && value) currentEnv[key.trim()] = value.trim();
+      });
+    } catch (e) {
+      log.warn('Não foi possível ler as configurações atuais do .env');
+    }
   }
 
   const questions = [
@@ -152,162 +159,111 @@ async function askQuestions() {
   return response;
 }
 
-
 function generateEnvFile(answers) {
-  const envContent = `
-# Configurações do Ambiente SPFx
-# Gerado automaticamente em ${new Date().toISOString()}
-
-SPFX_TENANT=${answers.tenant}
-SPFX_SITE_URL=${answers.siteUrl}
-SPFX_APP_NAME=${answers.appName}
-SPFX_APP_TITLE=${answers.appTitle}
-SPFX_MODE=${answers.mode}
-
-# Configurações de Build
-NODE_ENV=development
-`.trim();
-
+  const envContent = templates.env(answers);
   fs.writeFileSync(path.join(basePath, '.env'), envContent);
   log.success('Arquivo .env gerado com sucesso!');
 }
 
-
 function updateConfigs(answers, guids) {
-
+  // 1. Package Solution
   const pkgSolPath = path.join(basePath, 'config', 'package-solution.json');
-  const pkgSol = JSON.parse(fs.readFileSync(pkgSolPath, 'utf8'));
+  const pkgSol = readJson(pkgSolPath);
   pkgSol.solution.name = answers.appName;
   pkgSol.solution.id = guids.appId;
-  pkgSol.solution.features[0].id = guids.featureId;
+  if (pkgSol.solution.features && pkgSol.solution.features[0]) {
+    pkgSol.solution.features[0].id = guids.featureId;
+  }
   pkgSol.paths.zippedPackage = `solution/${answers.appName}.sppkg`;
   writeJson(pkgSolPath, pkgSol);
 
-
+  // 2. Fast Serve
   const fastServePath = path.join(basePath, 'fast-serve', 'config.json');
-  const fastServe = JSON.parse(fs.readFileSync(fastServePath, 'utf8'));
-  const fullUrl = `https://${answers.tenant}.sharepoint.com${answers.siteUrl}`;
-  fastServe.serveConfigurations.serve.openUrl = `${fullUrl}?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`;
-  writeJson(fastServePath, fastServe);
+  if (fs.existsSync(fastServePath)) {
+    const fastServe = readJson(fastServePath);
+    const fullUrl = `https://${answers.tenant}.sharepoint.com${answers.siteUrl}`;
+    fastServe.serveConfigurations.serve.openUrl = `${fullUrl}?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`;
+    writeJson(fastServePath, fastServe);
+  } else {
+    log.warn('Arquivo fast-serve/config.json não encontrado. Pulando configuração do fast-serve.');
+  }
 
-
+  // 3. Serve JSON (Gulp padrão)
   const servePath = path.join(basePath, 'config', 'serve.json');
-  const serve = JSON.parse(fs.readFileSync(servePath, 'utf8'));
-  serve.initialPage = `https://${answers.tenant}.sharepoint.com/_layouts/workbench.aspx`;
-  writeJson(servePath, serve);
+  if (fs.existsSync(servePath)) {
+    const serve = readJson(servePath);
+    serve.initialPage = `https://${answers.tenant}.sharepoint.com/_layouts/workbench.aspx`;
+    writeJson(servePath, serve);
+  }
 
-
+  // 4. Manifest
   const manifestPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.manifest.json');
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const manifest = readJson(manifestPath);
   manifest.id = guids.webPartId;
-  manifest.preconfiguredEntries[0].title.default = answers.appTitle;
-  manifest.preconfiguredEntries[0].description.default = answers.appTitle;
+  if (manifest.preconfiguredEntries && manifest.preconfiguredEntries[0]) {
+    manifest.preconfiguredEntries[0].title.default = answers.appTitle;
+    manifest.preconfiguredEntries[0].description.default = answers.appTitle;
+  }
   writeJson(manifestPath, manifest);
 }
 
-
 function configureAppMode(answers) {
   const appWebPartPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.ts');
-  let content = fs.readFileSync(appWebPartPath, 'utf8');
   
-
-  const fullPageImport = "import './shared/css/page-layout.css';";
-  const hasFullPageImport = content.includes(fullPageImport);
-  
-  if (answers.mode === 'page' && !hasFullPageImport) {
-    content = content.replace(
-      "import './shared/css/global.module.scss';",
-      "import './shared/css/global.module.scss';\nimport './shared/css/page-layout.css';"
-    );
-  } else if (answers.mode === 'component' && hasFullPageImport) {
-    content = content.replace(`\n${fullPageImport}`, '');
-    content = content.replace(fullPageImport, '');
+  if (!fs.existsSync(appWebPartPath)) {
+    log.error('AppWebPart.ts não encontrado!');
+    return;
   }
 
+  let content = fs.readFileSync(appWebPartPath, 'utf8');
+  const importMarker = '/* CONFIGURE: IMPORT_CSS */';
+  const injectMarker = '/* CONFIGURE: INJECT_STYLES */';
 
-  const injectCall = "this._injectGlobalStyles();";
-  const commentedInjectCall = "// this._injectGlobalStyles();";
+  // Configuração de CSS (Page Layout)
+  const pageCssImport = "import './shared/css/page-layout.css';";
+  
+  // Limpar import antigo se existir (para evitar duplicação ou conflito)
+  // Removemos imports manuais antigos se estiverem fora do marcador
+  content = content.replace(`\n${pageCssImport}`, ''); 
+  content = content.replace(pageCssImport, '');
 
-  if (answers.mode === 'page') {
-
-    if (content.includes(commentedInjectCall)) {
-      content = content.replace(commentedInjectCall, injectCall);
+  if (content.includes(importMarker)) {
+    if (answers.mode === 'page') {
+      // Adicionar import se for modo Page
+      content = content.replace(importMarker, `${pageCssImport}\n${importMarker}`);
+    } else {
+      // Se for component, apenas deixa o marcador limpo (sem o import)
+      // O replace acima já removeu o import se ele existia
     }
   } else {
+    log.warn(`Marcador '${importMarker}' não encontrado em AppWebPart.ts. O CSS de layout pode não ser injetado corretamente.`);
+  }
 
-    if (content.includes(injectCall) && !content.includes(commentedInjectCall)) {
-      content = content.replace(injectCall, commentedInjectCall);
+  // Configuração de Injeção de Estilos (Ocultar menus do SharePoint)
+  const injectCall = "this._injectGlobalStyles();";
+  
+  // Remove chamadas antigas para garantir estado limpo
+  content = content.replace(`\n    ${injectCall}`, '');
+  content = content.replace(`    ${injectCall}\n`, '');
+  content = content.replace(injectCall, '');
+
+  if (content.includes(injectMarker)) {
+    if (answers.mode === 'page') {
+      content = content.replace(injectMarker, `${injectCall}\n    ${injectMarker}`);
     }
+  } else {
+    log.warn(`Marcador '${injectMarker}' não encontrado em AppWebPart.ts. A lógica de ocultação de menus pode falhar.`);
   }
 
   fs.writeFileSync(appWebPartPath, content);
-  log.success(`Modo ${answers.mode.toUpperCase()} configurado (CSS e Scripts ajustados).`);
+  log.success(`Modo ${answers.mode.toUpperCase()} configurado.`);
 }
-
 
 function configureLayout(answers) {
   const layoutPath = path.join(basePath, 'src', 'webparts', 'app', 'components', 'Layout.tsx');
   
-  let layoutContent = '';
-
-  if (answers.layout === 'navbar') {
-    layoutContent = `
-import * as React from 'react';
-import { Outlet } from 'react-router-dom';
-import { Navbar } from './Navbar';
-
-export const Layout: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-white transition-colors duration-200 flex flex-col font-sans">
-      <Navbar />
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-fade-in">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  );
-};
-`;
-  } else if (answers.layout === 'sidebar') {
-    layoutContent = `
-import * as React from 'react';
-import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
-
-export const Layout: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-white transition-colors duration-200 flex">
-      <aside className="w-64 flex-shrink-0 hidden md:block h-screen sticky top-0">
-        <Sidebar />
-      </aside>
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto">
-        <div className="animate-fade-in">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  );
-};
-`;
-  } else { // blank
-    layoutContent = `
-import * as React from 'react';
-import { Outlet } from 'react-router-dom';
-
-export const Layout: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-white transition-colors duration-200">
-      <main className="w-full px-4 py-8">
-        <div className="animate-fade-in">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  );
-};
-`;
-  }
+  // Selecionar template
+  const layoutContent = templates[answers.layout] || templates.blank;
 
   fs.writeFileSync(layoutPath, layoutContent.trim());
   log.success(`Layout ${answers.layout.toUpperCase()} aplicado.`);

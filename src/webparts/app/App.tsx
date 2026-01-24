@@ -5,6 +5,7 @@ import { initializeIcons } from '@fluentui/font-icons-mdl2';
 import { getSP } from '../../config/pnpConfig';
 import { Layout } from './components/Layout';
 import Home from './pages/Home';
+/* GENERATOR: IMPORT_PAGE */
 
 // Inicializa ícones do Fluent UI
 initializeIcons();
@@ -144,6 +145,7 @@ const App: React.FC<IAppProps> = (props) => {
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Home userName={userDisplayName} />} />
+                {/* GENERATOR: ROUTE_PAGE */}
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

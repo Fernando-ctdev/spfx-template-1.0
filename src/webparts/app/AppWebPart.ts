@@ -16,6 +16,7 @@ import './shared/css/tailwind.css';
 import './shared/css/global.module.scss';
 // Mantemos o import do CSS para garantir que estilos específicos do app sejam carregados
 import './shared/css/page-layout.css';
+/* CONFIGURE: IMPORT_CSS */
 
 export interface IAppWebPartProps {
   description: string;
@@ -48,6 +49,7 @@ export default class AppWebPart extends BaseClientSideWebPart<IAppWebPartProps> 
 
     // Injetar estilos globais para forçar ocultação de elementos do SharePoint
     this._injectGlobalStyles();
+    /* CONFIGURE: INJECT_STYLES */
     
     return this._getEnvironmentMessage().then(message => {
       this._environmentMessage = message;

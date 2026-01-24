@@ -40,17 +40,58 @@ Componente React funcional limpo e tipado.
 Classe estática com métodos CRUD prontos para SharePoint.
 *   **Arquivo:** `src/core/services/ProjetosService.ts`
 *   **Métodos:** `getAll`, `getById`, `create`, `update`, `delete`
-*   **Uso:** `await ProjetosService.getAll('ListaProjetos')`
+*   **Segurança:** Inclui validação automática (`ensureListExists`) em desenvolvimento.
 
 ### 4. Hook (`generate:hook`)
 Hook React para encapsular lógica de estado ou efeitos.
 *   **Arquivo:** `src/core/hooks/usePermissoes.ts`
-*   **Estrutura:** Já vem com estados de `data`, `loading` e `error`.
+*   **Estrutura:** Já vem com estados de `data`, `loading` e `error` via TanStack Query.
 
 ### 5. Model (`generate:model`)
 Interface TypeScript com campos padrão do SharePoint.
 *   **Arquivo:** `src/models/IProjeto.ts`
 *   **Campos Padrão:** `Id`, `Title`, `Created`, `Author`, etc.
+
+---
+
+## ⚡ Conexão com Listas SharePoint
+
+O gerador agora possui uma inteligência de orquestração. Ao criar uma **Página**, você pode conectá-la diretamente a uma lista do SharePoint.
+
+**O Fluxo Automatizado:**
+1. Rode `pnpm run generate` e escolha **Página**.
+2. Responda **SIM** para "Deseja conectar essa página a uma lista SharePoint?".
+3. Informe o nome da lista (ex: `site_produtos`).
+4. Escolha o **Nível de Integração**:
+
+### Opção A: Apenas Leitura (Tabela)
+Ideal para dashboards e relatórios.
+*   ✅ Gera Model + Service + Hook (Query).
+*   ✅ Página exibe tabela com dados e filtro de busca.
+*   ❌ Sem botões de editar/excluir ou formulários.
+
+### Opção B: CRUD Completo
+Ideal para cadastros e gestão de dados.
+*   ✅ Gera tudo da opção A.
+*   ✅ Adiciona métodos de Create/Update/Delete no Hook.
+*   ✅ Página inclui botões de ação, dialog de exclusão e estrutura para formulários.
+
+**Resultado:**
+Em ambos os casos, você ganha 4 arquivos conectados e funcionando (`Model` -> `Service` -> `Hook` -> `Page`) em segundos.
+
+---
+
+## ⚠️ Importante: Marcadores de Código
+
+O gerador utiliza comentários especiais (marcadores) para injetar código de forma segura nos arquivos `App.tsx` e `navigation.ts`.
+
+**Não remova estes comentários:**
+*   `/* GENERATOR: IMPORT_PAGE */`
+*   `{/* GENERATOR: ROUTE_PAGE */}`
+*   `/* GENERATOR: IMPORT_ICON */`
+*   `/* GENERATOR: NAV_ITEM */`
+
+Se removidos, o gerador tentará usar um método de fallback, mas a precisão não é garantida.
 
 ---
 
