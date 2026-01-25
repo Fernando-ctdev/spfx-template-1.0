@@ -161,7 +161,7 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <DefaultButton
             iconProps={{ iconName: 'Filter' }}
             styles={{
@@ -195,8 +195,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
       <div className="bg-gradient-to-br from-white to-gray-50 dark:from-slate-900 dark:to-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col">
         
         {/* Toolbar de Busca */}
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
-          <div className="flex-1 max-w-md">
+        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex-1 w-full sm:max-w-md">
             <TextField
               placeholder="Buscar em ${name}..."
               value={${crudInfo ? 'filterText' : "''"}}
@@ -267,7 +267,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           main: {
             borderRadius: '16px',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            maxWidth: '480px',
+            maxWidth: '90vw',
+            width: '480px',
           },
         }}
       >
@@ -291,7 +292,15 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
             },
           }}
         />
-        <DialogFooter>
+        <DialogFooter
+          styles={{
+            actions: {
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+            },
+          }}
+        >
           <PrimaryButton 
             onClick={handleCreate} 
             text="Salvar" 
@@ -302,6 +311,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
                 boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
                 height: '44px',
                 fontWeight: 600,
+                flex: '1 1 auto',
+                minWidth: '120px',
               },
             }}
           />
@@ -312,6 +323,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
               root: {
                 borderRadius: '12px',
                 height: '44px',
+                flex: '1 1 auto',
+                minWidth: '120px',
               },
             }}
           />
@@ -330,7 +343,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           main: {
             borderRadius: '16px',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            maxWidth: '480px',
+            maxWidth: '90vw',
+            width: '480px',
           },
         }}
       >
@@ -354,7 +368,15 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
             },
           }}
         />
-        <DialogFooter>
+        <DialogFooter
+          styles={{
+            actions: {
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+            },
+          }}
+        >
           <PrimaryButton 
             onClick={handleUpdate} 
             text="Salvar" 
@@ -365,6 +387,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
                 boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
                 height: '44px',
                 fontWeight: 600,
+                flex: '1 1 auto',
+                minWidth: '120px',
               },
             }}
           />
@@ -375,6 +399,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
               root: {
                 borderRadius: '12px',
                 height: '44px',
+                flex: '1 1 auto',
+                minWidth: '120px',
               },
             }}
           />
@@ -394,11 +420,20 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
           main: {
             borderRadius: '16px',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            maxWidth: '480px',
+            maxWidth: '90vw',
+            width: '480px',
           },
         }}
       >
-        <DialogFooter>
+        <DialogFooter
+          styles={{
+            actions: {
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+            },
+          }}
+        >
           <PrimaryButton 
             onClick={confirmDelete} 
             text="Excluir" 
@@ -409,6 +444,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
                 boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
                 height: '44px',
                 fontWeight: 600,
+                flex: '1 1 auto',
+                minWidth: '120px',
               },
             }}
           />
@@ -419,6 +456,8 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
               root: {
                 borderRadius: '12px',
                 height: '44px',
+                flex: '1 1 auto',
+                minWidth: '120px',
               },
             }}
           />
