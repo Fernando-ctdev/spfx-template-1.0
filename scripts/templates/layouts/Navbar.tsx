@@ -1,3 +1,4 @@
+module.exports = `
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
@@ -20,15 +21,15 @@ export const Navbar: React.FC = () => {
         key={item.path}
         to={item.path}
         onClick={() => setIsOpen(false)}
-        className={`
+        className={\`
           relative px-5 py-2.5 rounded-full text-sm font-medium
           transition-all duration-200 ease-out
-          ${active 
+          \${active 
             ? 'bg-white/20 text-white shadow-lg shadow-white/10 backdrop-blur-sm' 
             : 'text-white/80 hover:bg-white/10 hover:text-white hover:scale-105'
           }
           focus:outline-none focus:ring-2 focus:ring-white/30
-        `}
+        \`}
       >
         {active && (
           <span className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 animate-pulse" />
@@ -75,7 +76,7 @@ export const Navbar: React.FC = () => {
                     <span className="text-sm font-medium">Perfil</span>
                     <ChevronDown 
                       size={14} 
-                      className={`transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`}
+                      className={\`transition-transform duration-200 \${isUserMenuOpen ? 'rotate-180' : ''}\`}
                     />
                   </button>
                   
@@ -132,15 +133,15 @@ export const Navbar: React.FC = () => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsOpen(false)}
-                    className={`
+                    className={\`
                       block px-4 py-3 rounded-lg text-base font-medium
                       transition-all duration-200 ease-out
-                      ${active 
+                      \${active 
                         ? 'bg-white/20 text-white shadow-lg shadow-white/10 backdrop-blur-sm' 
                         : 'text-white/80 hover:bg-white/10 hover:text-white hover:translate-x-1'
                       }
                       focus:outline-none focus:ring-2 focus:ring-white/30
-                    `}
+                    \`}
                   >
                     <div className="flex items-center justify-between">
                       <span>{item.title}</span>
@@ -166,3 +167,4 @@ export const Navbar: React.FC = () => {
     </>
   );
 };
+`;

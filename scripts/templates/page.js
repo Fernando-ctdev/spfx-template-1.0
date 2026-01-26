@@ -1,29 +1,43 @@
 module.exports = (name, options) => {
-    const { withSharePoint, crudInfo } = options || {};
-    const hookName = crudInfo ? `use${name}` : '';
-    const modelName = crudInfo ? `I${name}` : '';
-    const listName = crudInfo?.listName || '';
-    
-    const isFullCRUD = crudInfo && crudInfo.crudMode === 'crud';
-    const isReadOnly = crudInfo && crudInfo.crudMode === 'read';
+  const { withSharePoint, crudInfo, generatedFiles } = options || {};
+  const hookName = crudInfo ? `use${name}` : '';
+  const modelName = crudInfo ? `I${name}` : '';
+  const listName = crudInfo?.listName || '';
+  
+  const isFullCRUD = crudInfo && crudInfo.crudMode === 'crud';
+  const isReadOnly = crudInfo && crudInfo.crudMode === 'read';
+  const hasCRUD = crudInfo || withSharePoint;
 
-    let imports = `import * as React from 'react';
-import { FileText, Search, Filter, Plus, Edit, Trash2, MoreVertical } from 'lucide-react';
-import { AppButton, AppInput, AppModal, AppTable } from '../../core/ui';`;
+  const filesArray = generatedFiles && generatedFiles.length > 0 
+    ? JSON.stringify(generatedFiles.map(f => ({
+        name: f.name,
+        path: f.path,
+        description: f.description,
+        type: f.type
+      })))
+    : '[]';
 
-    if (crudInfo) {
-      imports += `
-import { Spinner, MessageBar, DialogTrigger } from '@fluentui/react-components';
+  let imports = `import * as React from 'react';
+import { FileText, FileCode, Database, Code, Layers } from 'lucide-react';
+import { PageOverview, DataGallery, NavigationAnchor } from '../../core/ui';`;
+
+  if (crudInfo) {
+    imports += `
+import { Spinner, MessageBar, DialogTrigger, DialogActions } from '@fluentui/react-components';
 import { ${hookName} } from '../../../core/hooks/${hookName}';
 import { ${modelName} } from '../../../models/${modelName}';`;
-    } else if (withSharePoint) {
-      imports += `
+  } else if (withSharePoint) {
+    imports += `
 import { Spinner, MessageBar } from '@fluentui/react-components';
 import { useListItems } from '../../../core/hooks/useSharePoint';`;
-    }
+  }
 
-    const content = `
+  const content = `
 export const ${name}: React.FC = () => {
+  const [activeSection, setActiveSection] = React.useState('overview');
+  const [filterText, setFilterText] = React.useState('');
+  const [scrollPosition, setScrollPosition] = React.useState(0);
+
 ${crudInfo ? `  const { 
     items, 
     loading, 
@@ -33,7 +47,7 @@ ${crudInfo ? `  const {
     delete: remove,
     isCreating,
     isDeleting ` : ''}
-  } = ${hookName}<${modelName}>('${listName}');` : withSharePoint ? `  const { items, loading, error } = useListItems('SitePages', ['Id', 'Title']);` : `  const loading = false;
+  } = ${hookName}<${modelName}>('${listName}');` : withSharePoint ? `  const { items, loading, error } = useListItems('${listName || 'SitePages'}', ['Id', 'Title']);` : `  const loading = false;
   const error: string | null = null;
   const items = [];`}
 
@@ -43,8 +57,6 @@ ${isFullCRUD ? `  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = Reac
   const [selectedItem, setSelectedItem] = React.useState<${modelName} | null>(null);
   const [newItemTitle, setNewItemTitle] = React.useState('');
   const [editingItemTitle, setEditingItemTitle] = React.useState('');` : ''}
-
-  const [filterText, setFilterText] = React.useState('');
 
   const filteredItems = React.useMemo(() => {
     if (!items) return [];
@@ -86,159 +98,99 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
     setEditingItemTitle('');
   };` : ''}
 
-${crudInfo || withSharePoint ? `  const columns = React.useMemo(() => [
-    {
-      key: 'id',
-      name: 'ID',
-      fieldName: 'Id',
-      minWidth: 80,
-      maxWidth: 100,
-    },
-    {
-      key: 'title',
-      name: 'Título',
-      fieldName: 'Title',
-      minWidth: 200,
-      isResizable: true,
-    },
-    {
-      key: 'created',
-      name: 'Criado em',
-      fieldName: 'Created',
-      minWidth: 150,
-      onRender: (item: any) => item.Created ? new Date(item.Created).toLocaleDateString() : '-',
-    },
-    ${isFullCRUD || withSharePoint ? `{
-      key: 'actions',
-      name: 'Ações',
-      minWidth: 100,
-      onRender: (item: ${crudInfo ? modelName : 'any'}) => (
-        <div className="flex gap-2 justify-end">
-          ${isFullCRUD ? `<button
-            onClick={() => handleEditClick(item)}
-            title="Editar"
-            className="p-2 hover:bg-gray-100 rounded"
-          >
-            <Edit size={16} />
-          </button>
-          <button
-            onClick={() => handleDeleteClick(item)}
-            title="Excluir"
-            className="p-2 hover:bg-red-50 rounded"
-          >
-            <Trash2 size={16} />
-          </button>` : `<button
-            onClick={() => console.log('Mais opções:', item)}
-            title="Mais opções"
-            className="p-2 hover:bg-gray-100 rounded"
-          >
-            <MoreVertical size={16} />
-          </button>`}
-        </div>
-      ),` : ''}
-  ], []);` : ''}
+  const sections = React.useMemo(() => [
+    { id: 'overview', label: 'Visão Geral', icon: <FileCode size={18} /> },
+    ${hasCRUD ? `{ id: 'data', label: 'Dados Conectados', icon: <Database size={18} /> }` : ''}
+  ], []);
+
+  const generatedFiles = ${filesArray};
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-600 flex items-center gap-2">
-            <FileText className="text-blue-600 dark:text-blue-400" size={28} />
-            ${name}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Gestão de ${name}
-          </p>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-2">
-          <AppButton
-            icon={<Filter size={16} />}
-            text="Filtrar"
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <header className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white shadow-lg">
+              <FileText size={24} />
+            </div>
+            <div>
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
+                ${name}
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Página gerada automaticamente
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <NavigationAnchor
+          sections={sections}
+          activeSection={activeSection}
+          onSectionClick={setActiveSection}
+          orientation="horizontal"
+        />
+
+        {activeSection === 'overview' && (
+          <PageOverview
+            pageName="${name}"
+            files={generatedFiles}
+            createdAt={new Date().toLocaleDateString('pt-BR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
           />
-          ${isFullCRUD ? `<AppButton
-            variant="primary"
-            icon={<Plus size={16} />}
-            onClick={() => setIsCreateDialogVisible(true)}
-            disabled={isCreating}
-            text="Novo Item"
-          />` : ''}
-        </div>
+        )}
+
+        ${hasCRUD ? `{activeSection === 'data' && (
+          <DataGallery
+            items={filteredItems}
+            loading={loading}
+            error={error}
+            listName="${listName || 'Dados'}"
+            crudMode="${crudInfo?.crudMode || 'read'}"
+            filterText={filterText}
+            onFilterChange={setFilterText}
+            ${isFullCRUD ? `onCreate={() => setIsCreateDialogVisible(true)}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}` : ''}
+          />
+        )}` : ''}
       </div>
 
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-slate-900 dark:to-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col">
-        
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex-1 w-full sm:max-w-md">
-            <AppInput
-              placeholder="Buscar em ${name}..."
-              value=${crudInfo ? 'filterText' : "''"}
-              onChange=${crudInfo ? '(e, value) => setFilterText(value || "")' : '() => {}'}
-              icon={<Search size={16} />}
+      ${isFullCRUD ? `<DialogTrigger disableButtonEnhancement>
+        <AppModal
+          isOpen={isCreateDialogVisible}
+          onDismiss={() => setIsCreateDialogVisible(false)}
+          title="Novo Item"
+        >
+          <AppInput
+            label="Título"
+            value={newItemTitle}
+            onChange={(e, value) => setNewItemTitle(value || '')}
+            placeholder="Digite o título do item"
+            required
+            fullWidth
+          />
+          <DialogActions>
+            <AppButton
+              variant="primary"
+              onClick={handleCreate}
+              text="Salvar"
+              disabled={isCreating || !newItemTitle.trim()}
               fullWidth
             />
-          </div>
-        </div>
-
-        <div className="p-0">
-          ${crudInfo || withSharePoint ? `{loading ? (
-            <div className="flex justify-center items-center h-64">
-              <Spinner size="large" label="Carregando dados..." />
-            </div>
-          ) : error ? (
-            <div className="p-6">
-              <MessageBar intent="error">{error}</MessageBar>
-            </div>
-          ) : (
-            <>
-              <AppTable
-                items=${crudInfo ? 'filteredItems' : 'items'}
-                columns={columns}
-              />
-              ${crudInfo ? `{filteredItems.length === 0 && (
-                <div className="p-12 text-center text-gray-500">
-                  Nenhum item encontrado.
-                </div>
-              )}` : `{items.length === 0 && (
-                <div className="p-12 text-center text-gray-500">
-                  Nenhum item encontrado.
-                </div>
-              )}`}
-            </>
-          )}` : `<div className="p-12 text-center">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Comece por aqui</h3>
-          </div>`}
-        </div>
-      </div>
-
-      ${isFullCRUD ? `<AppModal
-        isOpen={isCreateDialogVisible}
-        onDismiss={() => setIsCreateDialogVisible(false)}
-        title="Novo Item"
-      >
-        <AppInput
-          label="Título"
-          value={newItemTitle}
-          onChange={(e, value) => setNewItemTitle(value || '')}
-          placeholder="Digite o título do item"
-          required
-          fullWidth
-        />
-        <DialogActions>
-          <AppButton
-            variant="primary"
-            onClick={handleCreate}
-            text="Salvar"
-            disabled={isCreating || !newItemTitle.trim()}
-            fullWidth
-          />
-          <AppButton
-            onClick={() => setIsCreateDialogVisible(false)}
-            text="Cancelar"
-            fullWidth
-          />
-        </DialogActions>
-      </AppModal>
+            <AppButton
+              onClick={() => setIsCreateDialogVisible(false)}
+              text="Cancelar"
+              fullWidth
+            />
+          </DialogActions>
+        </AppModal>
+      </DialogTrigger>
 
       <AppModal
         isOpen={isEditDialogVisible}
@@ -294,7 +246,6 @@ ${crudInfo || withSharePoint ? `  const columns = React.useMemo(() => [
   );
 };
 
-export default ${name};
-`;
-    return imports + content;
-  };
+export default ${name};`;
+  return imports + content;
+};

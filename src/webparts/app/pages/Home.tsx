@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Terminal, FolderTree, Wrench, Settings, Linkedin, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
+import { Terminal, FolderTree, Wrench, Settings, Linkedin, Sparkles, ExternalLink, ArrowRight, Zap } from 'lucide-react';
 
 interface IHomeProps {
   userName?: string;
@@ -40,7 +40,7 @@ const Home: React.FC<IHomeProps> = () => {
             
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-4">
-                <Sparkles className="w-8 h-8 text-yellow-300" />
+                <Zap className="w-8 h-8 text-yellow-300" />
                 <span className="text-sm lg:text-base font-medium bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm">
                   v1.0.0
                 </span>
@@ -125,7 +125,7 @@ const Home: React.FC<IHomeProps> = () => {
                 
                 <div className="flex-1">
                   <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
-                    🎯 Esta é uma página de exemplo
+                    Esta é uma página de exemplo
                   </h3>
                   
                   <p className="text-lg text-gray-700 mb-4 leading-relaxed">

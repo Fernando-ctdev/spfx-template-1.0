@@ -66,6 +66,8 @@ async function generatePage(name, options = {}) {
   const pageName = toPascalCase(name);
   const routePath = options.route || `/${toKebabCase(name)}`;
   
+  const generatedFiles = [];
+  
   // Orquestração CRUD
   if (options.createCRUD) {
     log.info(`🚀 Iniciando geração da stack CRUD para ${pageName}...`);
@@ -74,13 +76,37 @@ async function generatePage(name, options = {}) {
     ensureQueryClientProvider();
     
     // 1. Model
-    await generateModel(name);
+    const modelResult = await generateModel(name);
+    if (modelResult) {
+      generatedFiles.push({
+        name: modelResult.modelName,
+        path: modelResult.filePath,
+        description: `Interface TypeScript com estrutura de dados para ${name}. Define as propriedades e tipos dos itens da lista SharePoint.`,
+        type: 'model'
+      });
+    }
     
     // 2. Service (passa nome com sufixo Service e desativa validação durante geração)
-    await generateService(`${name}Service`, { skipValidation: true });
+    const serviceResult = await generateService(`${name}Service`, { skipValidation: true });
+    if (serviceResult) {
+      generatedFiles.push({
+        name: serviceResult.serviceName,
+        path: serviceResult.filePath,
+        description: `Serviço PnP/SharePoint especializado para operações CRUD na lista de ${name}. Gerencia comunicações com a API do SharePoint.`,
+        type: 'service'
+      });
+    }
     
     // 3. Hook
-    await generateHook(name);
+    const hookResult = await generateHook(name);
+    if (hookResult) {
+      generatedFiles.push({
+        name: hookResult.hookName,
+        path: hookResult.filePath,
+        description: `React Hook customizado que encapsula a lógica de estado e operações assíncronas para ${name}. Utiliza TanStack Query para cache e otimizações.`,
+        type: 'hook'
+      });
+    }
     
     // Configurar metadados para o template da página
     options.crudInfo = {
@@ -108,6 +134,17 @@ async function generatePage(name, options = {}) {
     process.exit(1);
   }
   
+  // Adicionar a própria página à lista de arquivos gerados
+  generatedFiles.push({
+    name: `${pageName} (Página)`,
+    path: filePath,
+    description: `Componente React principal que renderiza a interface de ${name}. Contém a estrutura visual, lógica de navegação entre seções e integração com os demais componentes.`,
+    type: 'page'
+  });
+  
+  // Passar a lista de arquivos gerados para o template
+  options.generatedFiles = generatedFiles;
+  
   // Criar arquivo
   fs.writeFileSync(filePath, templates.page(pageName, options));
   log.success(`Arquivo criado: src/webparts/app/pages/${pageName}.tsx`);
@@ -129,9 +166,16 @@ async function generatePage(name, options = {}) {
     const testPath = path.join(testsDir, `${pageName}.test.tsx`);
     fs.writeFileSync(testPath, templates.test(pageName, 'page'));
     log.success(`Teste criado: tests/pages/${pageName}.test.tsx`);
+    
+    generatedFiles.push({
+      name: `${pageName}.test`,
+      path: testPath,
+      description: `Teste unitário do componente ${pageName}. Garante o funcionamento correto da interface e das interações do usuário.`,
+      type: 'test'
+    });
   }
   
-  return { pageName, routePath, filePath };
+  return { pageName, routePath, filePath, generatedFiles };
 }
 
 async function generateComponent(name, options = {}) {

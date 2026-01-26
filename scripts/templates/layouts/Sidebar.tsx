@@ -1,7 +1,8 @@
+module.exports = `
 import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
-import { ChevronRight, Menu, X } from 'lucide-react';
+import { Home, ChevronRight, Menu, X } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -36,20 +37,20 @@ export const Sidebar: React.FC = () => {
       <button
         key={item.path}
         onClick={() => onLinkClick(item.path)}
-        className={`
+        className={\`
           w-full flex items-center gap-3 px-4 py-3 rounded-lg
           transition-all duration-200 ease-out
-          ${selected 
+          \${selected 
             ? 'bg-white/20 text-white shadow-lg shadow-white/10 backdrop-blur-sm' 
             : 'text-white/70 hover:bg-white/10 hover:text-white hover:translate-x-1'
           }
           focus:outline-none focus:ring-2 focus:ring-white/30
-        `}
+        \`}
       >
         {Icon ? (
           <Icon 
             size={18} 
-            className={`transition-colors duration-200 ${selected ? 'text-white' : 'text-white/70'}`}
+            className={\`transition-colors duration-200 \${selected ? 'text-white' : 'text-white/70'}\`}
           />
         ) : null}
         <span className="font-medium text-sm tracking-wide">
@@ -64,27 +65,27 @@ export const Sidebar: React.FC = () => {
     <>
       <button
         onClick={toggleMobile}
-        className={`
+        className={\`
           md:hidden fixed top-4 left-4 z-50 p-3 rounded-lg
           bg-gradient-to-r from-blue-600 to-purple-600
           text-white shadow-lg shadow-blue-500/30
           hover:from-blue-700 hover:to-purple-700
           transition-all duration-200
-        `}
+        \`}
         aria-label="Toggle menu"
       >
         {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       <aside
-        className={`
+        className={\`
           fixed md:sticky top-0 left-0 h-screen z-40
           bg-gradient-to-b from-blue-600 to-purple-600
           border-r border-white/10
           transition-all duration-300 ease-in-out
-          ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 md:translate-x-0'}
-          ${isCollapsed ? 'md:w-20' : 'md:w-64'}
-        `}
+          \${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 md:translate-x-0'}
+          \${isCollapsed ? 'md:w-20' : 'md:w-64'}
+        \`}
       >
         <div className="h-full flex flex-col">
           <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 bg-black/10 backdrop-blur-sm sticky top-0 z-20">
@@ -92,10 +93,10 @@ export const Sidebar: React.FC = () => {
               <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shadow-lg shadow-black/10 backdrop-blur-md flex-shrink-0">
                 <span className="font-bold text-white text-base">🤖</span>
               </div>
-              <div className={`
+              <div className={\`
                 flex flex-col min-w-0 transition-all duration-300
-                ${isCollapsed ? 'md:opacity-0 md:overflow-hidden' : ''}
-              `}>
+                \${isCollapsed ? 'md:opacity-0 md:overflow-hidden' : ''}
+              \`}>
                 <span className="text-sm font-bold text-white tracking-tight leading-tight truncate">
                   SPFx Enterprise
                 </span>
@@ -125,11 +126,11 @@ export const Sidebar: React.FC = () => {
           </div>
 
           <div className="p-4 border-t border-white/10 bg-black/10 backdrop-blur-sm">
-            <div className={`
+            <div className={\`
               flex items-center gap-3 text-white/60 text-xs
               transition-all duration-300
-              ${isCollapsed ? 'md:justify-center md:opacity-0' : ''}
-            `}>
+              \${isCollapsed ? 'md:justify-center md:opacity-0' : ''}
+            \`}>
               <div className="w-2 h-2 rounded-full bg-green-400 shadow-lg shadow-green-400/50 animate-pulse" />
               <span className="font-medium tracking-wide">Online</span>
             </div>
@@ -149,3 +150,4 @@ export const Sidebar: React.FC = () => {
 };
 
 export default Sidebar;
+`;
