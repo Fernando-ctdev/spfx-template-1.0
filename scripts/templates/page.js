@@ -4,36 +4,27 @@ module.exports = (name, options) => {
     const modelName = crudInfo ? `I${name}` : '';
     const listName = crudInfo?.listName || '';
     
-    // Modos de operação
     const isFullCRUD = crudInfo && crudInfo.crudMode === 'crud';
     const isReadOnly = crudInfo && crudInfo.crudMode === 'read';
 
-    // Imports base
     let imports = `import * as React from 'react';
-import { FileText } from 'lucide-react';
-import { DefaultButton, TextField } from '@fluentui/react';`;
+import { FileText, Search, Filter, Plus, Edit, Trash2, MoreVertical } from 'lucide-react';
+import { AppButton, AppInput, AppModal, AppTable } from '../../core/ui';`;
 
-    // Imports condicionais
     if (crudInfo) {
       imports += `
-import { Spinner, SpinnerSize, MessageBar, MessageBarType, PrimaryButton, DetailsList, SelectionMode, Dialog, DialogType, DialogFooter${isFullCRUD ? ', IconButton' : ''} } from '@fluentui/react';
+import { Spinner, MessageBar, DialogTrigger } from '@fluentui/react-components';
 import { ${hookName} } from '../../../core/hooks/${hookName}';
 import { ${modelName} } from '../../../models/${modelName}';`;
     } else if (withSharePoint) {
       imports += `
-import { useListItems } from '../../../core/hooks/useSharePoint';
-import { Spinner, SpinnerSize, MessageBar, MessageBarType, DetailsList, SelectionMode, IconButton } from '@fluentui/react';`;
+import { Spinner, MessageBar } from '@fluentui/react-components';
+import { useListItems } from '../../../core/hooks/useSharePoint';`;
     }
 
     const content = `
-/**
- * Página ${name}
- * 
- * @description Página gerada automaticamente via CLI
- */
-const ${name}: React.FC = () => {
-${crudInfo ? `  // Hook CRUD gerado automaticamente
-  const { 
+export const ${name}: React.FC = () => {
+${crudInfo ? `  const { 
     items, 
     loading, 
     error,${isFullCRUD ? `
@@ -42,7 +33,9 @@ ${crudInfo ? `  // Hook CRUD gerado automaticamente
     delete: remove,
     isCreating,
     isDeleting ` : ''}
-  } = ${hookName}<${modelName}>('${listName}');
+  } = ${hookName}<${modelName}>('${listName}');` : withSharePoint ? `  const { items, loading, error } = useListItems('SitePages', ['Id', 'Title']);` : `  const loading = false;
+  const error: string | null = null;
+  const items = [];`}
 
 ${isFullCRUD ? `  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = React.useState(false);
   const [isCreateDialogVisible, setIsCreateDialogVisible] = React.useState(false);
@@ -50,9 +43,9 @@ ${isFullCRUD ? `  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = Reac
   const [selectedItem, setSelectedItem] = React.useState<${modelName} | null>(null);
   const [newItemTitle, setNewItemTitle] = React.useState('');
   const [editingItemTitle, setEditingItemTitle] = React.useState('');` : ''}
+
   const [filterText, setFilterText] = React.useState('');
 
-  // Filtragem local
   const filteredItems = React.useMemo(() => {
     if (!items) return [];
     if (!filterText) return items;
@@ -93,8 +86,7 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
     setEditingItemTitle('');
   };` : ''}
 
-${crudInfo || withSharePoint ? `  // Colunas para DetailsList
-  const columns = React.useMemo(() => [
+${crudInfo || withSharePoint ? `  const columns = React.useMemo(() => [
     {
       key: 'id',
       name: 'ID',
@@ -122,34 +114,32 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
       minWidth: 100,
       onRender: (item: ${crudInfo ? modelName : 'any'}) => (
         <div className="flex gap-2 justify-end">
-          ${isFullCRUD ? `<IconButton
-            iconProps={{ iconName: 'Edit' }}
+          ${isFullCRUD ? `<button
             onClick={() => handleEditClick(item)}
             title="Editar"
-          />
-          <IconButton
-            iconProps={{ iconName: 'Delete' }}
+            className="p-2 hover:bg-gray-100 rounded"
+          >
+            <Edit size={16} />
+          </button>
+          <button
             onClick={() => handleDeleteClick(item)}
             title="Excluir"
-          />` : `<IconButton
-            iconProps={{ iconName: 'More' }}
+            className="p-2 hover:bg-red-50 rounded"
+          >
+            <Trash2 size={16} />
+          </button>` : `<button
             onClick={() => console.log('Mais opções:', item)}
             title="Mais opções"
-          />`}
+            className="p-2 hover:bg-gray-100 rounded"
+          >
+            <MoreVertical size={16} />
+          </button>`}
         </div>
-      ),
-    },` : ''}
-  ], []);` : ''}` : withSharePoint ? `  // Exemplo de hook (descomente para usar)
-  // const { items, loading, error } = useListItems('SitePages', ['Id', 'Title']);
-  
-  // Mock para visualização inicial (remova ao integrar)
-  const loading = false;
-  const error: string | null = null;
-  const items = [1, 2, 3, 4, 5];` : ''}
+      ),` : ''}
+  ], []);` : ''}
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header da Página */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-600 flex items-center gap-2">
@@ -162,81 +152,48 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
         </div>
         
         <div className="flex flex-wrap items-center gap-2">
-          <DefaultButton
-            iconProps={{ iconName: 'Filter' }}
-            styles={{
-              root: {
-                borderRadius: '12px',
-                height: '44px',
-              },
-            }}
-          >
-            Filtrar
-          </DefaultButton>
-          ${isFullCRUD ? `<PrimaryButton
-            iconProps={{ iconName: 'Add' }}
+          <AppButton
+            icon={<Filter size={16} />}
+            text="Filtrar"
+          />
+          ${isFullCRUD ? `<AppButton
+            variant="primary"
+            icon={<Plus size={16} />}
             onClick={() => setIsCreateDialogVisible(true)}
             disabled={isCreating}
-            styles={{
-              root: {
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
-                height: '44px',
-                fontWeight: 600,
-              },
-            }}
-          >
-            Novo Item
-          </PrimaryButton>` : ''}
+            text="Novo Item"
+          />` : ''}
         </div>
       </div>
 
-      {/* Área de Conteúdo */}
       <div className="bg-gradient-to-br from-white to-gray-50 dark:from-slate-900 dark:to-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col">
         
-        {/* Toolbar de Busca */}
         <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex-1 w-full sm:max-w-md">
-            <TextField
+            <AppInput
               placeholder="Buscar em ${name}..."
-              value={${crudInfo ? 'filterText' : "''"}}
-              onChange={${crudInfo ? '(e, value) => setFilterText(value || "")' : '() => {}'}}
-              iconProps={{ iconName: 'Search' }}
-              underlined
-              styles={{
-                fieldGroup: {
-                  borderRadius: '8px',
-                  border: '2px solid #e2e8f0',
-                  outline: 'none',
-                },
-                field: {
-                  borderRadius: '8px',
-                },
-                wrapper: {
-                  borderRadius: '8px',
-                },
-              }}
+              value=${crudInfo ? 'filterText' : "''"}
+              onChange=${crudInfo ? '(e, value) => setFilterText(value || "")' : '() => {}'}
+              icon={<Search size={16} />}
+              fullWidth
             />
           </div>
         </div>
 
-        {/* Conteúdo Principal */}
         <div className="p-0">
           ${crudInfo || withSharePoint ? `{loading ? (
             <div className="flex justify-center items-center h-64">
-              <Spinner size={SpinnerSize.large} label="Carregando dados..." />
+              <Spinner size="large" label="Carregando dados..." />
             </div>
           ) : error ? (
             <div className="p-6">
-              <MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>
+              <MessageBar intent="error">{error}</MessageBar>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <DetailsList
-                items={${crudInfo ? 'filteredItems' : 'items'}}
+            <>
+              <AppTable
+                items=${crudInfo ? 'filteredItems' : 'items'}
                 columns={columns}
-                selectionMode={SelectionMode.none}
-                compact={true}
               />
               ${crudInfo ? `{filteredItems.length === 0 && (
                 <div className="p-12 text-center text-gray-500">
@@ -247,222 +204,92 @@ ${crudInfo || withSharePoint ? `  // Colunas para DetailsList
                   Nenhum item encontrado.
                 </div>
               )}`}
-            </div>
+            </>
           )}` : `<div className="p-12 text-center">
-            {/* ... Conteúdo vazio ... */}
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Comece por aqui</h3>
           </div>`}
         </div>
       </div>
 
-      ${isFullCRUD ? `{/* Dialog de Criação */}
-      <Dialog
-        hidden={!isCreateDialogVisible}
+      ${isFullCRUD ? `<AppModal
+        isOpen={isCreateDialogVisible}
         onDismiss={() => setIsCreateDialogVisible(false)}
-        dialogContentProps={{
-          type: DialogType.normal,
-          title: 'Novo Item',
-        }}
-        styles={{
-          main: {
-            borderRadius: '16px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            maxWidth: '90vw',
-            width: '480px',
-          },
-        }}
+        title="Novo Item"
       >
-        <TextField
+        <AppInput
           label="Título"
           value={newItemTitle}
           onChange={(e, value) => setNewItemTitle(value || '')}
           placeholder="Digite o título do item"
           required
-          styles={{
-            fieldGroup: {
-              borderRadius: '8px',
-              border: '2px solid #e2e8f0',
-              outline: 'none',
-            },
-            field: {
-              borderRadius: '8px',
-            },
-            wrapper: {
-              borderRadius: '8px',
-            },
-          }}
+          fullWidth
         />
-        <DialogFooter
-          styles={{
-            actions: {
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-            },
-          }}
-        >
-          <PrimaryButton 
-            onClick={handleCreate} 
-            text="Salvar" 
+        <DialogActions>
+          <AppButton
+            variant="primary"
+            onClick={handleCreate}
+            text="Salvar"
             disabled={isCreating || !newItemTitle.trim()}
-            styles={{
-              root: {
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
-                height: '44px',
-                fontWeight: 600,
-                flex: '1 1 auto',
-                minWidth: '120px',
-              },
-            }}
+            fullWidth
           />
-          <DefaultButton 
-            onClick={() => setIsCreateDialogVisible(false)} 
+          <AppButton
+            onClick={() => setIsCreateDialogVisible(false)}
             text="Cancelar"
-            styles={{
-              root: {
-                borderRadius: '12px',
-                height: '44px',
-                flex: '1 1 auto',
-                minWidth: '120px',
-              },
-            }}
+            fullWidth
           />
-        </DialogFooter>
-      </Dialog>
+        </DialogActions>
+      </AppModal>
 
-      {/* Dialog de Edição */}
-      <Dialog
-        hidden={!isEditDialogVisible}
+      <AppModal
+        isOpen={isEditDialogVisible}
         onDismiss={() => setIsEditDialogVisible(false)}
-        dialogContentProps={{
-          type: DialogType.normal,
-          title: 'Editar Item',
-        }}
-        styles={{
-          main: {
-            borderRadius: '16px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            maxWidth: '90vw',
-            width: '480px',
-          },
-        }}
+        title="Editar Item"
       >
-        <TextField
+        <AppInput
           label="Título"
           value={editingItemTitle}
           onChange={(e, value) => setEditingItemTitle(value || '')}
           placeholder="Digite o título do item"
           required
-          styles={{
-            fieldGroup: {
-              borderRadius: '8px',
-              border: '2px solid #e2e8f0',
-              outline: 'none',
-            },
-            field: {
-              borderRadius: '8px',
-            },
-            wrapper: {
-              borderRadius: '8px',
-            },
-          }}
+          fullWidth
         />
-        <DialogFooter
-          styles={{
-            actions: {
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-            },
-          }}
-        >
-          <PrimaryButton 
-            onClick={handleUpdate} 
-            text="Salvar" 
+        <DialogActions>
+          <AppButton
+            variant="primary"
+            onClick={handleUpdate}
+            text="Salvar"
             disabled={!editingItemTitle.trim()}
-            styles={{
-              root: {
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.2)',
-                height: '44px',
-                fontWeight: 600,
-                flex: '1 1 auto',
-                minWidth: '120px',
-              },
-            }}
+            fullWidth
           />
-          <DefaultButton 
-            onClick={() => setIsEditDialogVisible(false)} 
+          <AppButton
+            onClick={() => setIsEditDialogVisible(false)}
             text="Cancelar"
-            styles={{
-              root: {
-                borderRadius: '12px',
-                height: '44px',
-                flex: '1 1 auto',
-                minWidth: '120px',
-              },
-            }}
+            fullWidth
           />
-        </DialogFooter>
-      </Dialog>
+        </DialogActions>
+      </AppModal>
 
-      {/* Dialog de Confirmação de Exclusão */}
-      <Dialog
-        hidden={!isDeleteDialogVisible}
+      <AppModal
+        isOpen={isDeleteDialogVisible}
         onDismiss={() => setIsDeleteDialogVisible(false)}
-        dialogContentProps={{
-          type: DialogType.normal,
-          title: 'Confirmar exclusão',
-          subText: \`Tem certeza que deseja excluir o item "\${selectedItem?.Title}"? Esta ação não pode ser desfeita.\`,
-        }}
-        styles={{
-          main: {
-            borderRadius: '16px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            maxWidth: '90vw',
-            width: '480px',
-          },
-        }}
+        title="Confirmar exclusão"
+        subText={\`Tem certeza que deseja excluir o item "\${selectedItem?.Title}"? Esta ação não pode ser desfeita.\`}
       >
-        <DialogFooter
-          styles={{
-            actions: {
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-            },
-          }}
-        >
-          <PrimaryButton 
-            onClick={confirmDelete} 
-            text="Excluir" 
+        <DialogActions>
+          <AppButton
+            variant="danger"
+            onClick={confirmDelete}
+            text="Excluir"
             disabled={isDeleting}
-            styles={{
-              root: {
-                borderRadius: '12px',
-                boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
-                height: '44px',
-                fontWeight: 600,
-                flex: '1 1 auto',
-                minWidth: '120px',
-              },
-            }}
+            fullWidth
           />
-          <DefaultButton 
-            onClick={() => setIsDeleteDialogVisible(false)} 
+          <AppButton
+            onClick={() => setIsDeleteDialogVisible(false)}
             text="Cancelar"
-            styles={{
-              root: {
-                borderRadius: '12px',
-                height: '44px',
-                flex: '1 1 auto',
-                minWidth: '120px',
-              },
-            }}
+            fullWidth
           />
-        </DialogFooter>
-      </Dialog>` : ''}
+        </DialogActions>
+      </AppModal>` : ''}
     </div>
   );
 };

@@ -13,16 +13,17 @@ export class ${name} {
   private static sp = getSP();
 
   /**
-   * Verifica se a lista existe no site
+   * Verifica se a lista existe no site (não-bloqueante em geração)
    * @param listName Nome da lista
    */
-  private static async ensureListExists(listName: string): Promise<void> {
+  private static async ensureListExists(listName: string): Promise<boolean> {
     try {
       await this.sp.web.lists.getByTitle(listName).select('Id')();
+      return true;
     } catch (error) {
-      console.error(\`🚨 ERRO CRÍTICO: A lista '\${listName}' não foi encontrada no site SharePoint.\`);
-      console.error('Verifique se o nome está correto ou se a lista já foi criada.');
-      throw new Error(\`Lista '\${listName}' não encontrada.\`);
+      console.warn(\`⚠️ AVISO: A lista '\${listName}' não foi encontrada no site SharePoint.\`);
+      console.warn('Verifique se o nome está correto ou se a lista já foi criada antes de usar este serviço.');
+      return false;
     }
   }
 
@@ -34,11 +35,12 @@ export class ${name} {
    */
   public static async getAll<T = any>(
     listName: string,
-    select: string[] = ['Id', 'Title']
+    select: string[] = ['Id', 'Title'],
+    validateList: boolean = true
   ): Promise<T[]> {
     try {
-      // Validação de desenvolvimento (pode ser removida em prod se desejar performance máxima)
-      if (process.env.NODE_ENV === 'development') {
+      // Validação opcional da lista em desenvolvimento
+      if (validateList && process.env.NODE_ENV === 'development') {
         await this.ensureListExists(listName);
       }
 

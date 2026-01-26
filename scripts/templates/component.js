@@ -24,7 +24,7 @@ export interface I${name}Props {${withProps ? `
  * - Dialog para modais
  * - DetailsList para tabelas
  */
-const ${name}: React.FC<I${name}Props> = (${withProps ? '{ title, description }' : 'props'}) => {
+export const ${name}: React.FC<I${name}Props> = (${withProps ? '{ title, description }' : 'props'}) => {
   return (
     <div className="flex flex-col gap-2 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
       {/* Conteúdo do componente ${name} */}${withProps ? `

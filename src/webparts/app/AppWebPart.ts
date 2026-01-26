@@ -56,86 +56,16 @@ export default class AppWebPart extends BaseClientSideWebPart<IAppWebPartProps> 
     });
   }
 
-  /**
- * Injeta estilos globais diretamente no head do documento
- * Abordagem agressiva para esconder UI nativa do SharePoint
- */
-private _injectGlobalStyles(): void {
-  const styleId = 'spfx-app-global-styles';
-  if (document.getElementById(styleId)) return;
+  private _injectGlobalStyles(): void {
+    const styleId = 'spfx-app-global-styles';
+    if (document.getElementById(styleId)) return;
 
-  const style = document.createElement("style");
-  style.id = styleId;
-  style.innerHTML = `
-    /* ===============================
-       SUITE BAR + HEADER
-       =============================== */
-    #SuiteNavWrapper,
-    #SuiteNavPlaceholder,
-    #O365_SuiteBranding_container,
-    .ms-SuiteNav-wrapper,
-    div[data-automationid="SiteHeader"],
-    div[class*="headerRow-"],
-    div[class*="mainHeader-"],
-    #spSiteHeader,
-    .sp-page-header,
-    #sp-appBar,
-    .sp-appBar,
-    #HeaderButtonRegion,
-    .od-TopBar-header {
-      display: none !important;
-      height: 0 !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-      position: absolute !important;
-      z-index: -9999 !important;
-    }
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = require('./shared/css/sharepoint-hide.css');
 
-    /* ===============================
-       COMMAND BAR (Editar / + Novo / Republicar)
-       =============================== */
-    [data-automation-id="pageCommandBar"],
-    [data-automation-id="commandBar"],
-    .ms-CommandBar,
-    div[class*="commandBarWrapper"],
-    div[class*="commandBar"] {
-      display: none !important;
-      height: 0 !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-      position: absolute !important;
-      z-index: -9999 !important;
-    }
-
-    /* ===============================
-       RESET DE LAYOUT
-       =============================== */
-    #contentBox,
-    #workbenchPageContent,
-    #spPageCanvasContent,
-    .CanvasZone,
-    .CanvasComponent {
-      margin: 0 !important;
-      padding: 0 !important;
-      max-width: 100% !important;
-      border: none !important;
-    }
-
-    body {
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-
-    .CanvasZone {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-    }
-  `;
-
-  document.head.appendChild(style);
-}
+    document.head.appendChild(style);
+  }
 
   private _getEnvironmentMessage(): Promise<string> {
     if (this.context.sdks.microsoftTeams) {

@@ -76,8 +76,8 @@ async function generatePage(name, options = {}) {
     // 1. Model
     await generateModel(name);
     
-    // 2. Service
-    await generateService(name);
+    // 2. Service (passa nome com sufixo Service e desativa validação durante geração)
+    await generateService(`${name}Service`, { skipValidation: true });
     
     // 3. Hook
     await generateHook(name);
@@ -105,7 +105,7 @@ async function generatePage(name, options = {}) {
   
   if (fileExists(filePath)) {
     log.error(`Página ${pageName} já existe!`);
-    return false;
+    process.exit(1);
   }
   
   // Criar arquivo
@@ -147,7 +147,7 @@ async function generateComponent(name, options = {}) {
   
   if (fileExists(filePath)) {
     log.error(`Componente ${componentName} já existe!`);
-    return false;
+    process.exit(1);
   }
   
   // Criar arquivo
@@ -178,7 +178,7 @@ async function generateService(name, options = {}) {
   
   if (fileExists(filePath)) {
     log.error(`Serviço ${serviceName} já existe!`);
-    return false;
+    process.exit(1);
   }
   
   // Criar arquivo
@@ -214,7 +214,7 @@ async function generateHook(name, options = {}) {
   
   if (fileExists(filePath)) {
     log.error(`Hook ${hookName} já existe!`);
-    return false;
+    process.exit(1);
   }
   
   // Criar arquivo
@@ -276,14 +276,16 @@ function ensureQueryClientProvider() {
   }
   
   // Adiciona import do TanStack Query
-  const importRegex = /import { (.*?) } from '@fluentui\/react';/;
-  if (importRegex.test(content)) {
-    content = content.replace(importRegex, (match, p1) => {
-      return `import { QueryClient, QueryClientProvider } from '@tanstack/react-query';\nimport { ${p1} } from '@fluentui/react';`;
-    });
-  } else {
-    log.warn('Não foi possível adicionar import do QueryClient automaticamente.');
-    return;
+  const hasTanStackImport = content.includes('@tanstack/react-query');
+  if (!hasTanStackImport) {
+    const firstImportRegex = /^import .+? from '.*?';$/m;
+    const firstImport = content.match(firstImportRegex);
+    if (firstImport) {
+      content = content.replace(firstImportRegex, `${firstImport[0]}\nimport { QueryClient, QueryClientProvider } from '@tanstack/react-query';`);
+    } else {
+      log.warn('Não foi possível adicionar import do QueryClient automaticamente.');
+      return;
+    }
   }
   
   // Adiciona QueryClient antes do sp initialization
@@ -303,17 +305,17 @@ function ensureQueryClientProvider() {
   }
   
   // Envolve o componente principal com QueryClientProvider
-  const themeProviderStart = '<ThemeProvider theme={lightTheme}>';
-  const themeProviderEnd = '</ThemeProvider>';
+  const themeProviderStart = '<FluentProvider theme={webLightTheme}>';
+  const themeProviderEnd = '</FluentProvider>';
   
   if (content.includes(themeProviderStart) && content.includes(themeProviderEnd)) {
     content = content.replace(
       `<${themeProviderStart}>\n      <SharePointContext.Provider value={sp}>`,
-      `<QueryClientProvider client={queryClient}>\n      <ThemeProvider theme={lightTheme}>\n        <SharePointContext.Provider value={sp}>`
+      `<QueryClientProvider client={queryClient}>\n      <FluentProvider theme={webLightTheme}>\n        <SharePointContext.Provider value={sp}>`
     );
     content = content.replace(
-      `</SharePointContext.Provider>\n      </ThemeProvider>`,
-      `</SharePointContext.Provider>\n        </ThemeProvider>\n    </QueryClientProvider>`
+      `</SharePointContext.Provider>\n      </FluentProvider>`,
+      `</SharePointContext.Provider>\n        </FluentProvider>\n    </QueryClientProvider>`
     );
   } else {
     log.warn('Não foi possível envolver componentes com QueryClientProvider.');
@@ -524,8 +526,7 @@ async function interactiveMode() {
         type: 'text',
         name: 'route',
         message: 'Caminho da rota (ex: /minha-pagina)',
-        initial: `/${toKebabCase(name)}`,
-        active: prev => prev // Só pergunta se addRoute for true? Não, melhor perguntar sempre caso o user queira definir
+        initial: `/${toKebabCase(name)}`
       },
       {
         type: 'confirm',
@@ -538,39 +539,47 @@ async function interactiveMode() {
         name: 'connectToList',
         message: 'Deseja conectar essa página a uma lista SharePoint?',
         initial: false
-      },
-      {
-        type: 'text',
-        name: 'listName',
-        message: 'Qual o nome da lista no SharePoint?',
-        initial: name,
-        active: (prev, values) => values.connectToList // Só pergunta se conectou a lista
-      },
-      {
-        type: 'select',
-        name: 'crudType',
-        message: 'Qual o nível de integração desejado?',
-        choices: [
-          { title: 'Apenas Leitura (Tabela)', value: 'read' },
-          { title: 'CRUD Completo (Tabela + Formulários)', value: 'crud' }
-        ],
-        active: (prev, values) => values.connectToList
-      },
-      {
-        type: 'confirm',
-        name: 'withSharePoint',
-        message: 'Incluir código de exemplo do SharePoint?',
-        initial: true,
-        active: (prev, values) => !values.connectToList // Se não conectou a lista, pergunta do exemplo básico
       }
     ]);
-    
-    // Mapear respostas novas para o formato esperado pelo gerador
+
+    // Se optou por conectar à lista, perguntas adicionais
     if (pageOptions.connectToList) {
-      pageOptions.createCRUD = true; // Flag interna para disparar geração de artefatos
-      pageOptions.crudMode = pageOptions.crudType; // 'read' ou 'crud'
+      const listOptions = await prompts([
+        {
+          type: 'text',
+          name: 'listName',
+          message: 'Qual o nome da lista no SharePoint?',
+          initial: name,
+          validate: value => value.length < 2 ? 'Nome muito curto' : true
+        },
+        {
+          type: 'select',
+          name: 'crudType',
+          message: 'Qual o nível de integração desejado?',
+          choices: [
+            { title: 'Apenas Leitura (Tabela)', value: 'read' },
+            { title: 'CRUD Completo (Tabela + Formulários)', value: 'crud' }
+          ]
+        }
+      ]);
+
+      Object.assign(pageOptions, listOptions);
+      pageOptions.createCRUD = true;
+      pageOptions.crudMode = pageOptions.crudType;
+      pageOptions.withSharePoint = false;
+    } else {
+      const sharePointExample = await prompts([
+        {
+          type: 'confirm',
+          name: 'withSharePoint',
+          message: 'Incluir código de exemplo do SharePoint?',
+          initial: true
+        }
+      ]);
+
+      Object.assign(pageOptions, sharePointExample);
     }
-    
+
     options = pageOptions;
   } 
   
@@ -687,7 +696,17 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  log.error(`Erro: ${error.message}`);
-  process.exit(1);
-});
+module.exports = {
+  generatePage,
+  generateComponent,
+  generateService,
+  generateHook,
+  generateModel
+};
+
+if (require.main === module) {
+  main().catch((error) => {
+    log.error(`Erro: ${error.message}`);
+    process.exit(1);
+  });
+}

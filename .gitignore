@@ -45,3 +45,7 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+# Scripts de teste temporários
+scripts/test-*.js
+test-*.js

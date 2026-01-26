@@ -1,20 +1,13 @@
 
 module.exports = `
 import * as React from 'react';
-import { PrimaryButton } from '@fluentui/react';
+import { Button } from '@fluentui/react-components';
 import { Sparkles } from 'lucide-react';
 
 interface IMainWidgetProps {
   userName?: string;
 }
 
-/**
- * Componente MainWidget
- * 
- * ARQUITETURA HÍBRIDA:
- * - Tailwind CSS para layout (flex, grid, spacing, containers)
- * - Fluent UI para componentes interativos (botões, inputs, diálogos)
- */
 const MainWidget: React.FC<IMainWidgetProps> = ({ userName }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100 max-w-sm mx-auto">
@@ -29,12 +22,13 @@ const MainWidget: React.FC<IMainWidgetProps> = ({ userName }) => {
         Este é o seu novo <strong>Widget SPFx</strong>. Ele foi configurado para ser inserido em qualquer página do SharePoint.
       </p>
 
-      <PrimaryButton
+      <Button
+        appearance="primary"
         onClick={() => alert('Widget funcionando!')}
         className="w-full"
       >
         Interagir
-      </PrimaryButton>
+      </Button>
     </div>
   );
 };

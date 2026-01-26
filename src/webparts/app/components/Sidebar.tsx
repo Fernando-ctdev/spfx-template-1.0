@@ -1,11 +1,9 @@
 import * as React from 'react';
-import { Nav, INavLink, INavStyles, INavLinkGroup } from '@fluentui/react/lib/Nav';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
+import { makeStyles } from '@fluentui/react-components';
 
-// Estilos de Reset para o Fluent UI Nav
-// A estilização real é delegada ao Tailwind via classes CSS injetadas
-const navStyles: Partial<INavStyles> = {
+const useNavStyles = makeStyles({
   root: {
     width: '100%',
     height: '100%',
@@ -18,81 +16,46 @@ const navStyles: Partial<INavStyles> = {
     background: 'transparent',
     border: 'none',
     color: 'inherit',
-    selectors: {
-      ':after': { display: 'none' }, 
-      ':hover': { background: 'transparent' }, 
-      '.ms-Nav-compositeLink:hover &': { background: 'transparent' },
-      '.ms-Nav-compositeLink.is-selected &': { background: 'transparent' }
-    }
+    cursor: 'pointer',
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    transition: 'all 150ms ease',
+    ':hover': {
+      background: 'rgba(255, 255, 255, 0.1)',
+    },
+  },
+  linkSelected: {
+    background: 'rgba(255, 255, 255, 0.2)',
+    fontWeight: '600',
   },
   linkText: {
-    margin: 0
-  },
-  chevronButton: {
-    height: '36px',
-    lineHeight: '36px',
-    color: 'inherit',
-    selectors: {
-      ':hover': { background: 'transparent', color: 'inherit' }
-    }
+    margin: 0,
+    fontSize: '13px',
   },
   groupContent: {
-    marginBottom: '12px'
-  }
-};
+    marginBottom: '12px',
+  },
+});
 
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const classes = useNavStyles();
 
-  const groups: INavLinkGroup[] = React.useMemo(() => {
-    return [{
-      links: NAV_ITEMS.map(item => ({
-        name: item.title,
-        url: `#${item.path}`, 
-        key: item.path === '/' ? 'home' : item.path.replace('/', ''),
-        data: { 
-          iconComponent: item.icon,
-          originalPath: item.path 
-        }
-      }))
-    }];
-  }, []);
-
-  const onLinkClick = (ev?: React.MouseEvent<HTMLElement>, item?: INavLink) => {
-    if (ev) {
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-    
-    if (item?.data?.originalPath) {
-      navigate(item.data.originalPath);
-    } else if (item?.url) {
-      const path = item.url.replace(/^#/, '');
-      navigate(path);
-    }
+  const onLinkClick = (path: string) => {
+    navigate(path);
   };
 
-  const onRenderLink = (link: INavLink): JSX.Element => {
-    const Icon = link.data?.iconComponent;
-    const isSelected = link.key === (location.pathname === '/' ? 'home' : location.pathname.replace('/', ''));
-
-    return (
-      <div className="flex items-center gap-3">
-        {Icon ? (
-          <Icon 
-            size={16} 
-            className={isSelected ? "text-white" : "text-white/70 group-hover:text-white transition-colors duration-200"} 
-          />
-        ) : null}
-        <span className="text-[13px]">{link.name}</span>
-      </div>
-    );
+  const isSelected = (path: string) => {
+    const currentPath = location.pathname === '/' ? 'home' : location.pathname.replace('/', '');
+    const itemPath = path === '/' ? 'home' : path.replace('/', '');
+    return currentPath === itemPath;
   };
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-b from-brand-start to-brand-end border-r border-white/10 text-white/80 font-sans selection:bg-white/30">
-      {/* Header */}
       <div className="h-16 flex items-center px-4 border-b border-white/10 bg-black/10 backdrop-blur-sm sticky top-0 z-20">
         <div className="flex items-center gap-3 group cursor-default">
           <div className="w-8 h-8 rounded bg-white/20 flex items-center justify-center shadow-lg shadow-black/10 group-hover:bg-white/30 transition-colors backdrop-blur-md">
@@ -109,27 +72,30 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Navigation Area */}
-      <div className="flex-1 py-4 px-2 overflow-y-auto custom-scrollbar">
-        {/* Wrapper para injetar estilos Tailwind nos elementos internos do Fluent UI */}
-        <div className="
-          [&_.ms-Nav-compositeLink]:mb-1
-          [&_.ms-Nav-link]:transition-all [&_.ms-Nav-link]:duration-150 [&_.ms-Nav-link]:rounded-md 
-          [&_.ms-Nav-link]:text-white/70 [&_.ms-Nav-link:hover]:bg-white/10 [&_.ms-Nav-link:hover]:text-white
-          [&_.is-selected_.ms-Nav-link]:bg-white/20 [&_.is-selected_.ms-Nav-link]:text-white
-          [&_.is-selected_.ms-Nav-link]:font-semibold [&_.is-selected_.ms-Nav-link]:shadow-sm
-          [&_.ms-Nav-linkText]:text-[13px]
-        ">
-          <Nav
-            onLinkClick={onLinkClick}
-            onRenderLink={onRenderLink}
-            selectedKey={location.pathname === '/' ? 'home' : location.pathname.replace('/', '')}
-            styles={navStyles}
-            groups={groups}
-          />
-        </div>
+      <div className={classes.groupContent}>
+        <nav className={classes.root}>
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const selected = isSelected(item.path);
+            
+            return (
+              <button
+                key={item.path}
+                onClick={() => onLinkClick(item.path)}
+                className={`${classes.link} ${selected ? classes.linkSelected : ''}`}
+              >
+                {Icon ? (
+                  <Icon 
+                    size={16} 
+                    className={selected ? "text-white" : "text-white/70 group-hover:text-white transition-colors duration-200"} 
+                  />
+                ) : null}
+                <span className={classes.linkText}>{item.title}</span>
+              </button>
+            );
+          })}
+        </nav>
       </div>
-
     </div>
   );
 };
