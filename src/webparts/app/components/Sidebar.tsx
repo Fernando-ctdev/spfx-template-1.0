@@ -37,11 +37,11 @@ export const Sidebar: React.FC = () => {
         key={item.path}
         onClick={() => onLinkClick(item.path)}
         className={`
-          w-full flex items-center gap-3 px-4 py-3 rounded-lg
+          w-full flex items-center gap-2 px-6 py-3 rounded-lg
           transition-all duration-200 ease-out
           ${selected 
             ? 'bg-white/20 text-white shadow-lg shadow-white/10 backdrop-blur-sm' 
-            : 'text-white/70 hover:bg-white/10 hover:text-white hover:translate-x-1'
+            : 'text-white/70 hover:bg-white/10 hover:text-white hover:scale-105 shadow-lg'
           }
           focus:outline-none focus:ring-2 focus:ring-white/30
         `}
@@ -52,7 +52,7 @@ export const Sidebar: React.FC = () => {
             className={`transition-colors duration-200 ${selected ? 'text-white' : 'text-white/70'}`}
           />
         ) : null}
-        <span className="font-medium text-sm tracking-wide">
+        <span className="font-semibold text-sm tracking-wide">
           {item.title}
         </span>
         {selected && <ChevronRight size={16} className="ml-auto opacity-70" />}

@@ -13,13 +13,13 @@ module.exports = (name, options) => {
         name: f.name,
         path: f.path,
         description: f.description,
-        type: f.type
+        type: f.type as 'model' | 'service' | 'hook' | 'page' | 'component' | 'test'
       })))
     : '[]';
 
   let imports = `import * as React from 'react';
 import { FileText, FileCode, Database, Code, Layers } from 'lucide-react';
-import { PageOverview, DataGallery, NavigationAnchor } from '../../core/ui';`;
+import { PageOverview, DataGallery, NavigationAnchor, AppModal, AppInput, AppButton } from '../../core/ui';`;
 
   if (crudInfo) {
     imports += `
@@ -170,7 +170,7 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
           <AppInput
             label="Título"
             value={newItemTitle}
-            onChange={(e, value) => setNewItemTitle(value || '')}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>, value?: string) => setNewItemTitle(value || '')}
             placeholder="Digite o título do item"
             required
             fullWidth
@@ -200,7 +200,7 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
         <AppInput
           label="Título"
           value={editingItemTitle}
-          onChange={(e, value) => setEditingItemTitle(value || '')}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>, value?: string) => setEditingItemTitle(value || '')}
           placeholder="Digite o título do item"
           required
           fullWidth

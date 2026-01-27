@@ -4,10 +4,10 @@ module.exports = (name) => `/**
  * @description Model para ${name}
  */
 export interface ${name} {
-  Id: number;
+  Id: number | string;
   Title: string;
-  Created?: Date;
-  Modified?: Date;
+  Created?: string;
+  Modified?: string;
   Author?: {
     Title: string;
     EMail: string;
