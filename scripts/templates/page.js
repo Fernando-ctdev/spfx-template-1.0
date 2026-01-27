@@ -13,22 +13,21 @@ module.exports = (name, options) => {
         name: f.name,
         path: f.path,
         description: f.description,
-        type: f.type as 'model' | 'service' | 'hook' | 'page' | 'component' | 'test'
+        type: f.type
       })))
     : '[]';
 
   let imports = `import * as React from 'react';
 import { FileText, FileCode, Database, Code, Layers } from 'lucide-react';
-import { PageOverview, DataGallery, NavigationAnchor, AppModal, AppInput, AppButton } from '../../core/ui';`;
+import { PageOverview, DataGallery, NavigationAnchor, AppModal, AppInput, AppButton } from '../../../core/ui';`;
 
   if (crudInfo) {
     imports += `
-import { Spinner, MessageBar, DialogTrigger, DialogActions } from '@fluentui/react-components';
+import { DialogTrigger, DialogActions } from '@fluentui/react-components';
 import { ${hookName} } from '../../../core/hooks/${hookName}';
 import { ${modelName} } from '../../../models/${modelName}';`;
   } else if (withSharePoint) {
     imports += `
-import { Spinner, MessageBar } from '@fluentui/react-components';
 import { useListItems } from '../../../core/hooks/useSharePoint';`;
   }
 
@@ -71,7 +70,7 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
 
   const confirmDelete = async () => {
     if (selectedItem) {
-      await remove(selectedItem.Id);
+      await remove(Number(selectedItem.Id));
       setIsDeleteDialogVisible(false);
       setSelectedItem(null);
     }
@@ -92,7 +91,7 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
 
   const handleUpdate = async () => {
     if (!selectedItem || !editingItemTitle.trim()) return;
-    await update({ id: selectedItem.Id, data: { Title: editingItemTitle } });
+    await update({ id: Number(selectedItem.Id), data: { Title: editingItemTitle } });
     setIsEditDialogVisible(false);
     setSelectedItem(null);
     setEditingItemTitle('');
@@ -134,7 +133,7 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
         {activeSection === 'overview' && (
           <PageOverview
             pageName="${name}"
-            files={generatedFiles}
+            files={generatedFiles as any[]}
             createdAt={new Date().toLocaleDateString('pt-BR', {
               day: '2-digit',
               month: '2-digit',
@@ -159,20 +158,29 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
             onDelete={handleDeleteClick}` : ''}
           />
         )}` : ''}
+
+        ${isFullCRUD ? `{/* Action Buttons Section */}
+        <div className="flex gap-4 mt-6">
+          <AppButton
+            variant="primary"
+            onClick={() => setIsCreateDialogVisible(true)}
+            text="Criar Novo Item"
+            icon={<FileText size={18} />}
+          />
+        </div>` : ''}
       </div>
 
-      ${isFullCRUD ? `<DialogTrigger disableButtonEnhancement>
+      ${isFullCRUD ? `{/* Create Dialog */}
+      <DialogTrigger disableButtonEnhancement>
         <AppModal
           isOpen={isCreateDialogVisible}
-          onDismiss={() => setIsCreateDialogVisible(false)}
+          onOpenChange={() => setIsCreateDialogVisible(false)}
           title="Novo Item"
         >
           <AppInput
-            label="Título"
             value={newItemTitle}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>, value?: string) => setNewItemTitle(value || '')}
+            onChange={(ev, data) => setNewItemTitle(data.value)}
             placeholder="Digite o título do item"
-            required
             fullWidth
           />
           <DialogActions>
@@ -192,17 +200,16 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
         </AppModal>
       </DialogTrigger>
 
+      {/* Edit Dialog */}
       <AppModal
         isOpen={isEditDialogVisible}
-        onDismiss={() => setIsEditDialogVisible(false)}
+        onOpenChange={() => setIsEditDialogVisible(false)}
         title="Editar Item"
       >
         <AppInput
-          label="Título"
           value={editingItemTitle}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>, value?: string) => setEditingItemTitle(value || '')}
+          onChange={(ev, data) => setEditingItemTitle(data.value)}
           placeholder="Digite o título do item"
-          required
           fullWidth
         />
         <DialogActions>
@@ -221,12 +228,15 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
         </DialogActions>
       </AppModal>
 
+      {/* Delete Dialog */}
       <AppModal
         isOpen={isDeleteDialogVisible}
-        onDismiss={() => setIsDeleteDialogVisible(false)}
+        onOpenChange={() => setIsDeleteDialogVisible(false)}
         title="Confirmar exclusão"
-        subText={\`Tem certeza que deseja excluir o item "\${selectedItem?.Title}"? Esta ação não pode ser desfeita.\`}
       >
+        <div style={{ marginBottom: '16px' }}>
+          Tem certeza que deseja excluir o item "{selectedItem?.Title}"? Esta ação não pode ser desfeita.
+        </div>
         <DialogActions>
           <AppButton
             variant="danger"

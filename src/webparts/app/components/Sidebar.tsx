@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
-import { ChevronRight, Menu, X } from 'lucide-react';
+import { ChevronRight, Menu, X, Zap, ChevronsLeft } from 'lucide-react';
+import { AppButton } from '../../../core/ui';
 
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -33,114 +34,176 @@ export const Sidebar: React.FC = () => {
     const selected = isSelected(item.path);
     
     return (
-      <button
-        key={item.path}
-        onClick={() => onLinkClick(item.path)}
-        className={`
-          w-full flex items-center gap-2 px-6 py-3 rounded-lg
-          transition-all duration-200 ease-out
-          ${selected 
-            ? 'bg-white/20 text-white shadow-lg shadow-white/10 backdrop-blur-sm' 
-            : 'text-white/70 hover:bg-white/10 hover:text-white hover:scale-105 shadow-lg'
-          }
-          focus:outline-none focus:ring-2 focus:ring-white/30
-        `}
-      >
-        {Icon ? (
-          <Icon 
-            size={18} 
-            className={`transition-colors duration-200 ${selected ? 'text-white' : 'text-white/70'}`}
-          />
-        ) : null}
-        <span className="font-semibold text-sm tracking-wide">
-          {item.title}
-        </span>
-        {selected && <ChevronRight size={16} className="ml-auto opacity-70" />}
-      </button>
+      <div key={item.path} className="relative">
+        {selected && (
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur-lg opacity-40 -z-10" />
+        )}
+        
+        <AppButton
+          variant={selected ? 'primary' : 'default'}
+          onClick={() => onLinkClick(item.path)}
+          fullWidth
+          style={{
+            height: '48px',
+            justifyContent: 'flex-start',
+            gap: '12px',
+            background: selected 
+              ? 'linear-gradient(to right, rgb(37, 99, 235), rgb(147, 51, 234))' 
+              : 'transparent',
+            color: selected ? 'white' : 'rgb(55, 65, 81)',
+            boxShadow: selected ? '0 10px 15px -3px rgba(37, 99, 235, 0.3)' : 'none',
+            transition: 'all 0.3s ease-out',
+          }}
+          className={`
+            ${!selected ? 'hover:bg-gray-100' : ''}
+            ${isCollapsed ? 'justify-center' : ''}
+          `}
+        >
+          <div className={`
+            flex items-center gap-3 w-full
+            ${isCollapsed ? 'justify-center' : ''}
+          `}>
+            {Icon ? (
+              <div className={`
+                flex items-center justify-center w-9 h-9 rounded-lg
+                transition-all duration-300
+                ${selected 
+                  ? 'bg-white/20 text-white shadow-sm' 
+                  : 'bg-gray-100 text-gray-600'
+                }
+              `}>
+                <Icon size={18} strokeWidth={2.5} />
+              </div>
+            ) : null}
+            
+            {!isCollapsed && (
+              <>
+                <span className="font-semibold text-sm tracking-wide flex-1 text-left">
+                  {item.title}
+                </span>
+                
+                {selected && (
+                  <ChevronRight size={16} />
+                )}
+              </>
+            )}
+          </div>
+        </AppButton>
+      </div>
     );
   });
 
   return (
     <>
-      <button
+      <AppButton
         onClick={toggleMobile}
-        className={`
-          md:hidden fixed top-4 left-4 z-50 p-3 rounded-lg
-          bg-gradient-to-r from-blue-600 to-purple-600
-          text-white shadow-lg shadow-blue-500/30
-          hover:from-blue-700 hover:to-purple-700
-          transition-all duration-200
-        `}
+        variant="primary"
+        style={{
+          position: 'fixed',
+          top: '16px',
+          left: '16px',
+          zIndex: 50,
+          padding: '12px',
+          borderRadius: '12px',
+          background: 'linear-gradient(to right, rgb(37, 99, 235), rgb(147, 51, 234))',
+          color: 'white',
+          boxShadow: '0 20px 25px -5px rgba(37, 99, 235, 0.3)',
+          transition: 'all 0.3s',
+          display: 'none',
+        }}
+        className="md:hidden"
         aria-label="Toggle menu"
       >
         {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
+      </AppButton>
 
       <aside
         className={`
           fixed md:sticky top-0 left-0 h-screen z-40
-          bg-gradient-to-b from-blue-600 to-purple-600
-          border-r border-white/10
+          bg-white border-r border-gray-200
           transition-all duration-300 ease-in-out
-          ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 md:translate-x-0'}
-          ${isCollapsed ? 'md:w-20' : 'md:w-64'}
+          ${isMobileOpen ? 'translate-x-0 w-72' : '-translate-x-full w-72 md:translate-x-0'}
+          ${isCollapsed ? 'md:w-20' : 'md:w-72'}
         `}
       >
-        <div className="h-full flex flex-col">
-          <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 bg-black/10 backdrop-blur-sm sticky top-0 z-20">
+        <div className="h-full flex flex-col bg-gradient-to-b from-gray-50 to-white">
+          {/* Header */}
+          <div className="h-20 flex items-center justify-between px-5 border-b border-gray-200 bg-white sticky top-0 z-20 shadow-sm">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shadow-lg shadow-black/10 backdrop-blur-md flex-shrink-0">
-                <span className="font-bold text-white text-base">🤖</span>
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0 hover:scale-110 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 cursor-pointer">
+                <Zap className="w-6 h-6 text-white" strokeWidth={2.5} />
               </div>
+              
               <div className={`
                 flex flex-col min-w-0 transition-all duration-300
-                ${isCollapsed ? 'md:opacity-0 md:overflow-hidden' : ''}
+                ${isCollapsed ? 'md:opacity-0 md:overflow-hidden md:w-0' : ''}
               `}>
-                <span className="text-sm font-bold text-white tracking-tight leading-tight truncate">
+                <span className="text-base font-bold text-gray-900 tracking-tight leading-tight truncate">
                   SPFx Enterprise
                 </span>
-                <span className="text-[11px] tracking-wider font-medium text-blue-100/70 truncate">
-                  Template
+                <span className="text-xs tracking-wide font-medium text-gray-500 truncate">
+                  Template v1.0.0
                 </span>
               </div>
             </div>
-            <button
+            
+            <AppButton
               onClick={toggleCollapse}
-              className="
-                hidden md:flex items-center justify-center
-                w-8 h-8 rounded-lg bg-white/10
-                text-white/70 hover:bg-white/20 hover:text-white
-                transition-all duration-200
-              "
+              variant="default"
+              style={{
+                width: '36px',
+                height: '36px',
+                minWidth: '36px',
+                padding: '0',
+                display: 'none',
+                borderRadius: '8px',
+                background: 'rgb(243, 244, 246)',
+                color: 'rgb(75, 85, 99)',
+                transition: 'all 0.3s',
+                transform: isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+              }}
+              className="md:flex items-center justify-center"
               aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              <ChevronRight size={16} className={isCollapsed ? '-rotate-180' : 'transition-transform duration-300'} />
-            </button>
+              <ChevronsLeft size={16} />
+            </AppButton>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-3 py-4">
-            <nav className="space-y-1">
+          {/* Navigation */}
+          <div className="flex-1 overflow-y-auto px-4 py-6">
+            <nav className="space-y-2">
               {navItems}
             </nav>
           </div>
 
-          <div className="p-4 border-t border-white/10 bg-black/10 backdrop-blur-sm">
+          {/* Footer */}
+          <div className="p-5 border-t border-gray-200 bg-white">
             <div className={`
-              flex items-center gap-3 text-white/60 text-xs
-              transition-all duration-300
-              ${isCollapsed ? 'md:justify-center md:opacity-0' : ''}
+              flex items-center gap-3 transition-all duration-300
+              ${isCollapsed ? 'md:justify-center' : ''}
             `}>
-              <div className="w-2 h-2 rounded-full bg-green-400 shadow-lg shadow-green-400/50 animate-pulse" />
-              <span className="font-medium tracking-wide">Online</span>
+              <div className="relative flex items-center justify-center w-2.5 h-2.5">
+                <div className="absolute w-full h-full rounded-full bg-green-400 animate-ping opacity-75" />
+                <div className="relative w-full h-full rounded-full bg-green-500 shadow-lg shadow-green-400/60" />
+              </div>
+              
+              <span className={`
+                text-sm font-semibold text-gray-700 tracking-wide
+                transition-all duration-300
+                ${isCollapsed ? 'md:opacity-0 md:w-0 md:overflow-hidden' : ''}
+              `}>
+                Sistema Online
+              </span>
             </div>
           </div>
         </div>
       </aside>
 
+      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
           onClick={() => setIsMobileOpen(false)}
-          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
+          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30 animate-in fade-in duration-300"
           aria-hidden="true"
         />
       )}
