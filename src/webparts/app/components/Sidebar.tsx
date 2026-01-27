@@ -3,12 +3,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
 import { ChevronRight, Menu, X, Zap, ChevronsLeft } from 'lucide-react';
 import { AppButton } from '../../../core/ui';
+import { useSidebar } from '../contexts/SidebarContext';
 
 export const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+  const { isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar();
 
   const onLinkClick = (path: string) => {
     navigate(path);

@@ -158,16 +158,6 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
             onDelete={handleDeleteClick}` : ''}
           />
         )}` : ''}
-
-        ${isFullCRUD ? `{/* Action Buttons Section */}
-        <div className="flex gap-4 mt-6">
-          <AppButton
-            variant="primary"
-            onClick={() => setIsCreateDialogVisible(true)}
-            text="Criar Novo Item"
-            icon={<FileText size={18} />}
-          />
-        </div>` : ''}
       </div>
 
       ${isFullCRUD ? `{/* Create Dialog */}

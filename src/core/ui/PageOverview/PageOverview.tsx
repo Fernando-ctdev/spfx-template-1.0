@@ -115,10 +115,10 @@ const PageOverview: React.FC<IPageOverviewProps> = ({ pageName, files, createdAt
           <div className="flex items-start gap-3">
             <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+              <h4 className="font-semibold text-black-900 dark:text-gray-600 mb-1">
                 Dica de Desenvolvimento
               </h4>
-              <p className="text-sm text-blue-800 dark:text-blue-200">
+              <p className="text-sm text-blue-800 dark:text-gray-500">
                 Todos os arquivos estão interconectados e seguem o padrão de arquitetura do template. 
                 Modifique os arquivos conforme necessário para implementar sua lógica de negócios.
               </p>

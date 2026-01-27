@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button } from '@fluentui/react-components';
+import { Button, mergeClasses } from '@fluentui/react-components';
 import { makeStyles, shorthands } from '@fluentui/react-components';
 
 export type AppButtonVariant = 'default' | 'primary' | 'danger';
@@ -61,14 +61,14 @@ export const AppButton: React.FC<AppButtonProps> = ({
   };
 
   const getClassName = () => {
-    const baseClass = variant === 'primary' ? buttonStyles.primary : 
-                      variant === 'danger' ? buttonStyles.danger : 
-                      buttonStyles.root;
+    const variantClass = variant === 'primary' ? buttonStyles.primary : 
+                         variant === 'danger' ? buttonStyles.danger : 
+                         buttonStyles.root;
     
     if (fullWidth) {
-      return `${baseClass} ${buttonStyles.root}`;
+      return mergeClasses(buttonStyles.root, variantClass);
     }
-    return baseClass;
+    return variantClass;
   };
 
   const getStyle = () => {
