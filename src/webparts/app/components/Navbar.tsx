@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { NAV_ITEMS } from '../config/navigation';
-import { Menu, X, User, ChevronDown } from 'lucide-react';
+import { Menu, X, User, ChevronDown, Zap } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -46,15 +46,12 @@ export const Navbar: React.FC = () => {
             
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm shadow-lg shadow-black/10 border border-white/10">
-                <span className="text-xl">🤖</span>
+              <Zap className="w-6 h-6 text-yellow-300" />
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold text-white tracking-tight leading-none">
-                  SPFx Enterprise
+                  SPFx Enterprise App
                 </h1>
-                <p className="text-[11px] text-blue-100/70 tracking-wide font-medium">
-                  Template
-                </p>
               </div>
             </div>
 

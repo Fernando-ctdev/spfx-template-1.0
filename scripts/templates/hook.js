@@ -6,7 +6,7 @@ import { getSP } from '../../config/pnpConfig';
  * 
  * @description Hook para gerenciar dados do SharePoint com cache
  */
-export const ${name} = <T = any>(listName: string, select: string[] = ['Id', 'Title']) => {
+export const ${name} = <T = any>(listName: string, select: string[] = ['Id', 'Title', 'Created', 'Modified']) => {
   const sp = getSP();
   const queryClient = useQueryClient();
 
