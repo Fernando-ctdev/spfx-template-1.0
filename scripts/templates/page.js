@@ -116,9 +116,6 @@ ${isFullCRUD ? `  const handleDeleteClick = (item: ${modelName}) => {
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">
                 ${name}
               </h1>
-              <p className="text-gray-600 text-lg">
-                Página gerada automaticamente
-              </p>
             </div>
           </div>
         </header>

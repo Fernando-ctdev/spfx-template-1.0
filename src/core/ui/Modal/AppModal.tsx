@@ -35,33 +35,20 @@ export const AppModal: React.FC<AppModalProps> = ({
   const dialogStyles = useDialogStyles();
   const isDialogOpen = isOpen !== undefined ? isOpen : open;
 
-  const surfaceStyle: React.CSSProperties = {
-    borderRadius: '16px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    maxWidth: '90vw',
-    width: '480px',
-  };
-
-  const actionsStyle: React.CSSProperties = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-  };
-
   return (
     <Dialog
       open={isDialogOpen}
       onOpenChange={onOpenChange}
       {...props}
     >
-      <DialogSurface style={surfaceStyle}>
+      <DialogSurface className={dialogStyles.surface}>
         <DialogBody>
           {title && <DialogTitle>{title}</DialogTitle>}
           <DialogContent>
             {children}
           </DialogContent>
           {actions && (
-            <DialogActions style={actionsStyle}>
+            <DialogActions className={dialogStyles.actions}>
               {actions}
             </DialogActions>
           )}

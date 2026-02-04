@@ -41,7 +41,7 @@ export const AppInput: React.FC<AppInputProps> = ({
     borderRadius: '8px',
     border: '2px solid #e2e8f0',
     outline: 'none',
-    ...(fullWidth && { width: '100%' }),
+    ...(fullWidth && { width: '99%' }),
     ...style,
   };
 
@@ -54,7 +54,7 @@ export const AppInput: React.FC<AppInputProps> = ({
         placeholder={placeholder}
         disabled={disabled}
         className={className}
-        style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent' }}
+        style={{ width: '99%', border: 'none', outline: 'none', background: 'transparent' }}
       />
     </div>
   );
