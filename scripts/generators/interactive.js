@@ -126,52 +126,8 @@ async function interactiveMode() {
         name: 'addToNav',
         message: 'Adicionar ao menu de navegação?',
         initial: true
-      },
-      {
-        type: 'confirm',
-        name: 'connectToList',
-        message: 'Deseja conectar essa página a uma lista SharePoint?',
-        initial: false
       }
     ]);
-
-    // Se optou por conectar à lista, perguntas adicionais
-    if (pageOptions.connectToList) {
-      const listOptions = await prompts([
-        {
-          type: 'text',
-          name: 'listName',
-          message: 'Qual o nome da lista no SharePoint?',
-          initial: name,
-          validate: value => value.length < 2 ? 'Nome muito curto' : true
-        },
-        {
-          type: 'select',
-          name: 'crudType',
-          message: 'Qual o nível de integração desejado?',
-          choices: [
-            { title: 'Apenas Leitura (Tabela)', value: 'read' },
-            { title: 'CRUD Completo (Tabela + Formulários)', value: 'crud' }
-          ]
-        }
-      ]);
-
-      Object.assign(pageOptions, listOptions);
-      pageOptions.createCRUD = true;
-      pageOptions.crudMode = pageOptions.crudType;
-      pageOptions.withSharePoint = false;
-    } else {
-      const sharePointExample = await prompts([
-        {
-          type: 'confirm',
-          name: 'withSharePoint',
-          message: 'Incluir código de exemplo do SharePoint?',
-          initial: true
-        }
-      ]);
-
-      Object.assign(pageOptions, sharePointExample);
-    }
 
     options = pageOptions;
   } 

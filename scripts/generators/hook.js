@@ -127,7 +127,7 @@ async function generateHook(name, options = {}) {
       const { models } = await prompts({
         type: 'multiselect',
         name: 'models',
-        message: 'Selecione os models que este hook deve expor (use espaço para selecionar, enter para confirmar):',
+        message: 'Selecione os models que este hook deve expor:',
         choices: availableModels.map(model => ({
           title: model,
           value: model
