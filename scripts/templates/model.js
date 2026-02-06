@@ -1,6 +1,21 @@
-module.exports = (name) => `/**
+module.exports = (name, options = {}) => {
+  const { extendModel } = options || {};
+  
+  if (extendModel) {
+    return `/**
  * Interface ${name}
- * 
+ *
+ * @description Model para ${name} (estende ${extendModel})
+ */
+export interface ${name} extends ${extendModel} {
+  // Adicione seus campos customizados aqui
+}
+`;
+  }
+  
+  return `/**
+ * Interface ${name}
+ *
  * @description Model para ${name}
  */
 export interface ${name} {
@@ -20,3 +35,4 @@ export interface ${name} {
   // Adicione seus campos customizados aqui
 }
 `;
+};

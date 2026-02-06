@@ -2,17 +2,17 @@
  * ===============================================
  * 🎨 GERADOR DE COMPONENTES/PÁGINAS SPFx
  * ===============================================
- * 
+ *
  * Gera automaticamente páginas, componentes, serviços e hooks
  * para projetos SharePoint SPFx.
- * 
+ *
  * Uso:
  *   pnpm run generate:page NomeDaPagina
  *   pnpm run generate:component NomeDoComponente
- *   pnpm run generate:service NomeDoServico
- *   pnpm run generate:hook useNomeDoHook
+ *   pnpm run generate:service NomeDoServico (apenas o nome base, sem "Service")
+ *   pnpm run generate:hook NomeDoHook (o prefixo "use" será adicionado automaticamente)
  *   pnpm run generate (modo interativo com menu)
- * 
+ *
  * ===============================================
  */
 
@@ -58,6 +58,67 @@ function fileExists(filePath) {
   return fs.existsSync(filePath);
 }
 
+function modelExists(modelName) {
+  // Verifica se o model existe em src/models ou lib/models
+  const modelsDirSrc = path.join(basePath, 'src', 'models');
+  const modelsDirLib = path.join(basePath, 'lib', 'models');
+  
+  const modelPathSrc = path.join(modelsDirSrc, `${modelName}.ts`);
+  const modelPathLib = path.join(modelsDirLib, `${modelName}.ts`);
+  
+  return fileExists(modelPathSrc) || fileExists(modelPathLib);
+}
+
+function getModelPath(modelName) {
+  // Retorna o caminho do model se existir
+  const modelsDirSrc = path.join(basePath, 'src', 'models');
+  const modelsDirLib = path.join(basePath, 'lib', 'models');
+  
+  const modelPathSrc = path.join(modelsDirSrc, `${modelName}.ts`);
+  const modelPathLib = path.join(modelsDirLib, `${modelName}.ts`);
+  
+  if (fileExists(modelPathSrc)) {
+    return { path: modelPathSrc, relative: 'src/models' };
+  }
+  if (fileExists(modelPathLib)) {
+    return { path: modelPathLib, relative: 'lib/models' };
+  }
+  return null;
+}
+
+function getAvailableModels() {
+  // Retorna lista de models disponíveis
+  const models = [];
+  const modelsDirSrc = path.join(basePath, 'src', 'models');
+  const modelsDirLib = path.join(basePath, 'lib', 'models');
+  
+  const scanModelsDir = (dir) => {
+    if (!fileExists(dir)) return [];
+    const files = fs.readdirSync(dir);
+    return files
+      .filter(file => file.endsWith('.ts') && file !== 'index.ts')
+      .map(file => file.replace('.ts', ''));
+  };
+  
+  models.push(...scanModelsDir(modelsDirSrc));
+  models.push(...scanModelsDir(modelsDirLib));
+  
+  return [...new Set(models)]; // Remove duplicatas
+}
+
+function getAvailableServices() {
+  // Retorna lista de serviços disponíveis
+  const services = [];
+  const servicesDir = path.join(basePath, 'src', 'core', 'services');
+  
+  if (!fileExists(servicesDir)) return [];
+  
+  const files = fs.readdirSync(servicesDir);
+  return files
+    .filter(file => file.endsWith('.ts') && file !== 'index.ts')
+    .map(file => file.replace('.ts', ''));
+}
+
 // ============================================
 // GERADORES
 // ============================================
@@ -86,8 +147,8 @@ async function generatePage(name, options = {}) {
       });
     }
     
-    // 2. Service (passa nome com sufixo Service e desativa validação durante geração)
-    const serviceResult = await generateService(`${name}Service`, { skipValidation: true });
+    // 2. Service (passa apenas o nome base, o sufixo "Service" será adicionado automaticamente)
+    const serviceResult = await generateService(name, { skipValidation: true });
     if (serviceResult) {
       generatedFiles.push({
         name: serviceResult.serviceName,
@@ -211,7 +272,15 @@ async function generateComponent(name, options = {}) {
 }
 
 async function generateService(name, options = {}) {
-  const serviceName = toPascalCase(name);
+  // Converter para PascalCase e remover o sufixo "Service" se o usuário informar
+  let pascalName = toPascalCase(name);
+  
+  // Remover o sufixo "Service" se o usuário informar (ex: "NoticiasService" -> "Noticias")
+  const baseName = pascalName.replace(/Service$/, '');
+  
+  // Adicionar automaticamente o sufixo "Service" ao nome base
+  const serviceName = `${baseName}Service`;
+  const listName = options.listName || '';
   
   // Criar diretório se não existir
   const servicesDir = path.join(basePath, 'src', 'core', 'services');
@@ -225,8 +294,129 @@ async function generateService(name, options = {}) {
     process.exit(1);
   }
   
-  // Criar arquivo
-  fs.writeFileSync(filePath, templates.service(serviceName));
+  // Nome do model derivado do nome base (sem o sufixo "Service")
+  const modelName = `I${baseName}`;
+  
+  // Verificar se o model já existe
+  let modelInfo = null;
+  let shouldGenerateModel = false;
+  let extendModel = null;
+  
+  if (!options.skipModelCheck) {
+    const existingModel = getModelPath(modelName);
+    
+    if (existingModel) {
+      log.info(`📦 Model ${modelName} já existe em ${existingModel.relative}/`);
+      
+      // Apresentar opções ao usuário
+      const { modelAction } = await prompts({
+        type: 'select',
+        name: 'modelAction',
+        message: `O model ${modelName} já existe. O que deseja fazer?`,
+        choices: [
+          {
+            title: '✅ Reutilizar o model existente',
+            value: 'reuse',
+            description: 'Não criar novo model, apenas importar o existente'
+          },
+          {
+            title: '➕ Criar um novo model',
+            value: 'create',
+            description: 'Gerar um novo arquivo de model com o mesmo nome'
+          },
+          {
+            title: '🔗 Criar um model estendendo outro',
+            value: 'extend',
+            description: 'Criar um novo model que estende um model existente'
+          }
+        ]
+      });
+      
+      if (!modelAction) {
+        log.info('Operação cancelada.');
+        process.exit(0);
+      }
+      
+      switch (modelAction) {
+        case 'reuse':
+          modelInfo = {
+            name: modelName,
+            path: existingModel.path,
+            relative: existingModel.relative
+          };
+          log.success(`✅ Reutilizando model existente: ${modelName}`);
+          break;
+          
+        case 'create':
+          shouldGenerateModel = true;
+          log.info(`➕ Criando novo model: ${modelName}`);
+          break;
+          
+        case 'extend':
+          // Listar models disponíveis para extensão
+          const availableModels = getAvailableModels().filter(m => m !== modelName);
+          
+          if (availableModels.length === 0) {
+            log.warn('Nenhum model disponível para estender. Criando novo model.');
+            shouldGenerateModel = true;
+          } else {
+            const { selectedModel } = await prompts({
+              type: 'select',
+              name: 'selectedModel',
+              message: 'Selecione o model base para estender:',
+              choices: availableModels.map(m => ({
+                title: m,
+                value: m
+              }))
+            });
+            
+            if (!selectedModel) {
+              log.info('Operação cancelada.');
+              process.exit(0);
+            }
+            
+            extendModel = selectedModel;
+            shouldGenerateModel = true;
+            log.info(`🔗 Criando model ${modelName} estendendo ${selectedModel}`);
+          }
+          break;
+      }
+    } else {
+      // Model não existe, perguntar se deseja criar
+      const { createModel } = await prompts({
+        type: 'confirm',
+        name: 'createModel',
+        message: `Deseja criar o model ${modelName} para este serviço?`,
+        initial: true
+      });
+      
+      if (createModel) {
+        shouldGenerateModel = true;
+        log.info(`➕ Criando novo model: ${modelName}`);
+      }
+    }
+  }
+  
+  // Gerar o model se necessário
+  if (shouldGenerateModel) {
+    const modelResult = await generateModel(baseName, { extendModel });
+    if (modelResult) {
+      modelInfo = {
+        name: modelResult.modelName,
+        path: modelResult.filePath,
+        relative: 'src/models'
+      };
+    }
+  }
+  
+  // Preparar opções para o template do serviço
+  const serviceOptions = {
+    ...options,
+    modelName: modelInfo?.name || null
+  };
+  
+  // Criar arquivo com opções (incluindo listName e model se fornecido)
+  fs.writeFileSync(filePath, templates.service(serviceName, serviceOptions));
   log.success(`Arquivo criado: src/core/services/${serviceName}.ts`);
   
   // Criar teste
@@ -238,16 +428,24 @@ async function generateService(name, options = {}) {
     log.success(`Teste criado: tests/services/${serviceName}.test.ts`);
   }
   
-  return { serviceName, filePath };
+  return { serviceName, filePath, modelInfo };
 }
 
 async function generateHook(name, options = {}) {
-  let hookName = name;
-  if (!hookName.startsWith('use')) {
-    hookName = 'use' + toPascalCase(hookName);
+  // Normalizar o nome do hook: adicionar prefixo 'use' se não estiver presente
+  let hookName;
+  const nameLower = name.toLowerCase();
+  
+  if (nameLower.startsWith('use')) {
+    // Se já começa com 'use', converter para PascalCase mantendo o prefixo
+    const baseName = name.replace(/^use/i, '');
+    hookName = 'use' + toPascalCase(baseName);
   } else {
-    hookName = 'use' + toPascalCase(hookName.replace(/^use/i, ''));
+    // Se não começa com 'use', adicionar o prefixo
+    hookName = 'use' + toPascalCase(name);
   }
+  
+  log.info(`📝 Nome do hook: ${hookName}`);
   
   // Criar diretório se não existir
   const hooksDir = path.join(basePath, 'src', 'core', 'hooks');
@@ -261,9 +459,113 @@ async function generateHook(name, options = {}) {
     process.exit(1);
   }
   
-  // Criar arquivo
-  fs.writeFileSync(filePath, templates.hook(hookName));
+  // Obter o nome base do hook (sem o prefixo "use")
+  const baseName = hookName.replace(/^use/i, '');
+  
+  // Verificar se existe um serviço com o mesmo nome (excluindo "Service")
+  const availableServices = getAvailableServices();
+  const matchingService = availableServices.find(s => s.toLowerCase() === baseName.toLowerCase() + 'service');
+  
+  // Log de informações sobre o serviço correspondente
+  if (matchingService) {
+    log.info(`🔗 Serviço correspondente encontrado: ${matchingService}`);
+  }
+  
+  let selectedService = null;
+  let selectedModels = [];
+  
+  // Se não estiver no modo interativo (CLI direto), usar valores padrão
+  if (options.skipInteractive) {
+    selectedService = options.serviceName || matchingService || null;
+    selectedModels = options.models || [];
+  } else {
+    // Modo interativo: perguntar sobre serviço e models
+    
+    // 1. Seleção do serviço
+    let serviceChoices = [];
+    
+    if (matchingService) {
+      serviceChoices.push({
+        title: `✅ ${matchingService} (corresponde ao hook ${hookName})`,
+        value: matchingService,
+        description: `Serviço com nome correspondente ao hook ${hookName}`
+      });
+    }
+    
+    // Adicionar outros serviços disponíveis
+    const otherServices = availableServices.filter(s => s !== matchingService);
+    otherServices.forEach(service => {
+      serviceChoices.push({
+        title: service,
+        value: service
+      });
+    });
+    
+    serviceChoices.push({
+      title: '❌ Nenhum serviço',
+      value: null,
+      description: 'Criar hook sem injeção de serviço'
+    });
+    
+    const { service } = await prompts({
+      type: 'select',
+      name: 'service',
+      message: 'Selecione o serviço para injetar no hook:',
+      choices: serviceChoices,
+      initial: matchingService ? 0 : serviceChoices.length - 1
+    });
+    
+    if (service === undefined) {
+      log.info('Operação cancelada.');
+      process.exit(0);
+    }
+    
+    selectedService = service;
+    
+    // 2. Seleção de models (múltipla)
+    const availableModels = getAvailableModels();
+    
+    if (availableModels.length > 0) {
+      const { models } = await prompts({
+        type: 'multiselect',
+        name: 'models',
+        message: 'Selecione os models que este hook deve expor (use espaço para selecionar, enter para confirmar):',
+        choices: availableModels.map(model => ({
+          title: model,
+          value: model
+        })),
+        hint: '- Espaço para selecionar/desmarcar, Enter para confirmar'
+      });
+      
+      if (models === undefined) {
+        log.info('Operação cancelada.');
+        process.exit(0);
+      }
+      
+      selectedModels = models || [];
+    } else {
+      log.info('Nenhum model disponível encontrado.');
+    }
+  }
+  
+  // Preparar opções para o template do hook
+  const hookOptions = {
+    ...options,
+    models: selectedModels,
+    serviceName: selectedService
+  };
+  
+  // Criar arquivo com opções
+  fs.writeFileSync(filePath, templates.hook(hookName, hookOptions));
   log.success(`Arquivo criado: src/core/hooks/${hookName}.ts`);
+  
+  // Exibir informações sobre o que foi configurado
+  if (selectedService) {
+    log.info(`📦 Serviço injetado em ${hookName}: ${selectedService}`);
+  }
+  if (selectedModels.length > 0) {
+    log.info(`📦 Models expostos por ${hookName}: ${selectedModels.join(', ')}`);
+  }
   
   // Criar teste
   if (options.withTest !== false) {
@@ -274,11 +576,12 @@ async function generateHook(name, options = {}) {
     log.success(`Teste criado: tests/hooks/${hookName}.test.ts`);
   }
   
-  return { hookName, filePath };
+  return { hookName, filePath, selectedService, selectedModels };
 }
 
 async function generateModel(name, options = {}) {
   const modelName = 'I' + toPascalCase(name);
+  const { extendModel } = options || {};
   
   // Criar diretório se não existir
   const modelsDir = path.join(basePath, 'src', 'models');
@@ -292,8 +595,8 @@ async function generateModel(name, options = {}) {
     return false;
   }
   
-  // Criar arquivo
-  fs.writeFileSync(filePath, templates.model(modelName));
+  // Criar arquivo com opção de extensão
+  fs.writeFileSync(filePath, templates.model(modelName, { extendModel }));
   log.success(`Arquivo criado: src/models/${modelName}.ts`);
   
   return { modelName, filePath };
@@ -546,11 +849,36 @@ async function interactiveMode() {
   }
 
   // Perguntas comuns
+  let nameMessage = `Qual o nome do(a) ${artifactType}?`;
+  
+  // Para serviços, deixar claro que deve informar apenas o nome base (sem o sufixo "Service")
+  if (artifactType === 'service') {
+    nameMessage = `Qual o nome do serviço (apenas o nome base, sem "Service")?`;
+  }
+  
+  // Para hooks, deixar claro que o prefixo "use" será adicionado automaticamente
+  if (artifactType === 'hook') {
+    nameMessage = `Qual o nome do hook (o prefixo "use" será adicionado automaticamente)?`;
+  }
+  
   const { name } = await prompts({
     type: 'text',
     name: 'name',
-    message: `Qual o nome do(a) ${artifactType}?`,
-    validate: value => value.length < 2 ? 'Nome muito curto' : true
+    message: nameMessage,
+    validate: value => {
+      if (value.length < 2) {
+        return 'Nome muito curto (mínimo 2 caracteres)';
+      }
+      // Para serviços, verificar se o usuário informou o sufixo "Service"
+      if (artifactType === 'service' && value.toLowerCase().endsWith('service')) {
+        return 'Por favor, informe apenas o nome base (sem o sufixo "Service"). Exemplo: "Noticias" em vez de "NoticiasService"';
+      }
+      // Para hooks, verificar se o usuário informou o prefixo "use" (opcional, mas vamos avisar)
+      if (artifactType === 'hook' && value.toLowerCase().startsWith('use')) {
+        return 'O prefixo "use" será adicionado automaticamente. Informe apenas o nome base. Exemplo: "Noticias" em vez de "useNoticias"';
+      }
+      return true;
+    }
   });
 
   if (!name) process.exit(0);
@@ -638,6 +966,47 @@ async function interactiveMode() {
     ]);
     options = compOptions;
   }
+  
+  else if (artifactType === 'service') {
+    const serviceOptions = await prompts([
+      {
+        type: 'text',
+        name: 'listName',
+        message: 'Qual o nome da lista SharePoint que este serviço deve conectar?',
+        initial: name, // O nome já está sem o sufixo "Service" devido à validação anterior
+        validate: value => value.length < 2 ? 'Nome muito curto (mínimo 2 caracteres)' : true
+      },
+      {
+        type: 'select',
+        name: 'serviceType',
+        message: 'Qual o tipo de serviço deseja criar?',
+        choices: [
+          { title: '📖 Apenas leitura', value: 'readonly', description: 'Gera apenas métodos de leitura (getAll, getById)' },
+          { title: '✏️ CRUD completo', value: 'crud', description: 'Gera todos os métodos (getAll, getById, create, update, delete)' }
+        ],
+        initial: 0
+      },
+      {
+        type: 'confirm',
+        name: 'withTest',
+        message: 'Criar arquivo de teste para o serviço?',
+        initial: true
+      }
+    ]);
+    options = serviceOptions;
+  }
+  
+  else if (artifactType === 'hook') {
+    const hookOptions = await prompts([
+      {
+        type: 'confirm',
+        name: 'withTest',
+        message: 'Criar arquivo de teste para o hook?',
+        initial: true
+      }
+    ]);
+    options = hookOptions;
+  }
 
   // Executar Geração
   let result;
@@ -651,7 +1020,7 @@ async function interactiveMode() {
       if (result) showSummary('Componente', result);
       break;
     case 'service':
-      result = await generateService(name);
+      result = await generateService(name, options);
       if (result) showSummary('Serviço', result);
       break;
     case 'hook':
@@ -676,6 +1045,8 @@ ${colors.cyan}┌─────────────────────
 ├─────────────────────────────────────────────────────┤${colors.reset}
 │ ${colors.yellow}Arquivo:${colors.reset} ${result.filePath?.replace(basePath, '').replace(/\\/g, '/')}
 ${result.routePath ? `│ ${colors.yellow}Rota:${colors.reset}    ${result.routePath}` : ''}
+${result.selectedService ? `│ ${colors.yellow}Serviço:${colors.reset}  ${result.selectedService}` : ''}
+${result.selectedModels && result.selectedModels.length > 0 ? `│ ${colors.yellow}Models:${colors.reset}   ${result.selectedModels.join(', ')}` : ''}
 ${colors.cyan}└─────────────────────────────────────────────────────┘${colors.reset}
 
 ${colors.green}📝 Próximos passos:${colors.reset}
@@ -702,10 +1073,13 @@ async function main() {
   if (!name) {
     log.error('Nome é obrigatório no modo CLI!');
     log.info('Uso: pnpm run generate:page NomeDaPagina');
+    log.info('      pnpm run generate:service NomeDoServico (apenas o nome base, sem "Service")');
+    log.info('      pnpm run generate:hook NomeDoHook (o prefixo "use" será adicionado automaticamente)');
     process.exit(1);
   }
   
   let result;
+  let options = {};
   
   switch (command) {
     case 'page':
@@ -719,7 +1093,7 @@ async function main() {
       break;
       
     case 'service':
-      result = await generateService(name);
+      result = await generateService(name, options);
       if (result) showSummary('Serviço', result);
       break;
       

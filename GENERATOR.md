@@ -19,8 +19,12 @@ pnpm run generate
 | **Página + Rota** | `pnpm run generate:page <Nome>` | `pnpm run generate:page Dashboard` |
 | **Componente** | `pnpm run generate:component <Nome>` | `pnpm run generate:component Header` |
 | **Serviço (CRUD)** | `pnpm run generate:service <Nome>` | `pnpm run generate:service Projetos` |
-| **Hook Customizado** | `pnpm run generate:hook <Nome>` | `pnpm run generate:hook usePermissoes` |
+| **Hook Customizado** | `pnpm run generate:hook <Nome>` | `pnpm run generate:hook Permissoes` |
 | **Interface (Model)** | `pnpm run generate:model <Nome>` | `pnpm run generate:model Projeto` |
+
+> ⚠️ **Nota importante para serviços:** Ao criar um serviço, informe apenas o nome base (sem o sufixo "Service"). O gerador adicionará automaticamente o sufixo. Por exemplo, use `pnpm run generate:service Projetos` para criar `ProjetosService.ts`.
+>
+> ⚠️ **Nota importante para hooks:** Ao criar um hook, informe apenas o nome base (sem o prefixo "use"). O gerador adicionará automaticamente o prefixo. Por exemplo, use `pnpm run generate:hook Permissoes` para criar `usePermissoes.ts`.
 
 ---
 
@@ -38,11 +42,11 @@ Se seu projeto é uma Aplicação de Tela Cheia (com roteamento):
 Se seu projeto é um Widget isolado (WebPart):
 *   A opção **"Página (Page)"** fica **oculta** (pois Widgets não têm roteamento interno).
 *   **Fluxo Recomendado para Widgets Inteligentes:**
-    1.  Gere o **Serviço** (`generate:service Noticias`) para a lógica de dados.
-    2.  Gere o **Hook** (`generate:hook useNoticias`) para gerenciar o estado.
-    3.  Gere o **Componente** (`generate:component NoticiasWidget`) para a interface.
-    4.  Conecte manualmente importando o hook no componente.
-    5.  Adicione o componente no `MainWidget.tsx`.
+1.  Gere o **Serviço** (`generate:service Noticias`) para a lógica de dados (o sufixo "Service" é adicionado automaticamente).
+2.  Gere o **Hook** (`generate:hook Noticias`) para gerenciar o estado (o prefixo "use" é adicionado automaticamente).
+3.  Gere o **Componente** (`generate:component NoticiasWidget`) para a interface.
+4.  Conecte manualmente importando o hook no componente.
+5.  Adicione o componente no `MainWidget.tsx`.
 
 ---
 
@@ -63,13 +67,13 @@ Componente React funcional limpo e tipado.
 
 ### 3. Serviço (`generate:service`)
 Classe estática com métodos CRUD prontos para SharePoint.
-*   **Arquivo:** `src/core/services/ProjetosService.ts`
+*   **Arquivo:** `src/core/services/ProjetosService.ts` (o sufixo "Service" é adicionado automaticamente)
 *   **Métodos:** `getAll`, `getById`, `create`, `update`, `delete`
 *   **Segurança:** Inclui validação automática (`ensureListExists`) em desenvolvimento.
 
 ### 4. Hook (`generate:hook`)
 Hook React para encapsular lógica de estado ou efeitos.
-*   **Arquivo:** `src/core/hooks/usePermissoes.ts`
+*   **Arquivo:** `src/core/hooks/usePermissoes.ts` (o prefixo "use" é adicionado automaticamente)
 *   **Estrutura:** Já vem com estados de `data`, `loading` e `error`.
 
 ### 5. Model (`generate:model`)
@@ -117,6 +121,6 @@ O gerador ajusta automaticamente o nome dos arquivos para seguir as boas prátic
 |--------------------|-------------------|------|
 | `minha pagina` | `MinhaPagina.tsx` | Página |
 | `header-top` | `HeaderTop.tsx` | Componente |
-| `projetos` | `ProjetosService.ts` | Serviço |
-| `get-dados` | `useGetDados.ts` | Hook |
+| `projetos` | `ProjetosService.ts` | Serviço (sufixo "Service" adicionado automaticamente) |
+| `permissoes` | `usePermissoes.ts` | Hook (prefixo "use" adicionado automaticamente) |
 | `projeto` | `IProjeto.ts` | Model |

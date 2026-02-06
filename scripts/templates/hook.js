@@ -1,14 +1,66 @@
-module.exports = (name) => `import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSP } from '../../config/pnpConfig';
+module.exports = (name, options = {}) => {
+  const { models = [], serviceName = null } = options || {};
+  const hasModels = models && models.length > 0;
+  const hasService = serviceName;
+  
+  // Gerar imports dos models
+  let modelImports = '';
+  if (hasModels) {
+    modelImports = models.map(model => 
+      `import { ${model} } from '../../models/${model}';`
+    ).join('\n');
+  }
+  
+  // Gerar import do serviço
+  let serviceImport = '';
+  if (hasService) {
+    serviceImport = `import { ${serviceName} } from '../services/${serviceName}';`;
+  }
+  
+  // Gerar tipos para os models
+  let modelTypes = '';
+  if (hasModels) {
+    const modelTypeList = models.join(' | ');
+    modelTypes = `<T = ${modelTypeList}>`;
+  } else {
+    modelTypes = '<T = any>';
+  }
+  
+  // Gerar comentário de documentação dos models
+  let modelsDoc = '';
+  if (hasModels) {
+    modelsDoc = `\n * @models Models expostos: ${models.join(', ')}`;
+  }
+  
+  // Gerar comentário de documentação do serviço
+  let serviceDoc = '';
+  if (hasService) {
+    serviceDoc = `\n * @service Serviço injetado: ${serviceName}`;
+  }
+  
+  // Gerar código de injeção do serviço
+  let serviceInjection = '';
+  let serviceUsage = '';
+  if (hasService) {
+    serviceInjection = `
+  // Injeção do serviço ${serviceName}
+  const service = ${serviceName};`;
+    serviceUsage = `
+      // Usar o serviço injetado para operações
+      // Exemplo: await service.getAll(listName, select)`;
+  }
+  
+  return `import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getSP } from '../../config/pnpConfig';${modelImports ? '\n' + modelImports : ''}${serviceImport ? '\n' + serviceImport : ''}
 
 /**
  * Hook customizado ${name}
  * 
- * @description Hook para gerenciar dados do SharePoint com cache
+ * @description Hook para gerenciar dados do SharePoint com cache${modelsDoc}${serviceDoc}
  */
-export const ${name} = <T = any>(listName: string, select: string[] = ['Id', 'Title', 'Created', 'Modified']) => {
+export const ${name} = ${modelTypes}(listName: string, select: string[] = ['Id', 'Title', 'Created', 'Modified']) => {
   const sp = getSP();
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient();${serviceInjection}
 
   // Query para buscar dados
   const {
@@ -23,7 +75,7 @@ export const ${name} = <T = any>(listName: string, select: string[] = ['Id', 'Ti
         .getByTitle(listName)
         .items
         .select(...select)
-        .top(5000)();
+        .top(5000)();${serviceUsage}
       return result as T[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
@@ -85,3 +137,4 @@ export const ${name} = <T = any>(listName: string, select: string[] = ['Id', 'Ti
   };
 };
 `;
+};
