@@ -20,6 +20,14 @@ const path = require('path');
 const prompts = require('prompts');
 const crypto = require('crypto');
 const { log, colors } = require('./utils/logger');
+const {
+  registerInterruptHandler,
+  finalize,
+  createFileWithTracking,
+  trackCreatedFile,
+  trackCreatedDir,
+  modifyFileWithBackup
+} = require('./utils/interrupt-handler');
 
 // Carregar templates
 const templates = {
@@ -166,7 +174,9 @@ async function askQuestions() {
 
 function generateEnvFile(answers) {
   const envContent = templates.env(answers);
-  fs.writeFileSync(path.join(basePath, '.env'), envContent);
+  const envPath = path.join(basePath, '.env');
+  fs.writeFileSync(envPath, envContent);
+  trackCreatedFile(envPath);
   log.success('Arquivo .env gerado com sucesso!');
 }
 
@@ -214,7 +224,7 @@ function updateConfigs(answers, guids) {
 
 function configureAppMode(answers) {
   const appWebPartPath = path.join(basePath, 'src', 'webparts', 'app', 'AppWebPart.ts');
-  
+
   if (!fs.existsSync(appWebPartPath)) {
     log.error('AppWebPart.ts não encontrado!');
     return;
@@ -226,10 +236,10 @@ function configureAppMode(answers) {
 
   // Configuração de CSS (Page Layout)
   const pageCssImport = "import './shared/css/page-layout.css';";
-  
+
   // Limpar import antigo se existir (para evitar duplicação ou conflito)
   // Removemos imports manuais antigos se estiverem fora do marcador
-  content = content.replace(`\n${pageCssImport}`, ''); 
+  content = content.replace(`\n${pageCssImport}`, '');
   content = content.replace(pageCssImport, '');
 
   if (content.includes(importMarker)) {
@@ -246,7 +256,7 @@ function configureAppMode(answers) {
 
   // Configuração de Injeção de Estilos (Ocultar menus do SharePoint)
   const injectCall = "this._injectGlobalStyles();";
-  
+
   // Remove chamadas antigas para garantir estado limpo
   content = content.replace(`\n    ${injectCall}`, '');
   content = content.replace(`    ${injectCall}\n`, '');
@@ -260,17 +270,17 @@ function configureAppMode(answers) {
     log.warn(`Marcador '${injectMarker}' não encontrado em AppWebPart.ts. A lógica de ocultação de menus pode falhar.`);
   }
 
-  fs.writeFileSync(appWebPartPath, content);
+  modifyFileWithBackup(appWebPartPath, content);
   log.success(`Modo ${answers.mode.toUpperCase()} configurado.`);
 }
 
 function configureLayout(answers) {
   const layoutPath = path.join(basePath, 'src', 'webparts', 'app', 'components', 'Layout.tsx');
-  
+
   // Selecionar template
   const layoutContent = templates[answers.layout] || templates.blank;
 
-  fs.writeFileSync(layoutPath, layoutContent.trim());
+  modifyFileWithBackup(layoutPath, layoutContent.trim());
   log.success(`Layout ${answers.layout.toUpperCase()} aplicado.`);
 }
 
@@ -280,13 +290,13 @@ async function configureWidgetStructure(answers) {
   // 1. Substituir App.tsx
   const appWidgetTemplate = require('./templates/app-widget');
   const appPath = path.join(basePath, 'src', 'webparts', 'app', 'App.tsx');
-  fs.writeFileSync(appPath, appWidgetTemplate.trim());
+  modifyFileWithBackup(appPath, appWidgetTemplate.trim());
   log.success('App.tsx otimizado para Widget (sem roteamento).');
 
   // 2. Mover/Renomear Home.tsx -> MainWidget.tsx
   const pagesDir = path.join(basePath, 'src', 'webparts', 'app', 'pages');
   const componentsDir = path.join(basePath, 'src', 'webparts', 'app', 'components');
-  
+
   const oldHomePath = path.join(pagesDir, 'Home.tsx');
   const newWidgetPath = path.join(componentsDir, 'MainWidget.tsx');
   const widgetTemplate = require('./templates/widget-example');
@@ -294,9 +304,11 @@ async function configureWidgetStructure(answers) {
   // Sempre sobrescreve com o template limpo para garantir que não sobra lixo do dashboard
   if (!fs.existsSync(componentsDir)) {
     fs.mkdirSync(componentsDir, { recursive: true });
+    trackCreatedDir(componentsDir);
   }
-  
+
   fs.writeFileSync(newWidgetPath, widgetTemplate.trim());
+  trackCreatedFile(newWidgetPath);
   log.success('Criado componente principal: src/webparts/app/components/MainWidget.tsx');
 
   // 3. Limpar pasta pages se existir Home.tsx lá
@@ -321,14 +333,17 @@ async function configureWidgetStructure(answers) {
 
 // Função Principal
 async function main() {
+  // Registrar handler de SIGINT
+  registerInterruptHandler();
+
   log.title('WIZARD DE CONFIGURAÇÃO DO PROJETO');
-  
+
   try {
     const answers = await askQuestions();
     const guids = getGuids();
-    
+
     console.log('\nAplicando configurações...\n');
-    
+
     generateEnvFile(answers);
     updateConfigs(answers, guids);
     configureAppMode(answers);
@@ -337,7 +352,7 @@ async function main() {
     if (answers.mode === 'component') {
       await configureWidgetStructure(answers);
     }
-    
+
     console.log(`
 ${colors.cyan}┌─────────────────────────────────────────────────────┐
 │              🚀 PRONTO PARA CODAR!                  │
@@ -346,10 +361,14 @@ ${colors.cyan}┌─────────────────────
 │ ${colors.green}pnpm run build${colors.reset}  Para gerar o pacote
 ${colors.cyan}└─────────────────────────────────────────────────────┘${colors.reset}
 `);
-    
+
+    // Finalizar handler
+    finalize();
+
   } catch (error) {
     log.error('Erro durante a configuração: ' + error.message);
     console.error(error);
+    finalize();
   }
 }
 

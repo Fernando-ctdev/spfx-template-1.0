@@ -190,23 +190,28 @@ async function interactiveMode() {
   switch (artifactType) {
     case 'page':
       result = await generatePage(name, options);
-      if (result) showSummary('Página', result);
+      if (result && result.filePath) showSummary('Página', result);
+      else if (result && !result.filePath) log.info('⏭️  Operação cancelada pelo usuário.');
       break;
     case 'component':
       result = await generateComponent(name, options);
-      if (result) showSummary('Componente', result);
+      if (result && result.filePath) showSummary('Componente', result);
+      else if (result && !result.filePath) log.info('⏭️  Operação cancelada pelo usuário.');
       break;
     case 'service':
       result = await generateService(name, options);
-      if (result) showSummary('Serviço', result);
+      if (result && result.filePath) showSummary('Serviço', result);
+      else if (result && !result.filePath) log.info('⏭️  Operação cancelada pelo usuário.');
       break;
     case 'hook':
       result = await generateHook(name);
-      if (result) showSummary('Hook', result);
+      if (result && result.filePath) showSummary('Hook', result);
+      else if (result && !result.filePath) log.info('⏭️  Operação cancelada pelo usuário.');
       break;
     case 'model':
       result = await generateModel(name);
-      if (result) showSummary('Model', result);
+      if (result && result.filePath) showSummary('Model', result);
+      else if (result === false) log.info('⏭️  Operação cancelada pelo usuário.');
       break;
   }
 }

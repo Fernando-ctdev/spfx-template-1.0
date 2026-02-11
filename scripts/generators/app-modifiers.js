@@ -13,6 +13,9 @@ const fs = require('fs');
 const path = require('path');
 const { log } = require('../utils/logger');
 const { fileExists, getBasePath } = require('./file-helpers');
+const {
+  modifyFileWithBackup
+} = require('../utils/interrupt-handler');
 
 /**
  * Garante que o QueryClientProvider esteja configurado no App.tsx
@@ -81,7 +84,7 @@ function ensureQueryClientProvider() {
     return;
   }
   
-  fs.writeFileSync(appPath, content);
+  modifyFileWithBackup(appPath, content);
   log.success('QueryClientProvider adicionado ao App.tsx.');
 }
 
@@ -141,7 +144,7 @@ function addRouteToApp(pageName, routePath) {
     }
   }
   
-  fs.writeFileSync(appPath, content);
+  modifyFileWithBackup(appPath, content);
   log.success(`Rota adicionada ao App.tsx: ${routePath}`);
 }
 
@@ -200,7 +203,7 @@ function addNavigationItem(name, routePath) {
 
   if (content.includes(itemMarker)) {
     content = content.replace(itemMarker, `${newItem}\n  ${itemMarker}`);
-    fs.writeFileSync(navPath, content);
+    modifyFileWithBackup(navPath, content);
     log.success(`Item adicionado ao menu: ${name}`);
   } else {
     // Fallback antigo
@@ -208,7 +211,7 @@ function addNavigationItem(name, routePath) {
     if (lastBracketIndex !== -1) {
       log.warn(`Marcador '${itemMarker}' não encontrado. Item adicionado ao final do array.`);
       content = content.slice(0, lastBracketIndex) + newItem + '\n' + content.slice(lastBracketIndex);
-      fs.writeFileSync(navPath, content);
+      modifyFileWithBackup(navPath, content);
       log.success(`Item adicionado ao menu: ${name}`);
     } else {
       log.error('Não foi possível encontrar o array de navegação em navigation.ts');

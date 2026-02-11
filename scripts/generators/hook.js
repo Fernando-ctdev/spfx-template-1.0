@@ -16,6 +16,11 @@ const templates = require('../templates');
 const { log } = require('../utils/logger');
 const { ensureDir, fileExists, getBasePath, getAvailableServices, getAvailableModels } = require('./file-helpers');
 const { toPascalCase } = require('./utils');
+const {
+  createFileWithTracking,
+  trackCreatedDir,
+  shouldCancelOperation
+} = require('../utils/interrupt-handler');
 
 /**
  * Gera um novo React Hook customizado
@@ -44,14 +49,17 @@ async function generateHook(name, options = {}) {
   log.info(`📝 Nome do hook: ${hookName}`);
   
   const basePath = getBasePath();
-  
+
   // Criar diretório se não existir
   const hooksDir = path.join(basePath, 'src', 'core', 'hooks');
-  ensureDir(hooksDir);
-  
+  if (!fs.existsSync(hooksDir)) {
+    fs.mkdirSync(hooksDir, { recursive: true });
+    trackCreatedDir(hooksDir);
+  }
+
   // Caminho do arquivo
   const filePath = path.join(hooksDir, `${hookName}.ts`);
-  
+
   if (fileExists(filePath)) {
     log.error(`Hook ${hookName} já existe!`);
     process.exit(1);
@@ -152,11 +160,25 @@ async function generateHook(name, options = {}) {
     models: selectedModels,
     serviceName: selectedService
   };
-  
+
   // Criar arquivo com opções
-  fs.writeFileSync(filePath, templates.hook(hookName, hookOptions));
-  log.success(`Arquivo criado: src/core/hooks/${hookName}.ts`);
-  
+  const hookCreated = await createFileWithTracking(
+    filePath,
+    templates.hook(hookName, hookOptions),
+    'Hook',
+    hookName
+  );
+
+  if (!hookCreated) {
+    return { hookName, filePath: null, selectedService, selectedModels };
+  }
+
+  // Verificar se o usuário cancelou a operação
+  if (shouldCancelOperation()) {
+    log.info('⏭️  Operação cancelada pelo usuário.');
+    return { hookName, filePath: null, selectedService, selectedModels };
+  }
+
   // Exibir informações sobre o que foi configurado
   if (selectedService) {
     log.info(`📦 Serviço injetado em ${hookName}: ${selectedService}`);
@@ -164,16 +186,24 @@ async function generateHook(name, options = {}) {
   if (selectedModels.length > 0) {
     log.info(`📦 Models expostos por ${hookName}: ${selectedModels.join(', ')}`);
   }
-  
+
   // Criar teste
   if (options.withTest !== false) {
     const testsDir = path.join(basePath, 'tests', 'hooks');
-    ensureDir(testsDir);
+    if (!fs.existsSync(testsDir)) {
+      fs.mkdirSync(testsDir, { recursive: true });
+      trackCreatedDir(testsDir);
+    }
+
     const testPath = path.join(testsDir, `${hookName}.test.ts`);
-    fs.writeFileSync(testPath, templates.test(hookName, 'hook'));
-    log.success(`Teste criado: tests/hooks/${hookName}.test.ts`);
+    await createFileWithTracking(
+      testPath,
+      templates.test(hookName, 'hook'),
+      'Teste',
+      `${hookName}.test`
+    );
   }
-  
+
   return { hookName, filePath, selectedService, selectedModels };
 }
 

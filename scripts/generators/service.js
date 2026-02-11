@@ -17,6 +17,11 @@ const { log } = require('../utils/logger');
 const { ensureDir, fileExists, getBasePath, getModelPath, getAvailableModels } = require('./file-helpers');
 const { toPascalCase } = require('./utils');
 const { generateModel } = require('./model');
+const {
+  createFileWithTracking,
+  trackCreatedDir,
+  shouldCancelOperation
+} = require('../utils/interrupt-handler');
 
 /**
  * Gera um novo serviço PnP/SharePoint
@@ -39,14 +44,17 @@ async function generateService(name, options = {}) {
   const listName = options.listName || '';
   
   const basePath = getBasePath();
-  
+
   // Criar diretório se não existir
   const servicesDir = path.join(basePath, 'src', 'core', 'services');
-  ensureDir(servicesDir);
-  
+  if (!fs.existsSync(servicesDir)) {
+    fs.mkdirSync(servicesDir, { recursive: true });
+    trackCreatedDir(servicesDir);
+  }
+
   // Caminho do arquivo
   const filePath = path.join(servicesDir, `${serviceName}.ts`);
-  
+
   if (fileExists(filePath)) {
     log.error(`Serviço ${serviceName} já existe!`);
     process.exit(1);
@@ -172,20 +180,42 @@ async function generateService(name, options = {}) {
     ...options,
     modelName: modelInfo?.name || null
   };
-  
+
   // Criar arquivo com opções (incluindo listName e model se fornecido)
-  fs.writeFileSync(filePath, templates.service(serviceName, serviceOptions));
-  log.success(`Arquivo criado: src/core/services/${serviceName}.ts`);
-  
+  const serviceCreated = await createFileWithTracking(
+    filePath,
+    templates.service(serviceName, serviceOptions),
+    'Serviço',
+    serviceName
+  );
+
+  if (!serviceCreated) {
+    return { serviceName, filePath: null, modelInfo };
+  }
+
+  // Verificar se o usuário cancelou a operação
+  if (shouldCancelOperation()) {
+    log.info('⏭️  Operação cancelada pelo usuário.');
+    return { serviceName, filePath: null, modelInfo };
+  }
+
   // Criar teste
   if (options.withTest !== false) {
     const testsDir = path.join(basePath, 'tests', 'services');
-    ensureDir(testsDir);
+    if (!fs.existsSync(testsDir)) {
+      fs.mkdirSync(testsDir, { recursive: true });
+      trackCreatedDir(testsDir);
+    }
+
     const testPath = path.join(testsDir, `${serviceName}.test.ts`);
-    fs.writeFileSync(testPath, templates.test(serviceName, 'service'));
-    log.success(`Teste criado: tests/services/${serviceName}.test.ts`);
+    await createFileWithTracking(
+      testPath,
+      templates.test(serviceName, 'service'),
+      'Teste',
+      `${serviceName}.test`
+    );
   }
-  
+
   return { serviceName, filePath, modelInfo };
 }
 
