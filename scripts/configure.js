@@ -130,7 +130,16 @@ function parseHideLevels(value) {
     .filter(Boolean);
 }
 
+function normalizeLayout(value, fallback = 'blank') {
+  return value === 'navbar' || value === 'sidebar' || value === 'blank' ? value : fallback;
+}
+
+function normalizeNavigationScope(value) {
+  return value === 'spa-and-sitepages' ? 'spa-and-sitepages' : 'spa-only';
+}
+
 function normalizeHideConfig(answers) {
+  const layout = normalizeLayout(answers.layout, answers.mode === 'page' ? 'navbar' : 'blank');
   const hideNativeUI = answers.mode === 'page' && toBoolean(answers.hideNativeUI, false);
   const hideScope = hideNativeUI ? normalizeHideScope(answers.hideScope) : 'sitepages';
   const hideTargetPageSlug = hideNativeUI && hideScope === 'specific-page'
@@ -141,8 +150,23 @@ function normalizeHideConfig(answers) {
     ? (Array.isArray(answers.hideLevels) ? answers.hideLevels : []).filter(Boolean)
     : [];
 
+  const navigationScope = answers.mode === 'page' && layout !== 'blank'
+    ? normalizeNavigationScope(answers.navigationScope)
+    : 'spa-only';
+
+  const navigationMount = answers.mode === 'page' && layout !== 'blank' && navigationScope === 'spa-and-sitepages'
+    ? 'app-customizer'
+    : 'layout';
+
+  const resolvedLayout = navigationMount === 'app-customizer' ? 'blank' : layout;
+
   return {
     ...answers,
+    layout,
+    resolvedLayout,
+    navigationScope,
+    navigationMount,
+    navigationShell: layout,
     hideNativeUI,
     hideScope,
     hideTargetPageSlug,
@@ -155,11 +179,17 @@ function writeHideUiConfig(answers) {
   const hideLevelsSet = new Set(answers.hideLevels || []);
 
   const configContent = `export type HideScope = 'sitepages' | 'specific-page';
+export type NavigationScope = 'spa-only' | 'spa-and-sitepages';
+export type NavigationMount = 'layout' | 'app-customizer';
+export type NavigationShell = 'navbar' | 'sidebar' | 'blank';
 
 export interface IHideUiConfig {
   enabled: boolean;
   scope: HideScope;
   targetPageSlug: string;
+  navigationScope: NavigationScope;
+  navigationMount: NavigationMount;
+  shellLayout: NavigationShell;
   hideLevels: {
     base: boolean;
     commandBar: boolean;
@@ -172,6 +202,9 @@ export const hideUiConfig: IHideUiConfig = {
   enabled: ${answers.hideNativeUI},
   scope: '${answers.hideScope}',
   targetPageSlug: '${answers.hideTargetPageSlug}',
+  navigationScope: '${answers.navigationScope}',
+  navigationMount: '${answers.navigationMount}',
+  shellLayout: '${answers.navigationShell}',
   hideLevels: {
     base: ${hideLevelsSet.has('base')},
     commandBar: ${hideLevelsSet.has('commandBar')},
@@ -213,6 +246,7 @@ async function askQuestions() {
 
   if (process.env.SPFX_NON_INTERACTIVE === 'true') {
     const mode = currentEnv.SPFX_MODE === 'component' ? 'component' : 'page';
+    const layout = normalizeLayout(currentEnv.SPFX_LAYOUT, mode === 'page' ? 'navbar' : 'blank');
     const hideNativeUI = mode === 'page' ? toBoolean(currentEnv.SPFX_HIDE_NATIVE_UI, false) : false;
     const hideScope = hideNativeUI ? normalizeHideScope(currentEnv.SPFX_HIDE_SCOPE) : 'sitepages';
     const hideTargetPageSlug = hideNativeUI && hideScope === 'specific-page'
@@ -225,13 +259,17 @@ async function askQuestions() {
       appName: (currentEnv.SPFX_APP_NAME || 'minha-app').toLowerCase().replace(/\s+/g, '-'),
       appTitle: currentEnv.SPFX_APP_TITLE || 'Minha Aplicação',
       mode,
-      layout: currentEnv.SPFX_LAYOUT || (mode === 'page' ? 'navbar' : 'blank'),
+      layout,
+      navigationScope: normalizeNavigationScope(currentEnv.SPFX_NAVIGATION_SCOPE),
       hideNativeUI,
       hideScope,
       hideTargetPageSlug,
       hideLevels: parseHideLevels(currentEnv.SPFX_HIDE_LEVELS)
     });
   }
+
+  const currentLayout = normalizeLayout(currentEnv.SPFX_LAYOUT, 'navbar');
+  const currentNavigationScope = normalizeNavigationScope(currentEnv.SPFX_NAVIGATION_SCOPE);
 
   const questions = [
     {
@@ -280,7 +318,17 @@ async function askQuestions() {
         { title: 'Sidebar (Menu Lateral)', value: 'sidebar' },
         { title: 'Blank (Apenas Conteúdo)', value: 'blank' }
       ],
-      initial: 0
+      initial: currentLayout === 'sidebar' ? 1 : currentLayout === 'blank' ? 2 : 0
+    },
+    {
+      type: (prev, values) => values.mode === 'page' && values.layout !== 'blank' ? 'select' : null,
+      name: 'navigationScope',
+      message: 'Como será a navegação?',
+      choices: [
+        { title: 'Somente interna da SPA', value: 'spa-only' },
+        { title: 'Interna da SPA + outras SitePages do mesmo site', value: 'spa-and-sitepages' }
+      ],
+      initial: currentNavigationScope === 'spa-and-sitepages' ? 1 : 0
     },
     {
       type: (prev, values) => values.mode === 'page' ? 'confirm' : null,
@@ -470,12 +518,13 @@ function configureAppMode(answers) {
 
 function configureLayout(answers) {
   const layoutPath = path.join(basePath, 'src', 'webparts', 'app', 'components', 'Layout.tsx');
+  const selectedLayout = answers.resolvedLayout || answers.layout;
 
   // Selecionar template
-  const layoutContent = templates[answers.layout] || templates.blank;
+  const layoutContent = templates[selectedLayout] || templates.blank;
 
   modifyFileWithBackup(layoutPath, layoutContent.trim());
-  log.success(`Layout ${answers.layout.toUpperCase()} aplicado.`);
+  log.success(`Layout ${selectedLayout.toUpperCase()} aplicado.`);
 }
 
 async function configureWidgetStructure(answers) {

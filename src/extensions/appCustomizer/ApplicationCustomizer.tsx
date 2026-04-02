@@ -8,7 +8,9 @@ import {
 } from '@microsoft/sp-application-base';
 import { HashRouter as Router } from 'react-router-dom';
 
-import { Navbar } from "../../webparts/app/components/Navbar"; //ou sidebar depende da configuração do template
+import { Navbar } from '../../webparts/app/components/Navbar';
+import { Sidebar } from '../../webparts/app/components/Sidebar';
+import { SidebarProvider } from '../../webparts/app/contexts/SidebarContext';
 import { getSPExtension } from "../../config/pnpConfig";
 import { hideUiConfig } from './hideUiConfig';
 
@@ -92,6 +94,20 @@ function buildHideCss(bodyClass: string, selectors: string[]): string {
 }
 
 const TopShell: React.FC = () => {
+  if (hideUiConfig.shellLayout === 'sidebar') {
+    return (
+      <Router>
+        <SidebarProvider>
+          <Sidebar />
+        </SidebarProvider>
+      </Router>
+    );
+  }
+
+  if (hideUiConfig.shellLayout === 'blank') {
+    return null;
+  }
+
   return (
     <Router>
       <Navbar />
@@ -127,23 +143,42 @@ export default class ApplicationCustomizer extends BaseApplicationCustomizer<IAp
   }
 
   private _renderPlaceHolders = (): void => {
+    if (!this._shouldRenderShellInCustomizer()) {
+      const existingWrapper = document.getElementById(TOP_WRAPPER_ID);
+      if (existingWrapper) {
+        ReactDom.unmountComponentAtNode(existingWrapper);
+        existingWrapper.remove();
+      }
+      return;
+    }
+
     if (!this._topPlaceholder) {
       this._topPlaceholder = this.context.placeholderProvider.tryCreateContent(
         PlaceholderName.Top,
         { onDispose: this._onDisposeTop }
       );
+    }
 
-      if (this._topPlaceholder?.domElement) {
-        const topWrapper = document.createElement("div");
-        topWrapper.id = TOP_WRAPPER_ID;
-        topWrapper.className = '-scope';
-        topWrapper.setAttribute('data-shell-source', '-appcustomizer');
-        this._topPlaceholder.domElement.appendChild(topWrapper);
+    const hasWrapper = document.getElementById(TOP_WRAPPER_ID);
+    if (!hasWrapper && this._topPlaceholder?.domElement) {
+      const topWrapper = document.createElement('div');
+      topWrapper.id = TOP_WRAPPER_ID;
+      topWrapper.className = '-scope';
+      topWrapper.setAttribute('data-shell-source', '-appcustomizer');
+      this._topPlaceholder.domElement.appendChild(topWrapper);
 
-        ReactDom.render(<TopShell />, topWrapper);
-      }
+      ReactDom.render(<TopShell />, topWrapper);
     }
   };
+
+  private _shouldRenderShellInCustomizer(): boolean {
+    if (hideUiConfig.navigationMount !== 'app-customizer' || hideUiConfig.shellLayout === 'blank') {
+      return false;
+    }
+
+    const normalizedPath = normalizePath(window.location.pathname);
+    return normalizedPath.includes('/sitepages/');
+  }
 
   private _shouldApplyHideOnCurrentPage(): boolean {
     if (!hideUiConfig.enabled) {
