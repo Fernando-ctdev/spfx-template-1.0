@@ -2,5 +2,16 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/sp-serve.schema.json",
   "port": 4321,
   "https": true,
-  "initialPage": "https://{tenant}.sharepoint.com/_layouts/workbench.aspx"
+  "initialPage": "https://{tenant}.sharepoint.com/_layouts/workbench.aspx",
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://{tenant}.sharepoint.com/_layouts/workbench.aspx",
+      "customActions": {
+        "00000000-0000-0000-0000-000000000000": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {}
+        }
+      }
+    }
+  }
 }

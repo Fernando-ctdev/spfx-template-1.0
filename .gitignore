@@ -49,3 +49,6 @@ coverage/
 # Scripts de teste temporários
 scripts/test-*.js
 test-*.js
+
+# Backups temporários gerados por scripts/ferramentas
+**/.backups/

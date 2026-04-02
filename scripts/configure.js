@@ -50,7 +50,12 @@ function getGuids() {
   const guidsFile = path.join(basePath, '.guids.json');
   if (fs.existsSync(guidsFile)) {
     try {
-      return JSON.parse(fs.readFileSync(guidsFile, 'utf8'));
+      const savedGuids = JSON.parse(fs.readFileSync(guidsFile, 'utf8'));
+      if (!savedGuids.extensionId) {
+        savedGuids.extensionId = generateGuid();
+        fs.writeFileSync(guidsFile, JSON.stringify(savedGuids, null, 2));
+      }
+      return savedGuids;
     } catch (e) {
       log.warn('Arquivo .guids.json corrompido. Gerando novos GUIDs.');
     }
@@ -59,7 +64,8 @@ function getGuids() {
   const guids = {
     appId: generateGuid(),
     webPartId: generateGuid(),
-    featureId: generateGuid()
+    featureId: generateGuid(),
+    extensionId: generateGuid()
   };
   
   fs.writeFileSync(guidsFile, JSON.stringify(guids, null, 2));
@@ -133,7 +139,7 @@ function normalizeHideConfig(answers) {
 }
 
 function writeHideUiConfig(answers) {
-  const extensionConfigPath = path.join(basePath, 'src', 'extensions', 'nipMais', 'hideUiConfig.ts');
+  const extensionConfigPath = path.join(basePath, 'src', 'extensions', 'appCustomizer', 'hideUiConfig.ts');
   const hideLevelsSet = new Set(answers.hideLevels || []);
 
   const configContent = `export type HideScope = 'sitepages' | 'specific-page';
@@ -191,6 +197,28 @@ async function askQuestions() {
     } catch (e) {
       log.warn('Não foi possível ler as configurações atuais do .env');
     }
+  }
+
+  if (process.env.SPFX_NON_INTERACTIVE === 'true') {
+    const mode = currentEnv.SPFX_MODE === 'component' ? 'component' : 'page';
+    const hideNativeUI = mode === 'page' ? toBoolean(currentEnv.SPFX_HIDE_NATIVE_UI, false) : false;
+    const hideScope = hideNativeUI ? normalizeHideScope(currentEnv.SPFX_HIDE_SCOPE) : 'sitepages';
+    const hideTargetPageSlug = hideNativeUI && hideScope === 'specific-page'
+      ? (currentEnv.SPFX_HIDE_TARGET_PAGE_SLUG || '').trim().toLowerCase()
+      : '';
+
+    return normalizeHideConfig({
+      tenant: currentEnv.SPFX_TENANT || '',
+      siteUrl: currentEnv.SPFX_SITE_URL || '/sites/dev',
+      appName: (currentEnv.SPFX_APP_NAME || 'minha-app').toLowerCase().replace(/\s+/g, '-'),
+      appTitle: currentEnv.SPFX_APP_TITLE || 'Minha Aplicação',
+      mode,
+      layout: currentEnv.SPFX_LAYOUT || (mode === 'page' ? 'navbar' : 'blank'),
+      hideNativeUI,
+      hideScope,
+      hideTargetPageSlug,
+      hideLevels: parseHideLevels(currentEnv.SPFX_HIDE_LEVELS)
+    });
   }
 
   const questions = [
@@ -349,6 +377,17 @@ function updateConfigs(answers, guids) {
   if (fs.existsSync(servePath)) {
     const serve = readJson(servePath);
     serve.initialPage = `https://${answers.tenant}.sharepoint.com/_layouts/workbench.aspx`;
+
+    serve.serveConfigurations = serve.serveConfigurations || {};
+    serve.serveConfigurations.default = serve.serveConfigurations.default || {};
+    serve.serveConfigurations.default.pageUrl = `https://${answers.tenant}.sharepoint.com/_layouts/workbench.aspx`;
+    serve.serveConfigurations.default.customActions = {
+      [guids.extensionId]: {
+        location: 'ClientSideExtension.ApplicationCustomizer',
+        properties: {}
+      }
+    };
+
     writeJson(servePath, serve);
   }
 
@@ -361,6 +400,25 @@ function updateConfigs(answers, guids) {
     manifest.preconfiguredEntries[0].description.default = answers.appTitle;
   }
   writeJson(manifestPath, manifest);
+
+  // 5. Application Customizer Manifest
+  const extensionManifestPath = path.join(basePath, 'src', 'extensions', 'appCustomizer', 'ApplicationCustomizer.manifest.json');
+  if (fs.existsSync(extensionManifestPath)) {
+    const extensionManifest = readJson(extensionManifestPath);
+    extensionManifest.id = guids.extensionId;
+    writeJson(extensionManifestPath, extensionManifest);
+  }
+
+  // 6. elements.xml (CustomAction)
+  const elementsPath = path.join(basePath, 'sharepoint', 'assets', 'elements.xml');
+  if (fs.existsSync(elementsPath)) {
+    const elementsXml = fs.readFileSync(elementsPath, 'utf8');
+    const updatedXml = elementsXml.replace(
+      /ClientSideComponentId="[^"]+"/,
+      `ClientSideComponentId="${guids.extensionId}"`
+    );
+    fs.writeFileSync(elementsPath, updatedXml);
+  }
 }
 
 function configureAppMode(answers) {

@@ -9,6 +9,14 @@
           "manifest": "./src/webparts/app/AppWebPart.manifest.json"
         }
       ]
+    },
+    "application-customizer": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/appCustomizer/ApplicationCustomizer.js",
+          "manifest": "./src/extensions/appCustomizer/ApplicationCustomizer.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
