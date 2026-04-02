@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getSP } from '../../config/pnpConfig';
 import { Layout } from './components/Layout';
 import Home from './pages/Home';
+import { ScrollToTop } from './components/ScrollToTop';
 /* GENERATOR: IMPORT_PAGE */
 
 export const SharePointContext = React.createContext<ReturnType<typeof getSP> | null>(null);

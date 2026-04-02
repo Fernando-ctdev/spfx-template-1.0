@@ -85,6 +85,93 @@ function writeJson(filePath, data) {
   }
 }
 
+function toBoolean(value, fallback = false) {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return value.toLowerCase() === 'true';
+  }
+
+  return fallback;
+}
+
+function normalizeHideScope(value) {
+  return value === 'specific-page' ? 'specific-page' : 'sitepages';
+}
+
+function parseHideLevels(value) {
+  if (!value || typeof value !== 'string') {
+    return [];
+  }
+
+  return value
+    .split(',')
+    .map(level => level.trim())
+    .filter(Boolean);
+}
+
+function normalizeHideConfig(answers) {
+  const hideNativeUI = answers.mode === 'page' && toBoolean(answers.hideNativeUI, false);
+  const hideScope = hideNativeUI ? normalizeHideScope(answers.hideScope) : 'sitepages';
+  const hideTargetPageSlug = hideNativeUI && hideScope === 'specific-page'
+    ? (answers.hideTargetPageSlug || '').trim().toLowerCase()
+    : '';
+
+  const hideLevels = hideNativeUI
+    ? (Array.isArray(answers.hideLevels) ? answers.hideLevels : []).filter(Boolean)
+    : [];
+
+  return {
+    ...answers,
+    hideNativeUI,
+    hideScope,
+    hideTargetPageSlug,
+    hideLevels
+  };
+}
+
+function writeHideUiConfig(answers) {
+  const extensionConfigPath = path.join(basePath, 'src', 'extensions', 'nipMais', 'hideUiConfig.ts');
+  const hideLevelsSet = new Set(answers.hideLevels || []);
+
+  const configContent = `export type HideScope = 'sitepages' | 'specific-page';
+
+export interface IHideUiConfig {
+  enabled: boolean;
+  scope: HideScope;
+  targetPageSlug: string;
+  hideLevels: {
+    base: boolean;
+    commandBar: boolean;
+    socialBar: boolean;
+    comments: boolean;
+  };
+}
+
+export const hideUiConfig: IHideUiConfig = {
+  enabled: ${answers.hideNativeUI},
+  scope: '${answers.hideScope}',
+  targetPageSlug: '${answers.hideTargetPageSlug}',
+  hideLevels: {
+    base: ${hideLevelsSet.has('base')},
+    commandBar: ${hideLevelsSet.has('commandBar')},
+    socialBar: ${hideLevelsSet.has('socialBar')},
+    comments: ${hideLevelsSet.has('comments')}
+  }
+};
+`;
+
+  if (fs.existsSync(extensionConfigPath)) {
+    modifyFileWithBackup(extensionConfigPath, configContent);
+  } else {
+    fs.writeFileSync(extensionConfigPath, configContent);
+    trackCreatedFile(extensionConfigPath);
+    log.success('Arquivo de configuração da extension criado com sucesso!');
+  }
+}
+
 async function askQuestions() {
   let currentEnv = {};
   
@@ -154,6 +241,58 @@ async function askQuestions() {
         { title: 'Blank (Apenas Conteúdo)', value: 'blank' }
       ],
       initial: 0
+    },
+    {
+      type: (prev, values) => values.mode === 'page' ? 'confirm' : null,
+      name: 'hideNativeUI',
+      message: 'Deseja ocultar elementos nativos do SharePoint?',
+      initial: toBoolean(currentEnv.SPFX_HIDE_NATIVE_UI, false)
+    },
+    {
+      type: (prev, values) => values.mode === 'page' && values.hideNativeUI ? 'select' : null,
+      name: 'hideScope',
+      message: 'Onde aplicar a ocultação?',
+      choices: [
+        { title: 'Todas as páginas em /SitePages/', value: 'sitepages' },
+        { title: 'Apenas uma página específica', value: 'specific-page' }
+      ],
+      initial: normalizeHideScope(currentEnv.SPFX_HIDE_SCOPE) === 'specific-page' ? 1 : 0
+    },
+    {
+      type: (prev, values) => values.mode === 'page' && values.hideNativeUI && values.hideScope === 'specific-page' ? 'text' : null,
+      name: 'hideTargetPageSlug',
+      message: 'Qual slug da página? (ex: portal.aspx)',
+      initial: currentEnv.SPFX_HIDE_TARGET_PAGE_SLUG || 'portal.aspx',
+      format: val => val.trim().toLowerCase(),
+      validate: value => value.endsWith('.aspx') ? true : 'Informe um slug válido terminando com .aspx'
+    },
+    {
+      type: (prev, values) => values.mode === 'page' && values.hideNativeUI ? 'multiselect' : null,
+      name: 'hideLevels',
+      message: 'Selecione os níveis de ocultação desejados',
+      choices: [
+        {
+          title: 'Cabeçalho/Navegação nativa (suite nav, app bar, header, footer)',
+          value: 'base',
+          selected: parseHideLevels(currentEnv.SPFX_HIDE_LEVELS).includes('base')
+        },
+        {
+          title: 'Command bar (Editar, Novo, etc)',
+          value: 'commandBar',
+          selected: parseHideLevels(currentEnv.SPFX_HIDE_LEVELS).includes('commandBar')
+        },
+        {
+          title: 'Barra social',
+          value: 'socialBar',
+          selected: parseHideLevels(currentEnv.SPFX_HIDE_LEVELS).includes('socialBar')
+        },
+        {
+          title: 'Comentários',
+          value: 'comments',
+          selected: parseHideLevels(currentEnv.SPFX_HIDE_LEVELS).includes('comments')
+        }
+      ],
+      hint: '- Espaço para marcar/desmarcar. Enter para confirmar.'
     }
   ];
 
@@ -163,13 +302,15 @@ async function askQuestions() {
   if (!response.layout && response.mode === 'component') {
     response.layout = 'blank';
   }
+
+  const normalizedResponse = normalizeHideConfig(response);
   
   if (!response.tenant) {
     log.error('Configuração cancelada pelo usuário.');
     process.exit(0);
   }
 
-  return response;
+  return normalizedResponse;
 }
 
 function generateEnvFile(answers) {
@@ -232,7 +373,6 @@ function configureAppMode(answers) {
 
   let content = fs.readFileSync(appWebPartPath, 'utf8');
   const importMarker = '/* CONFIGURE: IMPORT_CSS */';
-  const injectMarker = '/* CONFIGURE: INJECT_STYLES */';
 
   // Configuração de CSS (Page Layout)
   const pageCssImport = "import './shared/css/page-layout.css';";
@@ -252,22 +392,6 @@ function configureAppMode(answers) {
     }
   } else {
     log.warn(`Marcador '${importMarker}' não encontrado em AppWebPart.ts. O CSS de layout pode não ser injetado corretamente.`);
-  }
-
-  // Configuração de Injeção de Estilos (Ocultar menus do SharePoint)
-  const injectCall = "this._injectGlobalStyles();";
-
-  // Remove chamadas antigas para garantir estado limpo
-  content = content.replace(`\n    ${injectCall}`, '');
-  content = content.replace(`    ${injectCall}\n`, '');
-  content = content.replace(injectCall, '');
-
-  if (content.includes(injectMarker)) {
-    if (answers.mode === 'page') {
-      content = content.replace(injectMarker, `${injectCall}\n    ${injectMarker}`);
-    }
-  } else {
-    log.warn(`Marcador '${injectMarker}' não encontrado em AppWebPart.ts. A lógica de ocultação de menus pode falhar.`);
   }
 
   modifyFileWithBackup(appWebPartPath, content);
@@ -345,6 +469,7 @@ async function main() {
     console.log('\nAplicando configurações...\n');
 
     generateEnvFile(answers);
+    writeHideUiConfig(answers);
     updateConfigs(answers, guids);
     configureAppMode(answers);
     configureLayout(answers);

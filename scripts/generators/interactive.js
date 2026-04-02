@@ -162,27 +162,13 @@ async function interactiveMode() {
           { title: '✏️ CRUD completo', value: 'crud', description: 'Gera todos os métodos (getAll, getById, create, update, delete)' }
         ],
         initial: 0
-      },
-      {
-        type: 'confirm',
-        name: 'withTest',
-        message: 'Criar arquivo de teste para o serviço?',
-        initial: true
       }
     ]);
     options = serviceOptions;
   }
   
   else if (artifactType === 'hook') {
-    const hookOptions = await prompts([
-      {
-        type: 'confirm',
-        name: 'withTest',
-        message: 'Criar arquivo de teste para o hook?',
-        initial: true
-      }
-    ]);
-    options = hookOptions;
+    options = {};
   }
 
   // Executar Geração

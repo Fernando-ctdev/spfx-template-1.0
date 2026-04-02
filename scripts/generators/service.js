@@ -29,7 +29,6 @@ const {
  * @param {object} options - Opções adicionais
  * @param {string} options.listName - Nome da lista SharePoint
  * @param {boolean} options.skipModelCheck - Pular verificação de model existente
- * @param {boolean} options.withTest - Criar arquivo de teste
  * @returns {object} Objeto com serviceName, filePath e modelInfo
  */
 async function generateService(name, options = {}) {
@@ -197,23 +196,6 @@ async function generateService(name, options = {}) {
   if (shouldCancelOperation()) {
     log.info('⏭️  Operação cancelada pelo usuário.');
     return { serviceName, filePath: null, modelInfo };
-  }
-
-  // Criar teste
-  if (options.withTest !== false) {
-    const testsDir = path.join(basePath, 'tests', 'services');
-    if (!fs.existsSync(testsDir)) {
-      fs.mkdirSync(testsDir, { recursive: true });
-      trackCreatedDir(testsDir);
-    }
-
-    const testPath = path.join(testsDir, `${serviceName}.test.ts`);
-    await createFileWithTracking(
-      testPath,
-      templates.test(serviceName, 'service'),
-      'Teste',
-      `${serviceName}.test`
-    );
   }
 
   return { serviceName, filePath, modelInfo };

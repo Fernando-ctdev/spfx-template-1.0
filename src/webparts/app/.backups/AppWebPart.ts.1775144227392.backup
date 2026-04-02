@@ -14,6 +14,7 @@ import { IAppProps } from './App';
 import { getSP } from '../../config/pnpConfig';
 import './shared/css/tailwind.css';
 import './shared/css/global.module.scss';
+import './shared/css/page-layout.css';
 /* CONFIGURE: IMPORT_CSS */
 
 export interface IAppWebPartProps {

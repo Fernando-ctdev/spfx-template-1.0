@@ -67,23 +67,6 @@ async function generateComponent(name, options = {}) {
     return { componentName, filePath: null };
   }
 
-  // Criar teste
-  if (options.withTest !== false) {
-    const testsDir = path.join(basePath, 'tests', 'components');
-    if (!fs.existsSync(testsDir)) {
-      fs.mkdirSync(testsDir, { recursive: true });
-      trackCreatedDir(testsDir);
-    }
-
-    const testPath = path.join(testsDir, `${componentName}.test.tsx`);
-    await createFileWithTracking(
-      testPath,
-      templates.test(componentName, 'component'),
-      'Teste',
-      `${componentName}.test`
-    );
-  }
-
   return { componentName, filePath };
 }
 

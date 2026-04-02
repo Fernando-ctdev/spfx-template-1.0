@@ -87,32 +87,6 @@ async function generatePage(name, options = {}) {
     addNavigationItem(name, routePath);
   }
 
-  // Criar teste sempre simplificado
-  if (options.withTest !== false) {
-    const testsDir = path.join(basePath, 'tests', 'pages');
-    if (!fs.existsSync(testsDir)) {
-      fs.mkdirSync(testsDir, { recursive: true });
-      trackCreatedDir(testsDir);
-    }
-
-    const testPath = path.join(testsDir, `${pageName}.test.tsx`);
-    const testCreated = await createFileWithTracking(
-      testPath,
-      templates.test(pageName, 'page'),
-      'Teste',
-      `${pageName}.test`
-    );
-
-    if (testCreated) {
-      generatedFiles.push({
-        name: `${pageName}.test`,
-        path: testPath,
-        description: `Teste unitário do componente ${pageName}.`,
-        type: 'test'
-      });
-    }
-  }
-
   return { pageName, routePath, filePath, generatedFiles };
 }
 

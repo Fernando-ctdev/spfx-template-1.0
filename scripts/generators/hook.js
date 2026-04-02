@@ -29,7 +29,6 @@ const {
  * @param {boolean} options.skipInteractive - Pular modo interativo
  * @param {string} options.serviceName - Nome do serviço a injetar (modo não interativo)
  * @param {string[]} options.models - Lista de models a expor (modo não interativo)
- * @param {boolean} options.withTest - Criar arquivo de teste
  * @returns {object} Objeto com hookName, filePath, selectedService e selectedModels
  */
 async function generateHook(name, options = {}) {
@@ -185,23 +184,6 @@ async function generateHook(name, options = {}) {
   }
   if (selectedModels.length > 0) {
     log.info(`📦 Models expostos por ${hookName}: ${selectedModels.join(', ')}`);
-  }
-
-  // Criar teste
-  if (options.withTest !== false) {
-    const testsDir = path.join(basePath, 'tests', 'hooks');
-    if (!fs.existsSync(testsDir)) {
-      fs.mkdirSync(testsDir, { recursive: true });
-      trackCreatedDir(testsDir);
-    }
-
-    const testPath = path.join(testsDir, `${hookName}.test.ts`);
-    await createFileWithTracking(
-      testPath,
-      templates.test(hookName, 'hook'),
-      'Teste',
-      `${hookName}.test`
-    );
   }
 
   return { hookName, filePath, selectedService, selectedModels };

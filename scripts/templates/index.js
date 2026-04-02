@@ -3,6 +3,5 @@ module.exports = {
   component: require('./component'),
   service: require('./service'),
   hook: require('./hook'),
-  model: require('./model'),
-  test: require('./test'),
+  model: require('./model')
 };
