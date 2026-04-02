@@ -42,7 +42,7 @@ const basePath = path.resolve(__dirname, '..');
 
 // Gera um GUID válido
 function generateGuid() {
-  return crypto.randomUUID().toUpperCase();
+  return crypto.randomUUID().toLowerCase();
 }
 
 // Ler ou gerar GUIDs
@@ -51,11 +51,23 @@ function getGuids() {
   if (fs.existsSync(guidsFile)) {
     try {
       const savedGuids = JSON.parse(fs.readFileSync(guidsFile, 'utf8'));
+      const normalizedGuids = {
+        ...savedGuids,
+        appId: (savedGuids.appId || '').toLowerCase(),
+        webPartId: (savedGuids.webPartId || '').toLowerCase(),
+        featureId: (savedGuids.featureId || '').toLowerCase(),
+        extensionId: (savedGuids.extensionId || '').toLowerCase()
+      };
+
       if (!savedGuids.extensionId) {
-        savedGuids.extensionId = generateGuid();
-        fs.writeFileSync(guidsFile, JSON.stringify(savedGuids, null, 2));
+        normalizedGuids.extensionId = generateGuid();
       }
-      return savedGuids;
+
+      if (JSON.stringify(savedGuids) !== JSON.stringify(normalizedGuids)) {
+        fs.writeFileSync(guidsFile, JSON.stringify(normalizedGuids, null, 2));
+      }
+
+      return normalizedGuids;
     } catch (e) {
       log.warn('Arquivo .guids.json corrompido. Gerando novos GUIDs.');
     }
