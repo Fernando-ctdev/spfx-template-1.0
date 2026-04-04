@@ -223,6 +223,70 @@ export const hideUiConfig: IHideUiConfig = {
   }
 }
 
+function ensureImport(content, importStatement) {
+  if (content.includes(importStatement)) {
+    return content;
+  }
+
+  const importLines = content.match(/^import\s.+;$/gm);
+  if (!importLines || importLines.length === 0) {
+    return `${importStatement}\n${content}`;
+  }
+
+  const lastImport = importLines[importLines.length - 1];
+  return content.replace(lastImport, `${lastImport}\n${importStatement}`);
+}
+
+function removeImport(content, importStatement) {
+  return content
+    .replace(`\n${importStatement}`, '')
+    .replace(`${importStatement}\n`, '')
+    .replace(importStatement, '');
+}
+
+function removeImportByPath(content, importPath) {
+  const escapedPath = importPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const importRegex = new RegExp(`\\n?import\\s+['\"]${escapedPath}['\"];?\\n?`, 'g');
+  return content.replace(importRegex, '\n');
+}
+
+function configureHideUiAssets() {
+  const extensionPath = path.join(basePath, 'src', 'extensions', 'appCustomizer', 'ApplicationCustomizer.ts');
+  const extensionCssImport = 'import "../../webparts/app/shared/css/sharepoint.css";';
+
+  if (fs.existsSync(extensionPath)) {
+    const extensionContent = fs.readFileSync(extensionPath, 'utf8');
+    const updatedExtensionContent = ensureImport(extensionContent, extensionCssImport);
+
+    if (updatedExtensionContent !== extensionContent) {
+      modifyFileWithBackup(extensionPath, updatedExtensionContent);
+      log.success('Application Customizer atualizado para carregar sharepoint.css.');
+    }
+  } else {
+    log.warn('ApplicationCustomizer.ts não encontrado. Não foi possível garantir o import de sharepoint.css na extension.');
+  }
+
+  const legacyImportPath = '../app/shared/css/sharepoint.css';
+  const webpartFilesToClean = [
+    path.join(basePath, 'src', 'webparts', 'app', 'routes.tsx'),
+    path.join(basePath, 'src', 'webparts', 'app', 'App.tsx')
+  ];
+
+  webpartFilesToClean.forEach(filePath => {
+    if (!fs.existsSync(filePath)) {
+      return;
+    }
+
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const updatedFileContent = removeImportByPath(fileContent, legacyImportPath);
+
+    if (updatedFileContent !== fileContent) {
+      modifyFileWithBackup(filePath, updatedFileContent);
+      log.info(`${path.basename(filePath)} limpo de import legado de sharepoint.css (agora controlado pela extension).`);
+    }
+  });
+}
+
 async function askQuestions() {
   let currentEnv = {};
   
@@ -495,21 +559,15 @@ function configureAppMode(answers) {
   // Configuração de CSS (Page Layout)
   const pageCssImport = "import './shared/css/page-layout.css';";
 
-  // Limpar import antigo se existir (para evitar duplicação ou conflito)
-  // Removemos imports manuais antigos se estiverem fora do marcador
-  content = content.replace(`\n${pageCssImport}`, '');
-  content = content.replace(pageCssImport, '');
+  // Sempre remove antes para evitar duplicação em reconfigurações sucessivas.
+  content = removeImport(content, pageCssImport);
 
-  if (content.includes(importMarker)) {
-    if (answers.mode === 'page') {
-      // Adicionar import se for modo Page
+  if (answers.mode === 'page') {
+    if (content.includes(importMarker)) {
       content = content.replace(importMarker, `${pageCssImport}\n${importMarker}`);
     } else {
-      // Se for component, apenas deixa o marcador limpo (sem o import)
-      // O replace acima já removeu o import se ele existia
+      content = ensureImport(content, pageCssImport);
     }
-  } else {
-    log.warn(`Marcador '${importMarker}' não encontrado em AppWebPart.ts. O CSS de layout pode não ser injetado corretamente.`);
   }
 
   modifyFileWithBackup(appWebPartPath, content);
@@ -589,6 +647,7 @@ async function main() {
 
     generateEnvFile(answers);
     writeHideUiConfig(answers);
+    configureHideUiAssets();
     updateConfigs(answers, guids);
     configureAppMode(answers);
     configureLayout(answers);

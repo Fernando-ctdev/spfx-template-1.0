@@ -1,0 +1,28 @@
+/* SharePoint native UI hide rules controlled by Application Customizer body classes. */
+
+body.hide-sp-base #SuiteNavWrapper,
+body.hide-sp-base #sp-appBar,
+body.hide-sp-base [data-automationid="SiteHeader"],
+body.hide-sp-base [data-automation-id="SiteHeader"],
+body.hide-sp-base [data-automationid="MinimalHeader"],
+body.hide-sp-base [data-automation-id="MinimalHeader"] {
+	display: none !important;
+}
+
+body.hide-sp-commandbar [data-automationid="commandBar"],
+body.hide-sp-commandbar [data-automation-id="commandBar"],
+body.hide-sp-commandbar #spCommandBar {
+	display: none !important;
+}
+
+body.hide-sp-socialbar [data-automationid="pageSocialBar"],
+body.hide-sp-socialbar [data-automation-id="pageSocialBar"],
+body.hide-sp-socialbar [id*="PageSocialBar"] {
+	display: none !important;
+}
+
+body.hide-sp-comments [data-automationid="CommentsWrapper"],
+body.hide-sp-comments [data-automation-id="CommentsWrapper"],
+body.hide-sp-comments [id*="CommentsWrapper"] {
+	display: none !important;
+}
